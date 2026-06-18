@@ -1401,6 +1401,7 @@
         this.startTime = Date.now();
         this.hitFlash = 0; this.spacePrev = false;
         this.keys = { left:false, right:false, up:false, space:false };
+        this.botMemory = []; // reaction delay buffer
         document.getElementById('getaway-overlay').style.display = 'none';
         document.getElementById('gw-role-tag').textContent = this.myRole === 'runner' ? '🏃 YOU RUN' : '🏷️ YOU TAG';
         document.getElementById('gw-role-tag').style.color = this.myRole === 'runner' ? '#22c55e' : '#ef4444';
@@ -1508,35 +1509,46 @@
         const b = this.other, p = this.player;
         if (b.stunTimer > 0) { b.stunTimer--; b.vx *= 0.85; this._physics(b); return; }
 
-        // Predict where player will be in ~10 frames
-        const targetX = p.x + p.vx * 10;
-        const targetY = p.y + p.vy * 5;
-        const dx = (targetX + p.w/2) - (b.x + b.w/2);
-        const dy = targetY - b.y;
+        // Store player position with a ~20-frame reaction delay
+        this.botMemory.push({ x: p.x + p.w/2, y: p.y, vx: p.vx });
+        if (this.botMemory.length > 20) this.botMemory.shift();
+        const mem = this.botMemory[0]; // react to where player WAS
 
-        // Slightly slower than player (3.2 vs player 5) — catchable but escapable
-        const spd = 3.2;
-        if (Math.abs(dx) > 8) {
-          b.vx += (Math.sign(dx) * spd - b.vx) * 0.18; // smooth acceleration
-          b.facingRight = dx > 0;
+        const W = this.W;
+        const bx = b.x + b.w/2;
+        const px = mem.x;
+
+        // Cornering: if player is near a wall, approach from open side to trap them
+        // Otherwise intercept slightly ahead of player's travel direction
+        let goalX;
+        if (px < W * 0.18) {
+          goalX = px + 80;           // player near left wall — come from right
+        } else if (px > W * 0.82) {
+          goalX = px - 80;           // player near right wall — come from left
         } else {
-          b.vx *= 0.75;
+          goalX = px + mem.vx * 12; // intercept ahead of movement
         }
 
+        const dx = goalX - bx;
+
+        // High inertia — bot takes time to change direction (feels independent)
+        const maxSpd = 3.0;
+        b.vx += (Math.sign(dx) * maxSpd - b.vx) * 0.08;
+        if (Math.abs(b.vx) > 0.6) b.facingRight = b.vx > 0;
+
+        // Jump only for platform routing, NOT because the player jumped
+        const dy = p.y - b.y;
         if (b.onGround) {
-          // Jump to reach player on higher platform
-          if (dy < -70) {
-            b.vy = -14;
+          if (dy < -110) {
+            b.vy = -13; // player is on a platform well above — route upward
           } else {
-            // Gap detection — look ahead and jump if no floor
-            const lookX = b.x + (b.facingRight ? b.w + 16 : -16);
+            const lookX = b.x + (b.facingRight ? b.w + 20 : -20);
             const hasFloor = this.platforms.some(pl =>
               lookX >= pl.x && lookX <= pl.x + pl.w &&
-              pl.y >= b.y + b.h - 8 && pl.y <= b.y + b.h + 36);
-            if (!hasFloor && Math.abs(dx) > 40) b.vy = -13;
+              pl.y >= b.y + b.h - 10 && pl.y <= b.y + b.h + 40);
+            if (!hasFloor && Math.abs(dx) > 30) b.vy = -12; // jump over gap
           }
-          // Small random hop occasionally to feel less robotic
-          if (Math.random() < 0.006) b.vy = -9;
+          if (Math.random() < 0.004) b.vy = -9; // rare independent hop
         }
 
         this._physics(b);
