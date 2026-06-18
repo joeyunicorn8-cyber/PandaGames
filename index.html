@@ -23,6 +23,135 @@
     .screen { display: none; width: 100%; min-height: 100vh; }
     .screen.active { display: flex; align-items: center; justify-content: center; }
 
+    /* ── GETAWAY BUTTON ── */
+    .getaway-btn {
+      position: relative; width: 240px; height: 240px;
+      cursor: pointer; background: #1a1a1a; border: 3px solid #444;
+      border-radius: 20px; overflow: hidden; transition: transform .2s, border-color .2s, box-shadow .2s;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+      box-shadow: 0 0 30px rgba(255,255,255,0.05);
+    }
+    .getaway-btn:hover { transform: scale(1.06); border-color: #fbbf24; box-shadow: 0 0 40px rgba(251,191,36,0.25); }
+    .getaway-btn-bg {
+      position: absolute; inset: 0; opacity: 0.12;
+      background: repeating-linear-gradient(0deg, transparent, transparent 18px, #fbbf24 18px, #fbbf24 20px),
+                  repeating-linear-gradient(90deg, transparent, transparent 18px, #fbbf24 18px, #fbbf24 20px);
+    }
+    .getaway-btn-label {
+      position: relative; z-index: 2;
+      font-size: 28px; font-weight: 900; letter-spacing: 2px;
+      color: #fbbf24; text-shadow: 0 0 20px rgba(251,191,36,0.5);
+    }
+    .getaway-btn-sub {
+      position: relative; z-index: 2;
+      font-size: 13px; color: rgba(255,255,255,0.5); letter-spacing: 1px;
+    }
+
+    /* ── GETAWAY SCREENS ── */
+    #screen-getaway {
+      background: #fef9c3;
+      flex-direction: column;
+    }
+    .getaway-lobby-title {
+      font-size: 64px; font-weight: 900; color: #92400e;
+      letter-spacing: 4px; text-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+      margin-bottom: 8px;
+    }
+    .getaway-lobby-sub {
+      font-size: 16px; color: #a16207; margin-bottom: 40px; letter-spacing: 1px;
+    }
+    .getaway-lobby-btns {
+      display: flex; gap: 18px; margin-bottom: 28px; flex-wrap: wrap; justify-content: center;
+    }
+    .getaway-lobby-btns button {
+      padding: 16px 36px; font-size: 18px; font-weight: 800;
+      border-radius: 14px; border: 3px solid #92400e; cursor: pointer;
+      transition: transform .15s, box-shadow .15s; letter-spacing: 1px;
+    }
+    .btn-gw-play { background: #f59e0b; color: #1c0a00; }
+    .btn-gw-host { background: #78350f; color: #fef3c7; }
+    .btn-gw-join { background: #fff; color: #78350f; }
+    .getaway-lobby-btns button:hover { transform: scale(1.06); box-shadow: 0 6px 20px rgba(0,0,0,0.2); }
+    .btn-gw-back { background: transparent; border: 2px solid #a16207 !important; color: #a16207; font-size: 14px !important; padding: 10px 24px !important; }
+
+    /* Code entry */
+    #screen-getaway-join { background: #fef9c3; flex-direction: column; }
+    .gw-code-card {
+      background: #fff; border-radius: 24px; padding: 40px 48px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.15); text-align: center;
+    }
+    .gw-code-card h2 { font-size: 28px; color: #78350f; margin-bottom: 28px; }
+    .gw-code-boxes { display: flex; gap: 14px; justify-content: center; margin-bottom: 28px; }
+    .gw-code-box {
+      width: 64px; height: 72px; border: 3px solid #d97706; border-radius: 12px;
+      font-size: 36px; font-weight: 900; text-align: center; text-transform: uppercase;
+      color: #78350f; background: #fef9c3; outline: none;
+    }
+    .gw-code-box:focus { border-color: #92400e; background: #fff; }
+    .gw-join-btn {
+      padding: 14px 44px; font-size: 18px; font-weight: 800; border-radius: 12px;
+      background: #f59e0b; border: 3px solid #92400e; color: #1c0a00; cursor: pointer;
+      margin-bottom: 16px; display: block; width: 100%;
+    }
+    .gw-join-btn:hover { background: #d97706; }
+    .gw-err { color: #ef4444; font-size: 13px; min-height: 18px; margin-top: 8px; }
+
+    /* Host lobby */
+    #screen-getaway-host { background: #fef9c3; flex-direction: column; }
+    .gw-host-card {
+      background: #fff; border-radius: 24px; padding: 48px 56px;
+      box-shadow: 0 8px 40px rgba(0,0,0,0.15); text-align: center;
+    }
+    .gw-host-card h2 { font-size: 22px; color: #78350f; margin-bottom: 20px; }
+    .gw-room-code {
+      font-size: 72px; font-weight: 900; letter-spacing: 16px;
+      color: #92400e; margin: 0 0 20px 0;
+    }
+    .gw-host-status { font-size: 15px; color: #a16207; margin-bottom: 28px; }
+    .gw-cancel-btn {
+      padding: 12px 32px; background: transparent; border: 2px solid #92400e;
+      color: #92400e; border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 700;
+    }
+
+    /* Play screen */
+    #screen-getaway-play {
+      padding: 0; background: #000;
+      align-items: stretch; justify-content: flex-start;
+    }
+    #getaway-wrap { position: relative; width: 100%; height: 100vh; }
+    #getaway-canvas { width: 100%; height: 100%; display: block; }
+    #getaway-overlay {
+      display: none; position: absolute; inset: 0;
+      background: rgba(0,0,0,0.6); flex-direction: column;
+      align-items: center; justify-content: center; gap: 20px;
+    }
+    #getaway-result-text {
+      font-size: 72px; font-weight: 900; letter-spacing: 3px;
+      text-shadow: 0 4px 24px rgba(0,0,0,0.6);
+    }
+    .gw-overlay-btns { display: flex; gap: 16px; }
+    .gw-overlay-btn {
+      padding: 14px 32px; font-size: 16px; font-weight: 800;
+      border-radius: 12px; border: 3px solid; cursor: pointer;
+    }
+    .gw-overlay-btn.again { background: #22c55e; border-color: #16a34a; color: #fff; }
+    .gw-overlay-btn.quit  { background: #1e293b; border-color: #475569; color: #94a3b8; }
+    #gw-quit-btn {
+      position: absolute; top: 12px; left: 14px;
+      background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.3);
+      color: #fff; border-radius: 8px; padding: 7px 16px; cursor: pointer; font-size: 13px; font-weight: 700;
+    }
+    #gw-timer-bar-wrap {
+      position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+      width: 200px; height: 10px; background: rgba(255,255,255,0.2); border-radius: 5px; overflow: hidden;
+    }
+    #gw-timer-bar { height: 100%; background: #22c55e; border-radius: 5px; transition: width .5s linear; }
+    #gw-role-tag {
+      position: absolute; top: 14px; right: 14px;
+      background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.3);
+      color: #fff; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 800;
+    }
+
     /* ── GLOBAL CHAT ── */
     #chat-bubble {
       position: fixed; bottom: 22px; right: 22px; z-index: 9999;
@@ -857,6 +986,67 @@
           <div class="slider-sublabel">Puzzle</div>
         </div>
       </button>
+
+      <!-- GETAWAY BUTTON -->
+      <button class="getaway-btn" onclick="showScreen('getaway')">
+        <div class="getaway-btn-bg"></div>
+        <div class="getaway-btn-label">GETAWAY</div>
+        <div class="getaway-btn-sub">Chase &amp; Escape</div>
+      </button>
+    </div>
+  </div>
+
+  <!-- GETAWAY LOBBY -->
+  <div id="screen-getaway" class="screen">
+    <div class="getaway-lobby-title">GETAWAY</div>
+    <div class="getaway-lobby-sub">Chase. Dodge. Escape.</div>
+    <div class="getaway-lobby-btns">
+      <button class="btn-gw-play" onclick="GW.startSolo()">▶ PLAY</button>
+      <button class="btn-gw-host" onclick="GW.hostRoom()">📡 HOST</button>
+      <button class="btn-gw-join" onclick="GW.openJoin()">🔗 JOIN</button>
+    </div>
+    <button class="btn-gw-back getaway-lobby-btns" onclick="showScreen('game')">← Back</button>
+  </div>
+
+  <!-- GETAWAY JOIN -->
+  <div id="screen-getaway-join" class="screen">
+    <div class="gw-code-card">
+      <h2>Enter Room Code</h2>
+      <div class="gw-code-boxes">
+        <input class="gw-code-box" id="gj1" maxlength="1" oninput="gwCodeNext(this,'gj2')" onkeydown="gwCodePrev(event,'','gj1')"/>
+        <input class="gw-code-box" id="gj2" maxlength="1" oninput="gwCodeNext(this,'gj3')" onkeydown="gwCodePrev(event,'gj1','gj2')"/>
+        <input class="gw-code-box" id="gj3" maxlength="1" oninput="gwCodeNext(this,'')"   onkeydown="gwCodePrev(event,'gj2','gj3')"/>
+      </div>
+      <button class="gw-join-btn" onclick="GW.joinRoom()">JOIN</button>
+      <div class="gw-err" id="gw-join-err"></div>
+      <button class="btn-gw-back" style="margin-top:10px;background:transparent;border:2px solid #a16207;color:#a16207;padding:10px 24px;border-radius:10px;cursor:pointer;font-weight:700;" onclick="showScreen('getaway')">← Back</button>
+    </div>
+  </div>
+
+  <!-- GETAWAY HOST LOBBY -->
+  <div id="screen-getaway-host" class="screen">
+    <div class="gw-host-card">
+      <h2>Your Room Code</h2>
+      <div class="gw-room-code" id="gw-host-code">---</div>
+      <div class="gw-host-status" id="gw-host-status">Waiting for a player to join…</div>
+      <button class="gw-cancel-btn" onclick="GW.cancelHost()">Cancel</button>
+    </div>
+  </div>
+
+  <!-- GETAWAY PLAY -->
+  <div id="screen-getaway-play" class="screen">
+    <div id="getaway-wrap">
+      <canvas id="getaway-canvas"></canvas>
+      <button id="gw-quit-btn" onclick="GW.cleanup();showScreen('getaway')">✕ QUIT</button>
+      <div id="gw-timer-bar-wrap"><div id="gw-timer-bar"></div></div>
+      <div id="gw-role-tag"></div>
+      <div id="getaway-overlay">
+        <div id="getaway-result-text"></div>
+        <div class="gw-overlay-btns">
+          <button class="gw-overlay-btn again" onclick="GW.cleanup();GW.startSolo()">Play Again</button>
+          <button class="gw-overlay-btn quit"  onclick="GW.cleanup();showScreen('game')">Quit</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1092,6 +1282,372 @@
     ══════════════════════════════════ */
     const WINS = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
     let board, gameOver, playerTurn;
+
+    /* ══════════════════════════════════
+       GETAWAY GAME
+    ══════════════════════════════════ */
+    function gwCodeNext(el, nextId) {
+      el.value = el.value.toUpperCase();
+      if (el.value && nextId) document.getElementById(nextId).focus();
+    }
+    function gwCodePrev(e, prevId, curId) {
+      if (e.key === 'Backspace' && !document.getElementById(curId).value && prevId)
+        document.getElementById(prevId).focus();
+    }
+
+    const GW = {
+      raf: null, gameOver: false, startTime: 0,
+      mode: 'solo', // 'solo' | 'host' | 'join'
+      myRole: 'runner', // 'runner' | 'tagger'
+      roomCode: '',
+      fbRef: null, fbListener: null,
+      W: 0, H: 0,
+      player: {}, other: {},
+      platforms: [],
+      keys: { left:false, right:false, up:false, space:false },
+      spacePrev: false,
+      hitFlash: 0,
+
+      /* ── LOBBY ── */
+      startSolo() {
+        this.mode = 'solo'; this.myRole = 'runner';
+        this._launch();
+      },
+
+      openJoin() {
+        ['gj1','gj2','gj3'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('gw-join-err').textContent = '';
+        showScreen('getaway-join');
+        setTimeout(() => document.getElementById('gj1').focus(), 200);
+      },
+
+      hostRoom() {
+        const db = getDb();
+        if (!db) { alert('Multiplayer not available.'); return; }
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+        let code = '';
+        for (let i = 0; i < 3; i++) code += chars[Math.floor(Math.random()*chars.length)];
+        this.roomCode = code;
+        document.getElementById('gw-host-code').textContent = code;
+        document.getElementById('gw-host-status').textContent = 'Waiting for a player to join…';
+        showScreen('getaway-host');
+        this.fbRef = db.ref('getaway/' + code);
+        this.fbRef.set({ state:'waiting', host: document.getElementById('display-username').textContent.trim() });
+        this.fbRef.on('value', snap => {
+          const d = snap.val();
+          if (!d) return;
+          if (d.state === 'joined') {
+            document.getElementById('gw-host-status').textContent = d.joiner + ' joined! Starting…';
+            // randomly assign roles
+            const hostIsRunner = Math.random() < 0.5;
+            this.myRole = hostIsRunner ? 'runner' : 'tagger';
+            this.fbRef.update({ state:'starting', hostRole: this.myRole, joinerRole: hostIsRunner ? 'tagger' : 'runner', startAt: Date.now() + 2000 });
+            setTimeout(() => { this.mode = 'host'; this._launch(); }, 2000);
+          }
+        });
+      },
+
+      cancelHost() {
+        if (this.fbRef) { this.fbRef.remove(); this.fbRef.off(); this.fbRef = null; }
+        showScreen('getaway');
+      },
+
+      joinRoom() {
+        const code = ['gj1','gj2','gj3'].map(id => document.getElementById(id).value.trim().toUpperCase()).join('');
+        if (code.length < 3) { document.getElementById('gw-join-err').textContent = 'Enter all 3 letters.'; return; }
+        const db = getDb();
+        if (!db) { document.getElementById('gw-join-err').textContent = 'Multiplayer unavailable.'; return; }
+        const ref = db.ref('getaway/' + code);
+        ref.once('value').then(snap => {
+          const d = snap.val();
+          if (!d || d.state !== 'waiting') {
+            document.getElementById('gw-join-err').textContent = 'Room not found or already started.'; return;
+          }
+          const me = document.getElementById('display-username').textContent.trim();
+          this.roomCode = code; this.fbRef = ref;
+          ref.update({ state:'joined', joiner: me });
+          ref.on('value', snap2 => {
+            const d2 = snap2.val();
+            if (!d2) return;
+            if (d2.state === 'starting') {
+              this.myRole = d2.joinerRole;
+              this.fbRef.off();
+              setTimeout(() => { this.mode = 'join'; this._launch(); }, Math.max(0, d2.startAt - Date.now()));
+            }
+          });
+        });
+      },
+
+      /* ── INIT ── */
+      _launch() {
+        showScreen('getaway-play');
+        const cv = document.getElementById('getaway-canvas');
+        const wrap = document.getElementById('getaway-wrap');
+        cv.width  = this.W = wrap.clientWidth  || window.innerWidth;
+        cv.height = this.H = wrap.clientHeight || window.innerHeight;
+        this.cx = cv.getContext('2d');
+        this._buildPlatforms();
+        this._spawnEntities();
+        this.gameOver = false;
+        this.startTime = Date.now();
+        this.hitFlash = 0; this.spacePrev = false;
+        this.keys = { left:false, right:false, up:false, space:false };
+        document.getElementById('getaway-overlay').style.display = 'none';
+        document.getElementById('gw-role-tag').textContent = this.myRole === 'runner' ? '🏃 YOU RUN' : '🏷️ YOU TAG';
+        document.getElementById('gw-role-tag').style.color = this.myRole === 'runner' ? '#22c55e' : '#ef4444';
+        this._bindKeys();
+        if (this.mode !== 'solo') this._initMpSync();
+        this._loop();
+      },
+
+      _buildPlatforms() {
+        const W = this.W, H = this.H;
+        this.platforms = [
+          { x:0,         y:H-50,      w:W,   h:50  }, // ground
+          { x:W*.08,     y:H-170,     w:140, h:16  },
+          { x:W*.30,     y:H-240,     w:120, h:16  },
+          { x:W*.55,     y:H-200,     w:150, h:16  },
+          { x:W*.20,     y:H-330,     w:110, h:16  },
+          { x:W*.48,     y:H-350,     w:130, h:16  },
+          { x:W*.72,     y:H-280,     w:120, h:16  },
+          { x:W*.85,     y:H-160,     w:100, h:16  },
+        ];
+      },
+
+      _spawnEntities() {
+        const H = this.H, W = this.W;
+        const runnerColor = '#6366f1', taggerColor = '#ef4444';
+        // In solo: player=runner(left), bot=tagger(right)
+        // In MP: myRole determines which side
+        const iAmLeft = (this.mode === 'solo') || (this.myRole === 'runner');
+        this.player = { x: iAmLeft ? 80 : W-130, y:H-120, vx:0, vy:0, w:28, h:36,
+          onGround:false, facingRight:iAmLeft,
+          color: this.myRole==='runner' ? runnerColor : taggerColor,
+          stunTimer:0, jumpCooldown:0 };
+        this.other  = { x: iAmLeft ? W-130 : 80, y:H-120, vx:0, vy:0, w:28, h:36,
+          onGround:false, facingRight:!iAmLeft,
+          color: this.myRole==='runner' ? taggerColor : runnerColor,
+          stunTimer:0, jumpCooldown:0 };
+      },
+
+      _bindKeys() {
+        this._onKey = (e, down) => {
+          if (e.key==='ArrowLeft'  || e.key==='a') this.keys.left  = down;
+          if (e.key==='ArrowRight' || e.key==='d') this.keys.right = down;
+          if (e.key==='ArrowUp'    || e.key==='w') this.keys.up    = down;
+          if (e.key===' ') { this.keys.space = down; e.preventDefault(); }
+        };
+        document.addEventListener('keydown', e => this._onKey(e, true));
+        document.addEventListener('keyup',   e => this._onKey(e, false));
+      },
+
+      /* ── GAME LOOP ── */
+      _loop() {
+        this.raf = requestAnimationFrame(() => this._loop());
+        const elapsed = (Date.now() - this.startTime) / 1000;
+        // Timer bar
+        const pct = Math.min(elapsed / 35, 1);
+        document.getElementById('gw-timer-bar').style.width = (pct * 100) + '%';
+        document.getElementById('gw-timer-bar').style.background = pct > 0.8 ? '#22c55e' : pct > 0.5 ? '#facc15' : '#f87171';
+
+        if (!this.gameOver) {
+          this._updatePlayer();
+          if (this.mode === 'solo') this._updateBot();
+          this._checkHit(elapsed);
+          if (elapsed >= 35 && !this.gameOver) {
+            this._endGame(this.myRole === 'runner' ? 'win' : 'lose');
+          }
+        }
+        if (this.hitFlash > 0) this.hitFlash--;
+        this._draw();
+      },
+
+      _physics(e) {
+        const G = 0.58;
+        e.vy += G;
+        e.x  += e.vx; e.y += e.vy;
+        e.x = Math.max(0, Math.min(this.W - e.w, e.x));
+        if (e.y > this.H + 100) { e.y = 50; e.vy = 0; } // fell off bottom
+        e.onGround = false;
+        for (const pl of this.platforms) {
+          if (e.x+e.w > pl.x && e.x < pl.x+pl.w &&
+              e.y+e.h > pl.y && e.y+e.h < pl.y+pl.h+18 && e.vy >= 0) {
+            e.y = pl.y - e.h; e.vy = 0; e.onGround = true;
+          }
+        }
+      },
+
+      _updatePlayer() {
+        const p = this.player;
+        if (p.stunTimer > 0) { p.stunTimer--; p.vx *= 0.85; this._physics(p); return; }
+        p.vx = this.keys.left ? -5 : this.keys.right ? 5 : 0;
+        if (p.vx !== 0) p.facingRight = p.vx > 0;
+        if (this.keys.up && p.onGround) { p.vy = -14; p.onGround = false; }
+        // SPACE: punch
+        if (this.keys.space && !this.spacePrev) {
+          const o = this.other;
+          const dx = (o.x+o.w/2)-(p.x+p.w/2), dy = (o.y+o.h/2)-(p.y+p.h/2);
+          if (Math.abs(dx)<65 && Math.abs(dy)<50) {
+            o.stunTimer = 80; o.vx = dx>0?9:-9; o.vy = -7;
+          }
+        }
+        this.spacePrev = this.keys.space;
+        this._physics(p);
+      },
+
+      _updateBot() {
+        const b = this.other, p = this.player;
+        if (b.stunTimer > 0) { b.stunTimer--; b.vx *= 0.85; this._physics(b); return; }
+        const dx = (p.x+p.w/2)-(b.x+b.w/2);
+        b.vx = Math.sign(dx) * 3.2;
+        b.facingRight = dx > 0;
+        if (b.onGround) {
+          if (p.y < b.y - 80) { b.vy = -14; }
+          else {
+            const lookX = b.x + (b.facingRight ? b.w+8 : -8);
+            const hasFloor = this.platforms.some(pl =>
+              lookX>=pl.x && lookX<=pl.x+pl.w && Math.abs(pl.y-(b.y+b.h))<28);
+            if (!hasFloor && Math.abs(dx)>50) b.vy = -13;
+          }
+        }
+        this._physics(b);
+      },
+
+      _checkHit(elapsed) {
+        const p = this.player, o = this.other;
+        if (p.stunTimer > 0 || o.stunTimer > 0) return;
+        const overlap = p.x+p.w > o.x+4 && p.x < o.x+o.w-4 &&
+                        p.y+p.h > o.y+4 && p.y < o.y+o.h-4;
+        if (!overlap) return;
+        this.hitFlash = 25;
+        if (this.mode === 'solo') {
+          // bot always tagger → player always loses on contact
+          this._endGame('lose');
+        } else {
+          // tagger touches runner → tagger wins
+          if (this.myRole === 'tagger') {
+            this._endGame('win');
+            if (this.fbRef) this.fbRef.update({ state:'done', result:'tagged' });
+          }
+        }
+      },
+
+      _endGame(result) {
+        if (this.gameOver) return;
+        this.gameOver = true;
+        cancelAnimationFrame(this.raf);
+        const el = document.getElementById('getaway-result-text');
+        if (result === 'win') { el.textContent = 'YOU WIN! 🎉'; el.style.color = '#22c55e'; }
+        else                  { el.textContent = 'YOU LOOSE 😢'; el.style.color = '#ef4444'; }
+        document.getElementById('getaway-overlay').style.display = 'flex';
+      },
+
+      /* ── MULTIPLAYER SYNC ── */
+      _initMpSync() {
+        const db = getDb(); if (!db || !this.fbRef) return;
+        const myKey   = this.mode === 'host' ? 'hpos' : 'jpos';
+        const theirKey= this.mode === 'host' ? 'jpos' : 'hpos';
+        this._syncInterval = setInterval(() => {
+          if (this.gameOver) return;
+          const p = this.player;
+          this.fbRef.update({ [myKey]: { x:Math.round(p.x), y:Math.round(p.y), vx:Math.round(p.vx), facingRight:p.facingRight } });
+        }, 50);
+        this.fbRef.on('value', snap => {
+          const d = snap.val(); if (!d) return;
+          if (d[theirKey]) {
+            const r = d[theirKey];
+            this.other.x = r.x; this.other.y = r.y; this.other.facingRight = r.facingRight;
+          }
+          if (d.state === 'done' && d.result === 'tagged' && !this.gameOver) {
+            this._endGame(this.myRole === 'runner' ? 'lose' : 'win');
+          }
+        });
+      },
+
+      cleanup() {
+        this.gameOver = true;
+        if (this.raf) cancelAnimationFrame(this.raf);
+        if (this._syncInterval) clearInterval(this._syncInterval);
+        if (this.fbRef) { this.fbRef.off(); this.fbRef = null; }
+        if (this._onKey) {
+          document.removeEventListener('keydown', e => this._onKey(e, true));
+          document.removeEventListener('keyup',   e => this._onKey(e, false));
+        }
+        this.keys = { left:false, right:false, up:false, space:false };
+      },
+
+      /* ── DRAW ── */
+      _draw() {
+        const ctx = this.cx, W = this.W, H = this.H;
+        // Sky gradient
+        const sky = ctx.createLinearGradient(0,0,0,H);
+        sky.addColorStop(0,'#93c5fd'); sky.addColorStop(1,'#dbeafe');
+        ctx.fillStyle = sky; ctx.fillRect(0,0,W,H);
+        // Clouds
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        [[W*.12,H*.14,90],[W*.42,H*.08,110],[W*.72,H*.18,75]].forEach(([x,y,s]) => {
+          ctx.beginPath();
+          ctx.arc(x,y,s*.38,0,Math.PI*2); ctx.arc(x+s*.32,y-s*.08,s*.27,0,Math.PI*2);
+          ctx.arc(x+s*.56,y,s*.22,0,Math.PI*2); ctx.fill();
+        });
+        // Platforms
+        this.platforms.forEach((pl,i) => {
+          ctx.fillStyle = i===0 ? '#4ade80' : '#86efac';
+          ctx.fillRect(pl.x, pl.y, pl.w, pl.h);
+          ctx.fillStyle = i===0 ? '#22c55e' : '#4ade80';
+          ctx.fillRect(pl.x, pl.y, pl.w, Math.min(8, pl.h));
+          // grass tufts on ground
+          if (i===0) {
+            ctx.fillStyle = '#16a34a';
+            for (let gx=10; gx<W; gx+=28) {
+              ctx.fillRect(gx, pl.y-4, 4, 6); ctx.fillRect(gx+7, pl.y-6, 4, 8);
+            }
+          }
+        });
+        // Hit flash
+        if (this.hitFlash > 0) {
+          ctx.fillStyle = `rgba(239,68,68,${this.hitFlash/25*0.35})`;
+          ctx.fillRect(0,0,W,H);
+        }
+        // Draw entities
+        this._drawChar(ctx, this.other, false);
+        this._drawChar(ctx, this.player, false);
+        // Labels
+        ctx.font = 'bold 11px Arial'; ctx.textAlign = 'center';
+        ctx.fillStyle = '#fff';
+        ctx.fillText('YOU',  this.player.x+this.player.w/2, this.player.y-7);
+        ctx.fillStyle = this.mode==='solo' ? '#fca5a5' : '#fff';
+        ctx.fillText(this.mode==='solo' ? 'BOT' : 'THEM', this.other.x+this.other.w/2, this.other.y-7);
+        // SPACE hint
+        ctx.font = '11px Arial'; ctx.fillStyle = 'rgba(0,0,0,0.35)'; ctx.textAlign = 'left';
+        ctx.fillText('SPACE = push  |  ↑ = jump  |  ← → = move', 14, H-14);
+      },
+
+      _drawChar(ctx, e, _) {
+        const x=Math.round(e.x), y=Math.round(e.y), w=e.w, h=e.h;
+        const stunned = e.stunTimer > 0;
+        // shadow
+        ctx.fillStyle='rgba(0,0,0,0.2)';
+        ctx.beginPath(); ctx.ellipse(x+w/2, y+h+2, w*.55, 4, 0, 0, Math.PI*2); ctx.fill();
+        // body
+        ctx.fillStyle = stunned ? '#94a3b8' : e.color;
+        ctx.beginPath(); ctx.roundRect(x, y, w, h, 6); ctx.fill();
+        // face
+        ctx.fillStyle='#fff';
+        const ex = e.facingRight ? x+w-11 : x+3;
+        ctx.fillRect(ex, y+7, 9, 8);
+        ctx.fillStyle='#1e293b';
+        ctx.fillRect(ex+(e.facingRight?3:2), y+9, 4, 5);
+        if (stunned) { // X eyes
+          ctx.fillStyle='#ef4444'; ctx.font='bold 10px Arial'; ctx.textAlign='center';
+          ctx.fillText('x', x+w/2, y+14);
+        }
+        // legs
+        ctx.fillStyle = stunned ? '#64748b' : (e.color==='#6366f1'?'#4338ca':'#b91c1c');
+        ctx.fillRect(x+3,  y+h,   10, 7);
+        ctx.fillRect(x+w-13, y+h, 10, 7);
+      }
+    };
 
     function startQuizzer() {
       showScreen('quizzer');
