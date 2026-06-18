@@ -302,6 +302,165 @@
     }
     .btn-shuffle:hover { transform: translateY(-2px); background: #1b4332; }
 
+    /* ── QUIZZER BUTTON ── */
+    .quizzer-btn {
+      position: relative; width: 240px; height: 240px;
+      cursor: pointer; background: #1a1a1a; border: 3px solid #444;
+      border-radius: 20px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 8px; overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 0 30px rgba(255,255,255,0.05);
+    }
+    .quizzer-btn:hover { transform: scale(1.06); border-color: #fff; box-shadow: 0 0 40px rgba(255,255,255,0.2); }
+    .quizzer-bg {
+      position: absolute; inset: 0; opacity: 0.10;
+    }
+    .quizzer-bg svg { width: 100%; height: 100%; }
+    .quizzer-label {
+      position: relative; z-index: 2;
+      font-size: 44px; font-weight: 900; letter-spacing: 2px; color: #fff;
+      text-shadow: 0 0 20px rgba(255,255,255,0.5);
+    }
+    .quizzer-sublabel {
+      position: relative; z-index: 2;
+      font-size: 11px; letter-spacing: 4px; text-transform: uppercase; color: #666;
+    }
+
+    /* ── QUIZZER LANDING ── */
+    #screen-quizzer {
+      flex-direction: column; gap: 40px;
+      background: linear-gradient(135deg, #c5cae9 0%, #b3c5f5 50%, #d1c4e9 100%);
+    }
+    .quizzer-hero { text-align: center; }
+    .quizzer-hero h1 {
+      font-size: 64px; font-weight: 900; letter-spacing: 3px;
+      color: #2c2c6c; text-shadow: 0 2px 12px rgba(100,100,200,0.3);
+    }
+    .quizzer-hero p { font-size: 16px; color: #5c5c9c; margin-top: 6px; letter-spacing: 2px; }
+    .quizzer-main-btns { display: flex; gap: 20px; }
+    .btn-host {
+      padding: 18px 48px; background: #3c3c9c; color: #fff; border: none;
+      border-radius: 50px; font-size: 18px; font-weight: 800; letter-spacing: 1px;
+      cursor: pointer; box-shadow: 0 4px 24px rgba(60,60,156,0.4);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-host:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(60,60,156,0.5); }
+    .btn-join {
+      padding: 18px 48px; background: rgba(255,255,255,0.6); color: #3c3c9c;
+      border: 2px solid rgba(60,60,156,0.4); border-radius: 50px;
+      font-size: 18px; font-weight: 800; letter-spacing: 1px; cursor: pointer;
+      transition: transform 0.15s, background 0.15s;
+    }
+    .btn-join:hover { transform: translateY(-2px); background: rgba(255,255,255,0.9); }
+    .btn-back-quizzer {
+      font-size: 13px; color: #5c5c9c; background: none; border: none;
+      cursor: pointer; letter-spacing: 1px;
+    }
+    .btn-back-quizzer:hover { color: #2c2c6c; }
+
+    /* ── QUIZ LIST ── */
+    #screen-quiz-list {
+      flex-direction: column; align-items: center;
+      background: linear-gradient(135deg, #e8eaf6 0%, #dce3fa 100%);
+      padding-bottom: 40px;
+    }
+    .quiz-list-topbar {
+      position: fixed; top: 0; left: 0; right: 0; height: 56px;
+      background: rgba(44,44,108,0.92); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; z-index: 200;
+    }
+    .quiz-list-title { font-size: 18px; font-weight: 900; color: #fff; letter-spacing: 2px; }
+    .quiz-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px; max-width: 900px; width: 100%; padding: 80px 24px 24px;
+    }
+    .quiz-card {
+      background: #fff; border-radius: 16px; padding: 20px 16px;
+      text-align: center; cursor: pointer; border: 2px solid transparent;
+      box-shadow: 0 2px 12px rgba(60,60,156,0.1);
+      transition: transform 0.15s, border-color 0.15s, box-shadow 0.15s;
+    }
+    .quiz-card:hover { transform: translateY(-4px); border-color: #3c3c9c; box-shadow: 0 8px 24px rgba(60,60,156,0.2); }
+    .quiz-card-emoji { font-size: 36px; margin-bottom: 8px; }
+    .quiz-card-title { font-size: 13px; font-weight: 800; color: #2c2c6c; letter-spacing: 0.5px; }
+    .quiz-card-sub { font-size: 11px; color: #888; margin-top: 4px; }
+
+    /* ── QUIZ PLAY ── */
+    #screen-quiz-play {
+      flex-direction: column; align-items: center;
+      background: linear-gradient(135deg, #e8eaf6 0%, #dce3fa 100%);
+    }
+    .quiz-play-topbar {
+      position: fixed; top: 0; left: 0; right: 0; height: 56px;
+      background: rgba(44,44,108,0.92); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; z-index: 200;
+    }
+    .quiz-play-info { font-size: 14px; color: rgba(255,255,255,0.8); font-weight: 700; }
+    .quiz-play-area {
+      max-width: 640px; width: 100%; padding: 80px 24px 24px;
+      display: flex; flex-direction: column; gap: 20px;
+    }
+    .quiz-progress-bar {
+      height: 6px; background: rgba(60,60,156,0.15); border-radius: 10px; overflow: hidden;
+    }
+    .quiz-progress-fill {
+      height: 100%; background: #3c3c9c; border-radius: 10px;
+      transition: width 0.3s ease;
+    }
+    .quiz-question-box {
+      background: #fff; border-radius: 16px; padding: 28px;
+      box-shadow: 0 2px 16px rgba(60,60,156,0.1);
+    }
+    .quiz-q-num { font-size: 12px; color: #999; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+    .quiz-q-text { font-size: 20px; font-weight: 800; color: #1a1a3a; line-height: 1.4; }
+    .quiz-options { display: flex; flex-direction: column; gap: 10px; }
+    .quiz-opt {
+      padding: 14px 20px; background: #fff; border: 2px solid #e0e0f0;
+      border-radius: 12px; font-size: 15px; font-weight: 600; color: #2c2c6c;
+      cursor: pointer; text-align: left; transition: all 0.15s;
+    }
+    .quiz-opt:hover:not(.answered) { border-color: #3c3c9c; background: #f0f0fc; }
+    .quiz-opt.correct { border-color: #2d6a4f; background: #d8f3dc; color: #1b4332; }
+    .quiz-opt.wrong { border-color: #c0392b; background: #fde8e8; color: #7b1a1a; }
+    .quiz-opt.answered { cursor: default; }
+    .quiz-next-btn {
+      padding: 14px; background: #3c3c9c; color: #fff; border: none;
+      border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer;
+      transition: background 0.15s, transform 0.15s; display: none;
+    }
+    .quiz-next-btn:hover { background: #2c2c7c; transform: translateY(-1px); }
+    .quiz-submit-btn {
+      padding: 14px; background: #27ae60; color: #fff; border: none;
+      border-radius: 12px; font-size: 16px; font-weight: 800; cursor: pointer;
+      transition: background 0.15s, transform 0.15s; display: none;
+    }
+    .quiz-submit-btn:hover { background: #1e8449; transform: translateY(-1px); }
+
+    /* ── QUIZ RESULT ── */
+    #screen-quiz-result {
+      flex-direction: column; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #c5cae9 0%, #b3c5f5 50%, #d1c4e9 100%);
+      gap: 24px;
+    }
+    .result-card {
+      background: #fff; border-radius: 24px; padding: 48px 40px;
+      text-align: center; max-width: 480px; width: 90%;
+      box-shadow: 0 8px 48px rgba(60,60,156,0.2);
+    }
+    .result-trophy { font-size: 72px; margin-bottom: 8px; }
+    .result-place {
+      font-size: 22px; font-weight: 900; color: #2c2c6c; margin-bottom: 8px;
+    }
+    .result-score { font-size: 16px; color: #666; margin-bottom: 24px; }
+    .btn-back-to-quizzes {
+      padding: 14px 36px; background: #3c3c9c; color: #fff; border: none;
+      border-radius: 50px; font-size: 15px; font-weight: 800; cursor: pointer;
+      transition: transform 0.15s; letter-spacing: 0.5px;
+    }
+    .btn-back-to-quizzes:hover { transform: translateY(-2px); }
+
     /* ── TTT GAME SCREEN ── */
     #screen-ttt {
       flex-direction: column;
@@ -504,6 +663,43 @@
         </div>
       </button>
 
+      <!-- QUIZZER BUTTON -->
+      <button class="quizzer-btn" onclick="showScreen('quizzer')">
+        <div class="quizzer-bg">
+          <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="40" cy="40" r="22" fill="none" stroke="#fff" stroke-width="3"/>
+            <circle cx="40" cy="40" r="10" fill="none" stroke="#fff" stroke-width="2"/>
+            <line x1="40" y1="14" x2="40" y2="8" stroke="#fff" stroke-width="3"/>
+            <line x1="40" y1="66" x2="40" y2="72" stroke="#fff" stroke-width="3"/>
+            <line x1="14" y1="40" x2="8" y2="40" stroke="#fff" stroke-width="3"/>
+            <line x1="66" y1="40" x2="72" y2="40" stroke="#fff" stroke-width="3"/>
+            <line x1="22" y1="22" x2="17" y2="17" stroke="#fff" stroke-width="3"/>
+            <line x1="58" y1="58" x2="63" y2="63" stroke="#fff" stroke-width="3"/>
+            <line x1="58" y1="22" x2="63" y2="17" stroke="#fff" stroke-width="3"/>
+            <line x1="22" y1="58" x2="17" y2="63" stroke="#fff" stroke-width="3"/>
+            <circle cx="190" cy="180" r="28" fill="none" stroke="#fff" stroke-width="3"/>
+            <circle cx="190" cy="180" r="12" fill="none" stroke="#fff" stroke-width="2"/>
+            <line x1="190" y1="148" x2="190" y2="140" stroke="#fff" stroke-width="3"/>
+            <line x1="190" y1="212" x2="190" y2="220" stroke="#fff" stroke-width="3"/>
+            <line x1="158" y1="180" x2="150" y2="180" stroke="#fff" stroke-width="3"/>
+            <line x1="222" y1="180" x2="230" y2="180" stroke="#fff" stroke-width="3"/>
+            <line x1="167" y1="157" x2="161" y2="151" stroke="#fff" stroke-width="3"/>
+            <line x1="213" y1="203" x2="219" y2="209" stroke="#fff" stroke-width="3"/>
+            <rect x="100" y="30" width="50" height="60" rx="6" fill="none" stroke="#fff" stroke-width="2"/>
+            <line x1="110" y1="48" x2="140" y2="48" stroke="#fff" stroke-width="2"/>
+            <line x1="110" y1="58" x2="140" y2="58" stroke="#fff" stroke-width="2"/>
+            <line x1="110" y1="68" x2="130" y2="68" stroke="#fff" stroke-width="2"/>
+            <rect x="20" y="130" width="60" height="80" rx="6" fill="none" stroke="#fff" stroke-width="2"/>
+            <line x1="30" y1="148" x2="70" y2="148" stroke="#fff" stroke-width="2"/>
+            <line x1="30" y1="160" x2="70" y2="160" stroke="#fff" stroke-width="2"/>
+            <line x1="30" y1="172" x2="55" y2="172" stroke="#fff" stroke-width="2"/>
+            <path d="M160 80 L180 60 L200 80 L195 80 L195 110 L165 110 L165 80 Z" fill="none" stroke="#fff" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="quizzer-label">QUIZZER</div>
+        <div class="quizzer-sublabel">Test your knowledge</div>
+      </button>
+
       <!-- SLIDER BUTTON -->
       <button class="slider-btn" onclick="startSlider()">
         <div class="slider-btn-bg"></div>
@@ -555,6 +751,56 @@
         <button class="btn-shuffle" onclick="shuffleSlider()">Shuffle</button>
         <button class="btn-change-image" onclick="changeSliderImage()">CHANGE IMAGE</button>
       </div>
+    </div>
+  </div>
+
+  <!-- QUIZZER LANDING -->
+  <div id="screen-quizzer" class="screen">
+    <div class="quizzer-hero">
+      <h1>QUIZZER</h1>
+      <p>Challenge your brain</p>
+    </div>
+    <div class="quizzer-main-btns">
+      <button class="btn-host" onclick="showScreen('quiz-list')">HOST QUIZ</button>
+      <button class="btn-join" onclick="alert('JOIN QUIZ coming soon! This feature requires multiplayer support.')">JOIN QUIZ</button>
+    </div>
+    <button class="btn-back-quizzer" onclick="showScreen('game')">← Back to Games</button>
+  </div>
+
+  <!-- QUIZ LIST -->
+  <div id="screen-quiz-list" class="screen">
+    <div class="quiz-list-topbar">
+      <div class="quiz-list-title">📋 Choose a Quiz</div>
+      <button class="btn-quit-green" style="border-color:rgba(255,255,255,0.4);color:#fff;background:rgba(255,255,255,0.15);" onclick="showScreen('quizzer')">← Back</button>
+    </div>
+    <div class="quiz-grid" id="quiz-grid"></div>
+  </div>
+
+  <!-- QUIZ PLAY -->
+  <div id="screen-quiz-play" class="screen">
+    <div class="quiz-play-topbar">
+      <div class="quiz-play-info" id="quiz-play-title">Quiz</div>
+      <button class="btn-quit-green" style="border-color:rgba(255,255,255,0.4);color:#fff;background:rgba(255,255,255,0.15);" onclick="showScreen('quiz-list')">Quit</button>
+    </div>
+    <div class="quiz-play-area">
+      <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="quiz-progress-fill"></div></div>
+      <div class="quiz-question-box">
+        <div class="quiz-q-num" id="quiz-q-num">Question 1 of 10</div>
+        <div class="quiz-q-text" id="quiz-q-text"></div>
+      </div>
+      <div class="quiz-options" id="quiz-options"></div>
+      <button class="quiz-next-btn" id="quiz-next-btn" onclick="nextQuestion()">Next →</button>
+      <button class="quiz-submit-btn" id="quiz-submit-btn" onclick="submitQuiz()">SUBMIT</button>
+    </div>
+  </div>
+
+  <!-- QUIZ RESULT -->
+  <div id="screen-quiz-result" class="screen">
+    <div class="result-card">
+      <div class="result-trophy" id="result-trophy">🏆</div>
+      <div class="result-place" id="result-place"></div>
+      <div class="result-score" id="result-score"></div>
+      <button class="btn-back-to-quizzes" onclick="showScreen('quiz-list')">Back to Quizzes</button>
     </div>
   </div>
 
@@ -926,6 +1172,408 @@
         }
       });
     }
+
+    /* ══════════════════════════════════
+       QUIZZER
+    ══════════════════════════════════ */
+    const QUIZZES = [
+      {id:'panda',title:'Panda Quiz',emoji:'🐼',qs:[
+        {q:'What do giant pandas mainly eat?',o:['Fish','Bamboo','Berries','Insects'],a:1},
+        {q:'Where are giant pandas originally from?',o:['Japan','India','China','Thailand'],a:2},
+        {q:'What color are giant pandas?',o:['All white','All black','Brown and white','Black and white'],a:3},
+        {q:'How many hours a day do pandas spend eating?',o:['2 hours','6 hours','14 hours','20 hours'],a:2},
+        {q:'What is a baby panda called?',o:['Pup','Cub','Kitten','Foal'],a:1},
+        {q:'Giant pandas are a type of what animal?',o:['Cat','Raccoon','Bear','Dog'],a:2},
+        {q:'Roughly how much can an adult panda weigh?',o:['20 kg','60 kg','135 kg','200 kg'],a:2},
+        {q:"A panda's special \"thumb\" is actually a what?",o:['Extra finger','Modified wrist bone','Toe','Claw'],a:1},
+        {q:'How many giant pandas exist in the wild approximately?',o:['100','500','1800','5000'],a:2},
+        {q:'What is the scientific name of the giant panda?',o:['Ursus panda','Ailurus fulgens','Ailuropoda melanoleuca','Panda giganticus'],a:2}
+      ]},
+      {id:'space',title:'Space Quiz',emoji:'🚀',qs:[
+        {q:'What is the closest planet to the Sun?',o:['Venus','Earth','Mercury','Mars'],a:2},
+        {q:'How many planets are in our solar system?',o:['7','8','9','10'],a:1},
+        {q:'What is the largest planet in our solar system?',o:['Saturn','Neptune','Jupiter','Uranus'],a:2},
+        {q:'How long does light from the Sun take to reach Earth?',o:['1 second','8 minutes','1 hour','1 day'],a:1},
+        {q:'What is a group of stars called?',o:['Nebula','Comet','Galaxy','Asteroid'],a:2},
+        {q:'Which planet has the most moons?',o:['Jupiter','Saturn','Uranus','Neptune'],a:1},
+        {q:'What is the hottest planet in our solar system?',o:['Mercury','Mars','Venus','Jupiter'],a:2},
+        {q:'What do you call a rock from space that lands on Earth?',o:['Asteroid','Comet','Meteorite','Nebula'],a:2},
+        {q:'Who was the first person to walk on the Moon?',o:['Buzz Aldrin','Neil Armstrong','Yuri Gagarin','John Glenn'],a:1},
+        {q:'What is the name of the galaxy we live in?',o:['Andromeda','Triangulum','Milky Way','Whirlpool'],a:2}
+      ]},
+      {id:'movie',title:'Movie Quiz',emoji:'🎬',qs:[
+        {q:'What movie features a lion named Simba?',o:['Jungle Book','The Lion King','Madagascar','Zootopia'],a:1},
+        {q:'Who directed the movie Jaws?',o:['James Cameron','Tim Burton','Steven Spielberg','George Lucas'],a:2},
+        {q:'What color pill does Neo take in The Matrix?',o:['Blue','Green','Red','Yellow'],a:2},
+        {q:'In Toy Story, what is the cowboy\'s name?',o:['Buzz','Rex','Woody','Bo'],a:2},
+        {q:'What movie features a clownfish named Nemo?',o:['Shark Tale','Finding Nemo','The Little Mermaid','Moana'],a:1},
+        {q:'Which movie has the quote "I\'ll be back"?',o:['Die Hard','Total Recall','The Terminator','Predator'],a:2},
+        {q:'In Frozen, what is Elsa\'s sister\'s name?',o:['Emma','Clara','Anna','Bella'],a:2},
+        {q:'What studio made the movie Toy Story?',o:['DreamWorks','Sony','Pixar','Warner Bros'],a:2},
+        {q:'Which movie features a character named Jack Sparrow?',o:['Hook','Pirates of the Caribbean','Treasure Island','The Sea Hawk'],a:1},
+        {q:'What animated movie features a rat who loves to cook?',o:['Antz','A Bug\'s Life','Ratatouille','Bee Movie'],a:2}
+      ]},
+      {id:'dino',title:'Dinosaur Quiz',emoji:'🦕',qs:[
+        {q:'What does the word "dinosaur" mean?',o:['Giant lizard','Terrible lizard','Ancient beast','Old reptile'],a:1},
+        {q:'What did T-Rex primarily eat?',o:['Plants','Fish','Meat','Insects'],a:2},
+        {q:'How many horns did a Triceratops have?',o:['1','2','3','4'],a:2},
+        {q:'When did non-bird dinosaurs go extinct?',o:['6 million years ago','66 million years ago','100 million years ago','200 million years ago'],a:1},
+        {q:'What modern animals are birds most closely related to?',o:['Lizards','Crocodiles','Dinosaurs','Turtles'],a:2},
+        {q:'Which dinosaur had a very long neck?',o:['Velociraptor','Stegosaurus','Brachiosaurus','Ankylosaurus'],a:2},
+        {q:'Which dinosaur had large bony plates on its back?',o:['Triceratops','Stegosaurus','Spinosaurus','Pterodactyl'],a:1},
+        {q:'What do you call a scientist who studies dinosaurs?',o:['Archaeologist','Biologist','Paleontologist','Zoologist'],a:2},
+        {q:'Which dinosaur was known for being extremely fast?',o:['T-Rex','Brachiosaurus','Velociraptor','Diplodocus'],a:2},
+        {q:'What is the largest dinosaur ever discovered?',o:['T-Rex','Brachiosaurus','Argentinosaurus','Triceratops'],a:2}
+      ]},
+      {id:'body',title:'Body Part Quiz',emoji:'🫀',qs:[
+        {q:'What is the largest organ in the human body?',o:['Brain','Liver','Lung','Skin'],a:3},
+        {q:'How many bones are in the adult human body?',o:['106','206','306','406'],a:1},
+        {q:'What pumps blood around the body?',o:['Lungs','Brain','Heart','Liver'],a:2},
+        {q:'Where is the femur bone located?',o:['Arm','Back','Leg','Skull'],a:2},
+        {q:'What do kidneys primarily do?',o:['Digest food','Filter blood','Pump blood','Store oxygen'],a:1},
+        {q:'How many chambers does the human heart have?',o:['2','3','4','5'],a:2},
+        {q:'What is the smallest bone in the human body?',o:['Kneecap','Pinky bone','Stirrup (in ear)','Tailbone'],a:2},
+        {q:'What carries oxygen in your blood?',o:['White blood cells','Platelets','Red blood cells','Plasma'],a:2},
+        {q:'What is the hard outer layer of teeth called?',o:['Dentin','Pulp','Enamel','Calcium'],a:2},
+        {q:'How many teeth do adults typically have?',o:['24','28','32','36'],a:2}
+      ]},
+      {id:'book',title:'Book Quiz',emoji:'📚',qs:[
+        {q:'Who wrote Harry Potter?',o:['Roald Dahl','J.R.R. Tolkien','J.K. Rowling','C.S. Lewis'],a:2},
+        {q:'What is the name of the school in Harry Potter?',o:['Narnia','Hogwarts','Rivendell','Neverland'],a:1},
+        {q:'Who wrote The Lord of the Rings?',o:['C.S. Lewis','J.K. Rowling','Roald Dahl','J.R.R. Tolkien'],a:3},
+        {q:'Who wrote Charlotte\'s Web?',o:['E.B. White','Roald Dahl','Beverly Cleary','Laura Ingalls Wilder'],a:0},
+        {q:'What is the name of the boy in The Jungle Book?',o:['Peter','Jack','Mowgli','Tarzan'],a:2},
+        {q:'Who wrote Alice in Wonderland?',o:['Charles Dickens','Lewis Carroll','Mark Twain','Oscar Wilde'],a:1},
+        {q:'What is the name of the lion in The Lion, the Witch and the Wardrobe?',o:['Leo','Simba','Aslan','Nala'],a:2},
+        {q:'How many books are in the original Harry Potter series?',o:['5','6','7','8'],a:2},
+        {q:'Who wrote The Very Hungry Caterpillar?',o:['Dr. Seuss','Eric Carle','Mo Willems','Jan Brett'],a:1},
+        {q:'Who wrote Matilda?',o:['J.K. Rowling','C.S. Lewis','Roald Dahl','Lewis Carroll'],a:2}
+      ]},
+      {id:'sea',title:'Sea Animal Quiz',emoji:'🐙',qs:[
+        {q:'What is the largest animal on Earth?',o:['Elephant','Giant squid','Blue whale','Great white shark'],a:2},
+        {q:'How many arms does an octopus have?',o:['6','8','10','12'],a:1},
+        {q:'What is the fastest fish in the ocean?',o:['Tuna','Marlin','Sailfish','Barracuda'],a:2},
+        {q:'What is a group of fish called?',o:['Pack','Herd','School','Flock'],a:2},
+        {q:'What is the largest species of shark?',o:['Great white','Tiger shark','Whale shark','Hammerhead'],a:2},
+        {q:'How many hearts does an octopus have?',o:['1','2','3','4'],a:2},
+        {q:'What do sea otters use to crack open shells?',o:['Their teeth','Rocks','The seafloor','Other shells'],a:1},
+        {q:'What color is a flamingo?',o:['White','Red','Pink','Orange'],a:2},
+        {q:'Which sea creature has no brain or heart?',o:['Starfish','Jellyfish','Clam','Crab'],a:1},
+        {q:'What do clownfish live among for protection?',o:['Coral','Sea anemones','Seaweed','Rocks'],a:1}
+      ]},
+      {id:'land',title:'Land Animal Quiz',emoji:'🦁',qs:[
+        {q:'What is the fastest land animal?',o:['Lion','Horse','Cheetah','Gazelle'],a:2},
+        {q:'What is the largest land animal?',o:['Hippo','Rhino','African elephant','Giraffe'],a:2},
+        {q:'How many legs does an insect have?',o:['4','6','8','10'],a:1},
+        {q:'What is a group of lions called?',o:['Pack','Herd','Pride','Troop'],a:2},
+        {q:'Which animal has the longest neck?',o:['Camel','Giraffe','Ostrich','Horse'],a:1},
+        {q:'What is the largest big cat?',o:['Lion','Leopard','Tiger','Jaguar'],a:2},
+        {q:'How many humps does a Bactrian camel have?',o:['0','1','2','3'],a:2},
+        {q:'What animal is known for its black and white stripes?',o:['Cheetah','Leopard','Zebra','Tiger'],a:2},
+        {q:'What do kangaroos carry their babies in?',o:['Nest','Pouch','Backpack','Den'],a:1},
+        {q:'Which land animal can sleep standing up?',o:['Cat','Dog','Horse','Bear'],a:2}
+      ]},
+      {id:'sky',title:'Sky Animal Quiz',emoji:'🦅',qs:[
+        {q:'What is the largest bird in the world?',o:['Eagle','Albatross','Ostrich','Condor'],a:2},
+        {q:'Which common bird cannot fly?',o:['Parrot','Penguin','Sparrow','Robin'],a:1},
+        {q:'What do bats use to navigate in the dark?',o:['Eyesight','Smell','Echolocation','Touch'],a:2},
+        {q:'What is the fastest bird in a dive?',o:['Eagle','Peregrine Falcon','Hawk','Osprey'],a:1},
+        {q:'How many wings does a butterfly have?',o:['2','4','6','8'],a:1},
+        {q:'What is a group of crows called?',o:['Flock','Pack','Murder','Colony'],a:2},
+        {q:'Which bird is famous for mimicking human speech?',o:['Eagle','Owl','Parrot','Sparrow'],a:2},
+        {q:'What is the smallest bird in the world?',o:['Sparrow','Finch','Hummingbird','Wren'],a:2},
+        {q:'How do birds navigate during migration?',o:['Stars and magnetic field','Smell','Memory only','Following leaders'],a:0},
+        {q:'What do owls traditionally symbolize?',o:['Speed','Wisdom','Love','Strength'],a:1}
+      ]},
+      {id:'house',title:'House Quiz',emoji:'🏠',qs:[
+        {q:'What room in a house is used for cooking?',o:['Living room','Bedroom','Kitchen','Bathroom'],a:2},
+        {q:'What is the lowest level of a house called?',o:['Attic','Basement','Porch','Gable'],a:1},
+        {q:'What room do people sleep in?',o:['Kitchen','Bathroom','Living room','Bedroom'],a:3},
+        {q:'What is a dormer?',o:['A window in a roof','A type of door','A chimney','A porch'],a:0},
+        {q:'What is the main purpose of a gutter?',o:['Decoration','Drain rainwater','Support walls','Insulation'],a:1},
+        {q:'What do you call a house built for two families side by side?',o:['Duplex','Condo','Villa','Bungalow'],a:0},
+        {q:'What keeps a house warm in winter?',o:['Roof','Foundation','Insulation and heating','Windows'],a:2},
+        {q:'What is an attic?',o:['Underground room','Space below the floor','Space just below the roof','The garage'],a:2},
+        {q:'What material are most traditional roofs covered with?',o:['Wood','Steel','Shingles or tiles','Concrete'],a:2},
+        {q:'What is the foundation of a house for?',o:['Decoration','Supporting the whole structure','Storing water','Insulation'],a:1}
+      ]},
+      {id:'device',title:'Device Quiz',emoji:'💻',qs:[
+        {q:'What does CPU stand for?',o:['Central Power Unit','Central Processing Unit','Computer Power Unit','Core Processing Unit'],a:1},
+        {q:'What stores data permanently on a computer?',o:['RAM','CPU','Hard Drive / SSD','GPU'],a:2},
+        {q:'What does USB stand for?',o:['Universal Serial Bus','Ultra Speed Boost','Universal Speed Bus','Unique System Board'],a:0},
+        {q:'What does RAM stand for?',o:['Read Access Memory','Random Access Memory','Rapid Action Memory','Read Action Memory'],a:1},
+        {q:'What device converts digital signals to sound?',o:['Monitor','Speaker','Printer','Scanner'],a:1},
+        {q:'What does Wi-Fi stand for?',o:['Wireless Fidelity','Wide Frequency','Wireless Function','Web Interface'],a:0},
+        {q:'What year was the first iPhone released?',o:['2003','2005','2007','2009'],a:2},
+        {q:'What is a touchpad?',o:['A screen','A mouse alternative','A keyboard','A speaker'],a:1},
+        {q:'What is a GPU used for?',o:['Playing sound','Storing files','Processing graphics','Cooling the computer'],a:2},
+        {q:'What does "Bluetooth" allow devices to do?',o:['Connect to internet','Connect wirelessly to each other','Charge faster','Display images'],a:1}
+      ]},
+      {id:'pets',title:'Pets Quiz',emoji:'🐾',qs:[
+        {q:'What is the most popular pet in the US?',o:['Fish','Cat','Dog','Bird'],a:2},
+        {q:'What do hamsters store in their cheeks?',o:['Water','Air','Food','Saliva'],a:2},
+        {q:'How do cats clean themselves?',o:['Water','Paws and tongue','Grass','Sand'],a:1},
+        {q:'What sound do rabbits typically make?',o:['Bark','Meow','They are mostly silent','Chirp'],a:2},
+        {q:'What water type do goldfish need?',o:['Salt water','Fresh water','Distilled water','Tap water only'],a:1},
+        {q:'How long is a dog\'s pregnancy approximately?',o:['3 weeks','9 weeks','6 months','1 year'],a:1},
+        {q:'What is a female cat called?',o:['Doe','Hen','Queen','Mare'],a:2},
+        {q:'What is the most intelligent pet bird?',o:['Canary','Pigeon','African Grey Parrot','Budgie'],a:2},
+        {q:'How often should a dog ideally be walked?',o:['Once a week','Twice a week','Once a day at least','Once a month'],a:2},
+        {q:'What do you call a group of kittens?',o:['Pack','Litter','Brood','Cluster'],a:1}
+      ]},
+      {id:'sport',title:'Sport Quiz',emoji:'⚽',qs:[
+        {q:'How many players are on a soccer team on the field?',o:['9','10','11','12'],a:2},
+        {q:'In basketball, how many points is a three-pointer worth?',o:['1','2','3','4'],a:2},
+        {q:'How long is a standard marathon?',o:['21 km','42.2 km','50 km','10 km'],a:1},
+        {q:'What sport uses a puck?',o:['Soccer','Field hockey','Ice hockey','Polo'],a:2},
+        {q:'In tennis, what is a score of zero called?',o:['Nil','Zero','Love','Empty'],a:2},
+        {q:'How many players are on a volleyball team on the court?',o:['4','5','6','7'],a:2},
+        {q:'How many holes are in a standard golf course?',o:['9','12','18','24'],a:2},
+        {q:'What is the highest score in one bowling frame?',o:['5','8','10','12'],a:2},
+        {q:'What sport is played at Wimbledon?',o:['Cricket','Golf','Tennis','Squash'],a:2},
+        {q:'How many players are on a basketball team on the court?',o:['4','5','6','7'],a:1}
+      ]},
+      {id:'crystal',title:'Crystal Quiz',emoji:'💎',qs:[
+        {q:'What is the hardest natural mineral?',o:['Ruby','Quartz','Diamond','Sapphire'],a:2},
+        {q:'What scale measures mineral hardness?',o:['Richter','Mohs','pH','Celsius'],a:1},
+        {q:'What gives amethyst its purple color?',o:['Iron impurities','Copper','Manganese','Chromium'],a:0},
+        {q:'What crystal is known as "fool\'s gold"?',o:['Pyrite','Quartz','Mica','Calcite'],a:0},
+        {q:'What is the birthstone for January?',o:['Amethyst','Garnet','Ruby','Sapphire'],a:1},
+        {q:'What is the rarest gemstone on Earth?',o:['Diamond','Emerald','Painite','Sapphire'],a:2},
+        {q:'What color is malachite?',o:['Blue','Red','Green','Yellow'],a:2},
+        {q:'What mineral makes up most of beach sand?',o:['Feldspar','Calcite','Quartz','Mica'],a:2},
+        {q:'What is the crystal structure of table salt?',o:['Hexagonal','Cubic','Triangular','Orthorhombic'],a:1},
+        {q:'What crystal is said to form inside geodes?',o:['Diamond','Ruby','Amethyst','Emerald'],a:2}
+      ]},
+      {id:'mining',title:'Mining Quiz',emoji:'⛏️',qs:[
+        {q:'What tool is most associated with mining?',o:['Shovel','Pickaxe','Hammer','Wrench'],a:1},
+        {q:'What gas is most dangerous in underground mines?',o:['Oxygen','Carbon dioxide','Methane','Nitrogen'],a:2},
+        {q:'What mineral is used to make steel?',o:['Copper','Iron','Gold','Aluminum'],a:1},
+        {q:'What do miners wear on their heads for light?',o:['Flashlight','Headlamp','Lantern','Torch'],a:1},
+        {q:'What is coal primarily used for?',o:['Jewelry','Food','Fuel and energy','Medicine'],a:2},
+        {q:'What precious metal is often found in riverbeds?',o:['Iron','Copper','Gold','Silver'],a:2},
+        {q:'What does the word "ore" mean?',o:['A type of tool','Rock containing valuable minerals','An underground lake','Mining equipment'],a:1},
+        {q:'What machine is used to dig large underground tunnels?',o:['Bulldozer','Crane','Tunnel boring machine','Excavator'],a:2},
+        {q:'What country is the world\'s largest gold producer?',o:['USA','Australia','China','South Africa'],a:2},
+        {q:'What is the process of separating minerals from rock called?',o:['Smelting','Drilling','Refining','Blasting'],a:0}
+      ]},
+      {id:'game',title:'Game Quiz',emoji:'🎮',qs:[
+        {q:'In Minecraft, what is the strongest material?',o:['Diamond','Gold','Netherite','Iron'],a:2},
+        {q:'What is Mario\'s brother\'s name?',o:['Wario','Luigi','Yoshi','Toad'],a:1},
+        {q:'What game features a character named Master Chief?',o:['Halo','Call of Duty','Doom','Battlefield'],a:0},
+        {q:'In chess, which piece can only move diagonally?',o:['Rook','Knight','Bishop','Queen'],a:2},
+        {q:'What is the best-selling video game of all time?',o:['Tetris','GTA V','Minecraft','Wii Sports'],a:2},
+        {q:'In Among Us, what are players trying to find?',o:['Treasure','The Impostor','The Exit','Keys'],a:1},
+        {q:'What company made Pokémon?',o:['Nintendo only','Sega','Game Freak / Nintendo','Sony'],a:2},
+        {q:'In Tetris, clearing 4 lines at once is called what?',o:['Combo','Tetris','Clear','Sweep'],a:1},
+        {q:'What is the name of the princess in The Legend of Zelda?',o:['Zelda','Peach','Daisy','Samus'],a:0},
+        {q:'What game popularised the Battle Royale genre?',o:['Fortnite','PUBG','Apex Legends','Warzone'],a:1}
+      ]},
+      {id:'bacteria',title:'Micro Bacteria Quiz',emoji:'🦠',qs:[
+        {q:'Approximately how many bacteria live in the human body?',o:['Millions','Billions','Trillions','Quadrillions'],a:2},
+        {q:'What shape is a cocci bacterium?',o:['Rod','Spiral','Round','Square'],a:2},
+        {q:'What kills harmful bacteria in the body?',o:['Vitamins','Antibiotics','Sugar','Fat'],a:1},
+        {q:'What structure do bacteria use to move?',o:['Legs','Fins','Flagella','Cilia'],a:2},
+        {q:'What is the study of bacteria called?',o:['Virology','Mycology','Bacteriology','Zoology'],a:2},
+        {q:'How do bacteria reproduce?',o:['Eggs','Seeds','Binary fission','Budding'],a:2},
+        {q:'What is smaller than a bacterium?',o:['Fungus','Virus','Protozoa','Amoeba'],a:1},
+        {q:'Which bacteria causes strep throat?',o:['E. coli','Salmonella','Streptococcus','Staphylococcus'],a:2},
+        {q:'What stops bacteria from growing in food?',o:['Color','Refrigeration','Light','Air'],a:1},
+        {q:'Which bacteria is found in yogurt?',o:['E. coli','Lactobacillus','Salmonella','Streptococcus'],a:1}
+      ]},
+      {id:'feelings',title:'Feelings Quiz',emoji:'😊',qs:[
+        {q:'What emotion do you feel when something scary happens?',o:['Joy','Sadness','Fear','Anger'],a:2},
+        {q:'What brain chemical is released when you feel happy?',o:['Cortisol','Adrenaline','Dopamine','Insulin'],a:2},
+        {q:'What do you call a feeling of extreme happiness?',o:['Sadness','Anxiety','Euphoria','Melancholy'],a:2},
+        {q:'What emotion is characterized by excessive worry?',o:['Anger','Anxiety','Jealousy','Pride'],a:1},
+        {q:'What is empathy?',o:['Feeling nothing','Understanding others\' feelings','Being selfish','Feeling angry'],a:1},
+        {q:'What is the long-lasting form of deep sadness called?',o:['Anxiety','Anger','Depression','Stress'],a:2},
+        {q:'What is the feeling of wanting what someone else has?',o:['Pride','Envy','Joy','Fear'],a:1},
+        {q:'What feeling makes your heart race with excitement?',o:['Boredom','Sadness','Thrill / Excitement','Calm'],a:2},
+        {q:'What emotion do you feel when you help someone?',o:['Anger','Guilt','Satisfaction','Jealousy'],a:2},
+        {q:'What is the opposite of courage?',o:['Happiness','Sadness','Cowardice','Anger'],a:2}
+      ]},
+      {id:'color',title:'Color Quiz',emoji:'🎨',qs:[
+        {q:'What are the three primary colors (traditional art)?',o:['Red, green, blue','Red, yellow, blue','Orange, purple, green','Pink, brown, grey'],a:1},
+        {q:'What color do red and blue make when mixed?',o:['Green','Orange','Purple','Brown'],a:2},
+        {q:'What color has the longest wavelength in visible light?',o:['Violet','Blue','Green','Red'],a:3},
+        {q:'What do yellow and blue make?',o:['Purple','Orange','Green','Brown'],a:2},
+        {q:'What color is associated with nature and growth?',o:['Blue','Green','Yellow','Brown'],a:1},
+        {q:'What are colors directly opposite on the color wheel called?',o:['Similar colors','Complementary colors','Analogous colors','Primary colors'],a:1},
+        {q:'What happens when all colors of light are combined?',o:['Black','Grey','Brown','White'],a:3},
+        {q:'What color symbolizes danger or stop?',o:['Yellow','Orange','Red','Purple'],a:2},
+        {q:'What two colors make orange?',o:['Red and blue','Yellow and green','Red and yellow','Blue and yellow'],a:2},
+        {q:'What color is the sky on a clear day?',o:['White','Grey','Blue','Purple'],a:2}
+      ]},
+      {id:'car',title:'Car Quiz',emoji:'🚗',qs:[
+        {q:'What does SUV stand for?',o:['Super Urban Vehicle','Sport Utility Vehicle','Standard Universal Vehicle','Speed Utility Van'],a:1},
+        {q:'What powers an electric car?',o:['Gasoline','Diesel','Battery','Hydrogen'],a:2},
+        {q:'What does RPM stand for?',o:['Rapid Power Motion','Revolutions Per Minute','Road Per Mile','Running Power Mode'],a:1},
+        {q:'What year was the Ford Model T introduced?',o:['1885','1900','1908','1920'],a:2},
+        {q:'What does AWD mean?',o:['All Wheel Drive','Automatic Wind Drive','Advanced Wheel Design','All Weather Drive'],a:0},
+        {q:'What is a car\'s alternator for?',o:['Braking','Charging the battery','Cooling the engine','Shifting gears'],a:1},
+        {q:'What harmful gas do petrol cars emit?',o:['Oxygen','Nitrogen','Carbon dioxide','Hydrogen'],a:2},
+        {q:'What is the most sold car brand worldwide?',o:['Ford','Toyota','Volkswagen','GM'],a:1},
+        {q:'What does ABS in a car stand for?',o:['Auto Brake System','Anti-lock Braking System','Advanced Brake Safety','Automatic Braking Sensor'],a:1},
+        {q:'What country invented the first petrol-powered car?',o:['USA','France','Germany','Italy'],a:2}
+      ]},
+      {id:'maths',title:'Mathematics Quiz',emoji:'🔢',qs:[
+        {q:'What is 7 × 8?',o:['54','56','58','64'],a:1},
+        {q:'What is the square root of 144?',o:['11','12','13','14'],a:1},
+        {q:'What is π (pi) approximately equal to?',o:['2.14','3.14','4.14','5.14'],a:1},
+        {q:'What is 15% of 200?',o:['20','25','30','35'],a:2},
+        {q:'How many sides does a hexagon have?',o:['5','6','7','8'],a:1},
+        {q:'What is 2 to the power of 10?',o:['512','1024','2048','256'],a:1},
+        {q:'What is the sum of angles in a triangle?',o:['90°','180°','270°','360°'],a:1},
+        {q:'What is 144 ÷ 12?',o:['10','11','12','13'],a:2},
+        {q:'What number is neither prime nor composite?',o:['1','2','3','4'],a:0},
+        {q:'What is 0.5 as a fraction?',o:['1/4','1/3','1/2','2/3'],a:2}
+      ]},
+      {id:'science',title:'Science Quiz',emoji:'🔬',qs:[
+        {q:'What is the chemical symbol for water?',o:['WA','H2O','HO','W2O'],a:1},
+        {q:'What is the speed of light approximately?',o:['100,000 km/s','200,000 km/s','300,000 km/s','400,000 km/s'],a:2},
+        {q:'What is the powerhouse of the cell?',o:['Nucleus','Ribosome','Mitochondria','Cell wall'],a:2},
+        {q:'What gas do plants absorb during photosynthesis?',o:['Oxygen','Nitrogen','Carbon dioxide','Helium'],a:2},
+        {q:'What is the atomic number of carbon?',o:['4','6','8','12'],a:1},
+        {q:'What is Newton\'s first law about?',o:['E=mc²','Objects in motion stay in motion','Force = mass × acceleration','Energy conservation'],a:1},
+        {q:'What is the study of living organisms called?',o:['Chemistry','Physics','Biology','Geology'],a:2},
+        {q:'What does DNA stand for?',o:['Deoxyribonucleic Acid','Double Nucleic Acid','Dynamic Nuclear Acid','Deoxyribose Nuclei Assembly'],a:0},
+        {q:'What is the most abundant gas in Earth\'s atmosphere?',o:['Oxygen','Carbon dioxide','Nitrogen','Argon'],a:2},
+        {q:'What force keeps planets in orbit around the Sun?',o:['Magnetism','Gravity','Friction','Electricity'],a:1}
+      ]},
+      {id:'history',title:'History Quiz',emoji:'🏛️',qs:[
+        {q:'Who was the first President of the United States?',o:['Abraham Lincoln','Thomas Jefferson','George Washington','John Adams'],a:2},
+        {q:'In what year did World War 2 end?',o:['1943','1944','1945','1946'],a:2},
+        {q:'Who built the ancient pyramids of Egypt?',o:['Romans','Greeks','Ancient Egyptians','Babylonians'],a:2},
+        {q:'In what year did the Titanic sink?',o:['1908','1910','1912','1914'],a:2},
+        {q:'Who was the first woman to win a Nobel Prize?',o:['Marie Curie','Rosa Parks','Florence Nightingale','Amelia Earhart'],a:0},
+        {q:'What wall divided East and West Berlin?',o:['Hadrian\'s Wall','Great Wall','Berlin Wall','Iron Wall'],a:2},
+        {q:'Who was the first human in space?',o:['Neil Armstrong','Buzz Aldrin','Yuri Gagarin','John Glenn'],a:2},
+        {q:'In what year did World War 1 begin?',o:['1910','1912','1914','1916'],a:2},
+        {q:'Which empire was ruled by Julius Caesar?',o:['Greek','Roman','Ottoman','Persian'],a:1},
+        {q:'What ancient wonder was located in Alexandria, Egypt?',o:['Hanging Gardens','Colosseum','Temple of Artemis','The Lighthouse'],a:3}
+      ]},
+      {id:'humanity',title:'Humanity Quiz',emoji:'🌍',qs:[
+        {q:'Approximately how many languages are spoken worldwide?',o:['500','2,000','7,000','10,000'],a:2},
+        {q:'What is the most spoken language in the world?',o:['English','Spanish','Mandarin Chinese','Hindi'],a:2},
+        {q:'What percentage of Earth is covered in water?',o:['51%','61%','71%','81%'],a:2},
+        {q:'What is the most practised religion in the world?',o:['Islam','Christianity','Hinduism','Buddhism'],a:1},
+        {q:'What is the most populated country as of 2024?',o:['USA','India','China','Russia'],a:1},
+        {q:'How long have modern humans (Homo sapiens) existed?',o:['10,000 years','50,000 years','300,000 years','1 million years'],a:2},
+        {q:'What is the universal symbol of peace?',o:['Star','Cross','Dove','Circle'],a:2},
+        {q:'What makes humans unique among all animals?',o:['Walking upright','Using tools','Complex language and culture','Living in groups'],a:2},
+        {q:'What is the most visited country in the world?',o:['USA','Spain','France','Italy'],a:2},
+        {q:'How many countries are officially recognised in the world?',o:['175','185','195','210'],a:2}
+      ]}
+    ];
+
+    let currentQuiz = null;
+    let currentQIndex = 0;
+    let userAnswers = [];
+    let answered = false;
+
+    function ordinal(n) {
+      const s = ['th','st','nd','rd'];
+      const v = n % 100;
+      return n + (s[(v-20)%10] || s[v] || s[0]);
+    }
+
+    function buildQuizGrid() {
+      const grid = document.getElementById('quiz-grid');
+      grid.innerHTML = '';
+      QUIZZES.forEach(q => {
+        const completions = parseInt(localStorage.getItem('qc_'+q.id)||'0');
+        const card = document.createElement('div');
+        card.className = 'quiz-card';
+        card.innerHTML = `<div class="quiz-card-emoji">${q.emoji}</div>
+          <div class="quiz-card-title">${q.title}</div>
+          <div class="quiz-card-sub">10 questions</div>`;
+        card.onclick = () => startQuiz(q.id);
+        grid.appendChild(card);
+      });
+    }
+
+    function startQuiz(id) {
+      currentQuiz = QUIZZES.find(q => q.id === id);
+      currentQIndex = 0;
+      userAnswers = [];
+      answered = false;
+      document.getElementById('quiz-play-title').textContent = currentQuiz.emoji + ' ' + currentQuiz.title;
+      showScreen('quiz-play');
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      answered = false;
+      const q = currentQuiz.qs[currentQIndex];
+      const total = currentQuiz.qs.length;
+      document.getElementById('quiz-q-num').textContent = 'Question ' + (currentQIndex+1) + ' of ' + total;
+      document.getElementById('quiz-q-text').textContent = q.q;
+      document.getElementById('quiz-progress-fill').style.width = (currentQIndex / total * 100) + '%';
+
+      const opts = document.getElementById('quiz-options');
+      opts.innerHTML = '';
+      q.o.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'quiz-opt';
+        btn.textContent = opt;
+        btn.onclick = () => selectAnswer(i);
+        opts.appendChild(btn);
+      });
+
+      const nextBtn = document.getElementById('quiz-next-btn');
+      const submitBtn = document.getElementById('quiz-submit-btn');
+      nextBtn.style.display = 'none';
+      submitBtn.style.display = 'none';
+    }
+
+    function selectAnswer(i) {
+      if (answered) return;
+      answered = true;
+      userAnswers.push(i);
+      const q = currentQuiz.qs[currentQIndex];
+      const opts = document.querySelectorAll('.quiz-opt');
+      opts.forEach((btn, idx) => {
+        btn.classList.add('answered');
+        if (idx === q.a) btn.classList.add('correct');
+        else if (idx === i) btn.classList.add('wrong');
+      });
+      const isLast = currentQIndex === currentQuiz.qs.length - 1;
+      if (isLast) {
+        document.getElementById('quiz-submit-btn').style.display = 'block';
+      } else {
+        document.getElementById('quiz-next-btn').style.display = 'block';
+      }
+    }
+
+    function nextQuestion() {
+      currentQIndex++;
+      renderQuestion();
+    }
+
+    function submitQuiz() {
+      const score = userAnswers.filter((a, i) => a === currentQuiz.qs[i].a).length;
+      const key = 'qc_' + currentQuiz.id;
+      const prev = parseInt(localStorage.getItem(key) || '0');
+      const place = prev + 1;
+      localStorage.setItem(key, place);
+
+      document.getElementById('quiz-progress-fill').style.width = '100%';
+      const trophy = score >= 9 ? '🏆' : score >= 7 ? '🥈' : score >= 5 ? '🥉' : '📋';
+      document.getElementById('result-trophy').textContent = trophy;
+      document.getElementById('result-place').textContent =
+        'You are the ' + ordinal(place) + ' person to complete this quiz!';
+      document.getElementById('result-score').textContent =
+        'You scored ' + score + ' out of ' + currentQuiz.qs.length + ' correct.';
+      showScreen('quiz-result');
+    }
+
+    // Build the quiz grid whenever the list screen is shown
+    const _origShowScreen = showScreen;
+    showScreen = function(name) {
+      _origShowScreen(name);
+      if (name === 'quiz-list') buildQuizGrid();
+    };
 
     /* ══════════════════════════════════
        KEYBOARD
