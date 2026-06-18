@@ -117,8 +117,27 @@
     #screen-getaway-play {
       padding: 0; background: #000;
       align-items: stretch; justify-content: flex-start;
+      flex-direction: column;
     }
-    #getaway-wrap { position: relative; width: 100%; height: 100vh; }
+    .gw-topbar {
+      position: fixed; top: 0; left: 0; right: 0; height: 56px;
+      background: rgba(0,0,0,0.55); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 28px; z-index: 200;
+    }
+    .gw-topbar-title { font-size: 18px; font-weight: 900; letter-spacing: 2px; color: #fbbf24; }
+    .gw-topbar-center {
+      position: absolute; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 10px;
+    }
+    #gw-timer-bar-wrap {
+      width: 180px; height: 10px; background: rgba(255,255,255,0.2); border-radius: 5px; overflow: hidden;
+    }
+    #gw-timer-bar { height: 100%; background: #22c55e; border-radius: 5px; transition: width .5s linear; }
+    #gw-role-tag {
+      font-size: 13px; font-weight: 800; color: #fff;
+    }
+    #getaway-wrap { position: relative; width: 100%; height: calc(100vh - 56px); margin-top: 56px; }
     #getaway-canvas { width: 100%; height: 100%; display: block; }
     #getaway-overlay {
       display: none; position: absolute; inset: 0;
@@ -136,21 +155,6 @@
     }
     .gw-overlay-btn.again { background: #22c55e; border-color: #16a34a; color: #fff; }
     .gw-overlay-btn.quit  { background: #1e293b; border-color: #475569; color: #94a3b8; }
-    #gw-quit-btn {
-      position: absolute; top: 12px; left: 14px;
-      background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.3);
-      color: #fff; border-radius: 8px; padding: 7px 16px; cursor: pointer; font-size: 13px; font-weight: 700;
-    }
-    #gw-timer-bar-wrap {
-      position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
-      width: 200px; height: 10px; background: rgba(255,255,255,0.2); border-radius: 5px; overflow: hidden;
-    }
-    #gw-timer-bar { height: 100%; background: #22c55e; border-radius: 5px; transition: width .5s linear; }
-    #gw-role-tag {
-      position: absolute; top: 14px; right: 14px;
-      background: rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.3);
-      color: #fff; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 800;
-    }
 
     /* ── GLOBAL CHAT ── */
     #chat-bubble {
@@ -1035,11 +1039,16 @@
 
   <!-- GETAWAY PLAY -->
   <div id="screen-getaway-play" class="screen">
+    <div class="gw-topbar">
+      <div class="gw-topbar-title">🏃 GETAWAY</div>
+      <div class="gw-topbar-center">
+        <div id="gw-timer-bar-wrap"><div id="gw-timer-bar"></div></div>
+        <div id="gw-role-tag"></div>
+      </div>
+      <button class="btn-quit" onclick="GW.cleanup();showScreen('getaway')">QUIT</button>
+    </div>
     <div id="getaway-wrap">
       <canvas id="getaway-canvas"></canvas>
-      <button id="gw-quit-btn" onclick="GW.cleanup();showScreen('getaway')">✕ QUIT</button>
-      <div id="gw-timer-bar-wrap"><div id="gw-timer-bar"></div></div>
-      <div id="gw-role-tag"></div>
       <div id="getaway-overlay">
         <div id="getaway-result-text"></div>
         <div class="gw-overlay-btns">
