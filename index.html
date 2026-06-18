@@ -966,9 +966,6 @@
     /* ══════════════════════════════════
        AUTH
     ══════════════════════════════════ */
-    function getAccounts() { return JSON.parse(localStorage.getItem('panda_accounts') || '{}'); }
-    function saveAccounts(a) { localStorage.setItem('panda_accounts', JSON.stringify(a)); }
-
     function createAccount() {
       const username = document.getElementById('create-username').value.trim();
       const password = document.getElementById('create-password').value;
@@ -976,22 +973,31 @@
       if (username.length < 3) return showError('create-error', 'Username must be at least 3 characters.');
       if (!password) return showError('create-error', 'Please enter a password.');
       if (password.length < 4) return showError('create-error', 'Password must be at least 4 characters.');
-      const accounts = getAccounts();
-      if (accounts[username.toLowerCase()]) return showError('create-error', 'That username is already taken.');
-      accounts[username.toLowerCase()] = { username, password };
-      saveAccounts(accounts);
-      showSuccess('create-success', 'Account created! Logging you in…');
-      setTimeout(() => enterGame(username), 900);
+      const db = getDb();
+      if (!db) return showError('create-error', 'Server unavailable. Try again later.');
+      const key = username.toLowerCase();
+      db.ref('accounts/' + key).once('value').then(snap => {
+        if (snap.exists()) return showError('create-error', 'That username is already taken.');
+        return db.ref('accounts/' + key).set({ username, password }).then(() => {
+          showSuccess('create-success', 'Account created! Logging you in…');
+          setTimeout(() => enterGame(username), 900);
+        });
+      }).catch(() => showError('create-error', 'Something went wrong. Try again.'));
     }
 
     function login() {
       const username = document.getElementById('login-username').value.trim();
       const password = document.getElementById('login-password').value;
       if (!username || !password) return showError('login-error', 'Please fill in both fields.');
-      const accounts = getAccounts();
-      const account = accounts[username.toLowerCase()];
-      if (!account || account.password !== password) return showError('login-error', 'Incorrect username or password.');
-      enterGame(account.username);
+      const db = getDb();
+      if (!db) return showError('login-error', 'Server unavailable. Try again later.');
+      const key = username.toLowerCase();
+      db.ref('accounts/' + key).once('value').then(snap => {
+        if (!snap.exists()) return showError('login-error', 'Incorrect username or password.');
+        const account = snap.val();
+        if (account.password !== password) return showError('login-error', 'Incorrect username or password.');
+        enterGame(account.username);
+      }).catch(() => showError('login-error', 'Something went wrong. Try again.'));
     }
 
     function enterGame(username) {
