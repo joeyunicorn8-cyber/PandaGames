@@ -1347,11 +1347,11 @@
           if (!d) return;
           if (d.state === 'joined') {
             document.getElementById('gw-host-status').textContent = d.joiner + ' joined! Starting…';
-            // randomly assign roles
             const hostIsRunner = Math.random() < 0.5;
             this.myRole = hostIsRunner ? 'runner' : 'tagger';
-            this.fbRef.update({ state:'starting', hostRole: this.myRole, joinerRole: hostIsRunner ? 'tagger' : 'runner', startAt: Date.now() + 2000 });
-            setTimeout(() => { this.mode = 'host'; this._launch(); }, 2000);
+            this.fbRef.update({ state:'starting', hostRole: this.myRole, joinerRole: hostIsRunner ? 'tagger' : 'runner', startAt: Date.now() + 2500 });
+            // off() here so _initMpSync can attach clean listeners
+            setTimeout(() => { this.fbRef.off(); this.mode = 'host'; this._launch(); }, 2500);
           }
         });
       },
@@ -1463,6 +1463,7 @@
         if (!this.gameOver) {
           this._updatePlayer();
           if (this.mode === 'solo') this._updateBot();
+          else this._updateRemote();
           this._checkHit(elapsed);
           if (elapsed >= 20 && !this.gameOver) {
             this._endGame(this.myRole === 'runner' ? 'win' : 'lose');
@@ -1562,13 +1563,11 @@
         if (!overlap) return;
         this.hitFlash = 25;
         if (this.mode === 'solo') {
-          // bot always tagger → player always loses on contact
           this._endGame('lose');
         } else {
-          // tagger touches runner → tagger wins
           if (this.myRole === 'tagger') {
             this._endGame('win');
-            if (this.fbRef) this.fbRef.update({ state:'done', result:'tagged' });
+            if (this.fbRef) this.fbRef.child('result').set('tagged');
           }
         }
       },
@@ -1586,23 +1585,61 @@
       /* ── MULTIPLAYER SYNC ── */
       _initMpSync() {
         const db = getDb(); if (!db || !this.fbRef) return;
-        const myKey   = this.mode === 'host' ? 'hpos' : 'jpos';
-        const theirKey= this.mode === 'host' ? 'jpos' : 'hpos';
+        // Remove ALL old listeners before attaching new ones
+        this.fbRef.off();
+
+        const myKey    = this.mode === 'host' ? 'hpos' : 'jpos';
+        const theirKey = this.mode === 'host' ? 'jpos' : 'hpos';
+
+        // Send my full state at ~30fps
+        if (this._syncInterval) clearInterval(this._syncInterval);
         this._syncInterval = setInterval(() => {
           if (this.gameOver) return;
           const p = this.player;
-          this.fbRef.update({ [myKey]: { x:Math.round(p.x), y:Math.round(p.y), vx:Math.round(p.vx), facingRight:p.facingRight } });
-        }, 50);
-        this.fbRef.on('value', snap => {
-          const d = snap.val(); if (!d) return;
-          if (d[theirKey]) {
-            const r = d[theirKey];
-            this.other.x = r.x; this.other.y = r.y; this.other.facingRight = r.facingRight;
+          this.fbRef.child(myKey).set({
+            x: Math.round(p.x),
+            y: Math.round(p.y),
+            vx: parseFloat(p.vx.toFixed(2)),
+            vy: parseFloat(p.vy.toFixed(2)),
+            gr: p.onGround ? 1 : 0,
+            fr: p.facingRight ? 1 : 0
+          });
+        }, 33);
+
+        // Receive other player — position + velocity so local physics can extrapolate
+        this.fbRef.child(theirKey).on('value', snap => {
+          const r = snap.val(); if (!r) return;
+          const o = this.other;
+          // Snap if first update or far off; otherwise blend smoothly
+          const dist = Math.hypot((r.x - o.x), (r.y - o.y));
+          if (dist > 80 || !o._netReady) {
+            o.x = r.x; o.y = r.y;
+          } else {
+            o.x += (r.x - o.x) * 0.4;
+            o.y += (r.y - o.y) * 0.4;
           }
-          if (d.state === 'done' && d.result === 'tagged' && !this.gameOver) {
-            this._endGame(this.myRole === 'runner' ? 'lose' : 'win');
-          }
+          o.vx = r.vx;
+          o.vy = r.vy;
+          o.onGround = !!r.gr;
+          o.facingRight = !!r.fr;
+          o._netReady = true;
         });
+
+        // Watch for tagged result
+        this.fbRef.child('result').on('value', snap => {
+          const v = snap.val();
+          if (v === 'tagged' && !this.gameOver)
+            this._endGame(this.myRole === 'runner' ? 'lose' : 'win');
+        });
+      },
+
+      // Runs every frame for the remote player — keeps them moving smoothly between updates
+      _updateRemote() {
+        const o = this.other;
+        if (!o._netReady) return;
+        if (o.stunTimer > 0) { o.stunTimer--; o.vx *= 0.85; }
+        // Run the same physics as local player so they look natural
+        this._physics(o);
       },
 
       cleanup() {
