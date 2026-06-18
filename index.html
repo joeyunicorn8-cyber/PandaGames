@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>PandaGames</title>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-database-compat.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -301,6 +303,76 @@
       transition: transform 0.15s, box-shadow 0.15s;
     }
     .btn-shuffle:hover { transform: translateY(-2px); background: #1b4332; }
+
+    /* ── MULTIPLAYER LOBBY ── */
+    .lobby-screen {
+      flex-direction: column; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #c5cae9 0%, #b3c5f5 50%, #d1c4e9 100%);
+    }
+    .lobby-card {
+      background: #fff; border-radius: 24px; padding: 40px;
+      width: 90%; max-width: 500px; text-align: center;
+      box-shadow: 0 8px 48px rgba(60,60,156,0.2);
+    }
+    .lobby-room-code {
+      font-size: 80px; font-weight: 900; letter-spacing: 12px;
+      color: #3c3c9c; line-height: 1; margin: 12px 0;
+      font-family: 'Courier New', monospace;
+    }
+    .lobby-label { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: #999; }
+    .lobby-quiz-name { font-size: 18px; font-weight: 800; color: #2c2c6c; margin: 8px 0 20px; }
+    .lobby-players { text-align: left; border-top: 1px solid #eee; padding-top: 16px; margin-top: 4px; }
+    .lobby-players-title { font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #999; margin-bottom: 10px; }
+    .lobby-player {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 14px; border-radius: 10px; margin-bottom: 6px;
+      background: #f4f4fc; font-weight: 700; color: #2c2c6c; font-size: 15px;
+    }
+    .btn-start-quiz {
+      width: 100%; padding: 16px; background: #3c3c9c; color: #fff;
+      border: none; border-radius: 12px; font-size: 18px; font-weight: 900;
+      letter-spacing: 1px; cursor: pointer; margin-top: 20px;
+      transition: background 0.15s, transform 0.15s;
+      display: none;
+    }
+    .btn-start-quiz:hover { background: #2c2c7c; transform: translateY(-2px); }
+    .lobby-waiting {
+      margin-top: 20px; font-size: 14px; color: #888;
+      display: flex; align-items: center; gap: 8px; justify-content: center;
+    }
+    .dot-pulse { display: inline-flex; gap: 4px; }
+    .dot-pulse span {
+      width: 6px; height: 6px; border-radius: 50%; background: #aaa;
+      animation: dotpulse 1.2s infinite;
+    }
+    .dot-pulse span:nth-child(2) { animation-delay: 0.2s; }
+    .dot-pulse span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes dotpulse { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
+
+    /* ── JOIN SCREEN ── */
+    .join-card {
+      background: #fff; border-radius: 24px; padding: 48px 40px;
+      width: 90%; max-width: 420px; text-align: center;
+      box-shadow: 0 8px 48px rgba(60,60,156,0.2);
+    }
+    .join-card h2 { font-size: 28px; font-weight: 900; color: #2c2c6c; margin-bottom: 8px; }
+    .join-card p { font-size: 14px; color: #888; margin-bottom: 28px; }
+    .code-inputs { display: flex; gap: 12px; justify-content: center; margin-bottom: 24px; }
+    .code-input {
+      width: 72px; height: 80px; text-align: center;
+      font-size: 40px; font-weight: 900; font-family: 'Courier New', monospace;
+      color: #3c3c9c; background: #f0f0fc; border: 2px solid #d0d0f0;
+      border-radius: 12px; outline: none; text-transform: uppercase;
+      transition: border-color 0.15s;
+    }
+    .code-input:focus { border-color: #3c3c9c; }
+    .join-error { color: #c0392b; font-size: 14px; font-weight: 700; min-height: 20px; margin-bottom: 8px; }
+    .btn-join-room {
+      width: 100%; padding: 14px; background: #3c3c9c; color: #fff;
+      border: none; border-radius: 12px; font-size: 16px; font-weight: 800;
+      cursor: pointer; transition: background 0.15s, transform 0.15s;
+    }
+    .btn-join-room:hover { background: #2c2c7c; transform: translateY(-1px); }
 
     /* ── QUIZZER BUTTON ── */
     .quizzer-btn {
@@ -761,8 +833,8 @@
       <p>Challenge your brain</p>
     </div>
     <div class="quizzer-main-btns">
-      <button class="btn-host" onclick="showScreen('quiz-list')">HOST QUIZ</button>
-      <button class="btn-join" onclick="alert('JOIN QUIZ coming soon! This feature requires multiplayer support.')">JOIN QUIZ</button>
+      <button class="btn-host" onclick="quizListMode='host'; showScreen('quiz-list')">HOST QUIZ</button>
+      <button class="btn-join" onclick="document.getElementById('ci1').value='';document.getElementById('ci2').value='';document.getElementById('ci3').value='';document.getElementById('join-error').textContent='';showScreen('quiz-join')">JOIN QUIZ</button>
     </div>
     <button class="btn-back-quizzer" onclick="showScreen('game')">← Back to Games</button>
   </div>
@@ -800,7 +872,66 @@
       <div class="result-trophy" id="result-trophy">🏆</div>
       <div class="result-place" id="result-place"></div>
       <div class="result-score" id="result-score"></div>
-      <button class="btn-back-to-quizzes" onclick="showScreen('quiz-list')">Back to Quizzes</button>
+      <button class="btn-back-to-quizzes" onclick="MP.cleanup(); MP.roomCode=''; quizListMode='solo'; showScreen('quiz-list')">Back to Quizzes</button>
+    </div>
+  </div>
+
+  <!-- HOST LOBBY -->
+  <div id="screen-quiz-host-lobby" class="screen lobby-screen">
+    <div class="lobby-card">
+      <div class="lobby-label">Room Code — Share this with players</div>
+      <div class="lobby-room-code" id="hl-code">---</div>
+      <div class="lobby-quiz-name" id="hl-quiz"></div>
+      <div class="lobby-players">
+        <div class="lobby-players-title">Players joined</div>
+        <div id="hl-players"></div>
+      </div>
+      <button class="btn-start-quiz" id="btn-start-quiz" onclick="MP.hostStart()">▶ START QUIZ</button>
+      <div class="lobby-waiting" id="hl-waiting">
+        Waiting for players to join
+        <div class="dot-pulse"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+    <button class="btn-back-quizzer" style="margin-top:16px;" onclick="MP.cancelRoom()">✕ Cancel Room</button>
+  </div>
+
+  <!-- JOIN SCREEN -->
+  <div id="screen-quiz-join" class="screen lobby-screen">
+    <div class="join-card">
+      <h2>🎮 Join a Quiz</h2>
+      <p>Enter the 3-letter room code from your host</p>
+      <div class="code-inputs">
+        <input class="code-input" id="ci1" maxlength="1"
+          oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'');if(this.value)document.getElementById('ci2').focus()">
+        <input class="code-input" id="ci2" maxlength="1"
+          oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'');if(this.value)document.getElementById('ci3').focus()"
+          onkeydown="if(event.key==='Backspace'&&!this.value)document.getElementById('ci1').focus()">
+        <input class="code-input" id="ci3" maxlength="1"
+          oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'')"
+          onkeydown="if(event.key==='Backspace'&&!this.value)document.getElementById('ci2').focus()"
+          onchange="if(this.value)document.getElementById('btn-join-room').focus()">
+      </div>
+      <div class="join-error" id="join-error"></div>
+      <button class="btn-join-room" id="btn-join-room" onclick="MP.joinRoom()">JOIN</button>
+      <br><br>
+      <button class="btn-back-quizzer" onclick="showScreen('quizzer')">← Back</button>
+    </div>
+  </div>
+
+  <!-- PLAYER LOBBY -->
+  <div id="screen-quiz-player-lobby" class="screen lobby-screen">
+    <div class="lobby-card">
+      <div class="lobby-label">You're in! Room code</div>
+      <div class="lobby-room-code" id="pl-code">---</div>
+      <div class="lobby-quiz-name" id="pl-quiz"></div>
+      <div class="lobby-players">
+        <div class="lobby-players-title">Players</div>
+        <div id="pl-players"></div>
+      </div>
+      <div class="lobby-waiting">
+        Waiting for host to start
+        <div class="dot-pulse"><span></span><span></span><span></span></div>
+      </div>
     </div>
   </div>
 
@@ -1573,6 +1704,231 @@
     showScreen = function(name) {
       _origShowScreen(name);
       if (name === 'quiz-list') buildQuizGrid();
+    };
+
+    /* ══════════════════════════════════
+       FIREBASE MULTIPLAYER
+    ══════════════════════════════════ */
+
+    // ─── PASTE YOUR FIREBASE CONFIG HERE ───────────────────────────────────
+    const FIREBASE_CONFIG = {
+      apiKey: "",
+      databaseURL: "",
+    };
+    // ───────────────────────────────────────────────────────────────────────
+
+    let _fbDb = null;
+    function getDb() {
+      if (_fbDb) return _fbDb;
+      if (!FIREBASE_CONFIG.apiKey || !FIREBASE_CONFIG.databaseURL) return null;
+      try {
+        const app = firebase.apps.length
+          ? firebase.app()
+          : firebase.initializeApp(FIREBASE_CONFIG);
+        _fbDb = firebase.database(app);
+        return _fbDb;
+      } catch(e) { console.error('Firebase error:', e); return null; }
+    }
+
+    let quizListMode = 'solo'; // 'solo' or 'host'
+
+    const MP = {
+      roomCode: '',
+      isHost: false,
+      quizId: '',
+      _listeners: [],
+
+      id() {
+        let id = sessionStorage.getItem('pgp_id');
+        if (!id) { id = 'p' + Math.random().toString(36).slice(2,10); sessionStorage.setItem('pgp_id', id); }
+        return id;
+      },
+
+      name() { return document.getElementById('display-username').textContent.trim() || 'Player'; },
+
+      genCode() {
+        const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+        return [0,1,2].map(() => c[Math.floor(Math.random()*c.length)]).join('');
+      },
+
+      cleanup() {
+        this._listeners.forEach(fn => fn());
+        this._listeners = [];
+      },
+
+      noDb() {
+        alert('⚠️ Multiplayer not configured yet.\n\nAsk the site owner to set up Firebase.\n(See the setup guide in the code.)');
+      },
+
+      renderPlayers(id, players) {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.innerHTML = Object.values(players || {}).map(p =>
+          `<div class="lobby-player">${p.isHost?'👑':'🎮'} ${p.name}${p.done?' ✅':''}</div>`
+        ).join('') || '<div style="color:#bbb;font-size:13px;">No players yet…</div>';
+      },
+
+      async createRoom(quizId) {
+        const db = getDb();
+        if (!db) { this.noDb(); return; }
+        const quiz = QUIZZES.find(q => q.id === quizId);
+        const code = this.genCode();
+        this.roomCode = code;
+        this.isHost = true;
+        this.quizId = quizId;
+        this.cleanup();
+
+        await db.ref('rooms/'+code).set({
+          quizId, state: 'waiting',
+          hostId: this.id(),
+          quizTitle: quiz.title,
+          quizEmoji: quiz.emoji,
+          created: Date.now()
+        });
+        await db.ref('rooms/'+code+'/players/'+this.id()).set({
+          name: this.name(), isHost: true, done: false, score: 0, completedAt: 0
+        });
+
+        document.getElementById('hl-code').textContent = code;
+        document.getElementById('hl-quiz').textContent = quiz.emoji + ' ' + quiz.title;
+        document.getElementById('btn-start-quiz').style.display = 'none';
+        document.getElementById('hl-waiting').style.display = 'flex';
+        showScreen('quiz-host-lobby');
+
+        const ref = db.ref('rooms/'+code+'/players');
+        const h = ref.on('value', snap => {
+          const players = snap.val() || {};
+          this.renderPlayers('hl-players', players);
+          const others = Object.values(players).filter(p => !p.isHost);
+          document.getElementById('btn-start-quiz').style.display = others.length ? 'block' : 'none';
+          document.getElementById('hl-waiting').style.display = others.length ? 'none' : 'flex';
+        });
+        this._listeners.push(() => ref.off('value', h));
+      },
+
+      async hostStart() {
+        const db = getDb();
+        if (!db) return;
+        await db.ref('rooms/'+this.roomCode+'/state').set('active');
+        this.cleanup();
+        startQuiz(this.quizId);
+      },
+
+      async joinRoom() {
+        const db = getDb();
+        if (!db) { this.noDb(); return; }
+
+        const code = (document.getElementById('ci1').value +
+                      document.getElementById('ci2').value +
+                      document.getElementById('ci3').value).toUpperCase();
+        const errEl = document.getElementById('join-error');
+        errEl.textContent = '';
+
+        if (code.length < 3) { errEl.textContent = 'Enter all 3 letters.'; return; }
+
+        let snap;
+        try { snap = await db.ref('rooms/'+code).once('value'); }
+        catch(e) { errEl.textContent = 'Connection error. Try again.'; return; }
+
+        if (!snap.exists()) { errEl.textContent = 'Room not found. Check the code!'; return; }
+        const room = snap.val();
+        if (room.state !== 'waiting') { errEl.textContent = 'This quiz has already started!'; return; }
+
+        this.roomCode = code;
+        this.isHost = false;
+        this.quizId = room.quizId;
+        this.cleanup();
+
+        await db.ref('rooms/'+code+'/players/'+this.id()).set({
+          name: this.name(), isHost: false, done: false, score: 0, completedAt: 0
+        });
+
+        document.getElementById('pl-code').textContent = code;
+        document.getElementById('pl-quiz').textContent = room.quizEmoji + ' ' + room.quizTitle;
+        showScreen('quiz-player-lobby');
+
+        // listen for player list
+        const pRef = db.ref('rooms/'+code+'/players');
+        const pH = pRef.on('value', snap => this.renderPlayers('pl-players', snap.val()));
+        this._listeners.push(() => pRef.off('value', pH));
+
+        // listen for game start
+        const sRef = db.ref('rooms/'+code+'/state');
+        const sH = sRef.on('value', snap => {
+          if (snap.val() === 'active') {
+            this.cleanup();
+            startQuiz(this.quizId);
+          }
+        });
+        this._listeners.push(() => sRef.off('value', sH));
+      },
+
+      async submitScore(score) {
+        const db = getDb();
+        if (!db || !this.roomCode) return 1;
+        await db.ref('rooms/'+this.roomCode+'/players/'+this.id()).update({
+          score, done: true, completedAt: Date.now()
+        });
+        const snap = await db.ref('rooms/'+this.roomCode+'/players').once('value');
+        const done = Object.values(snap.val() || {}).filter(p => p.done);
+        return done.length;
+      },
+
+      async cancelRoom() {
+        const db = getDb();
+        if (db && this.roomCode && this.isHost) {
+          await db.ref('rooms/'+this.roomCode).remove();
+        }
+        this.cleanup();
+        this.roomCode = '';
+        quizListMode = 'solo';
+        showScreen('quizzer');
+      }
+    };
+
+    // Override buildQuizGrid to support host mode
+    const _buildQuizGrid = buildQuizGrid;
+    buildQuizGrid = function() {
+      const grid = document.getElementById('quiz-grid');
+      grid.innerHTML = '';
+      QUIZZES.forEach(q => {
+        const card = document.createElement('div');
+        card.className = 'quiz-card';
+        card.innerHTML = `<div class="quiz-card-emoji">${q.emoji}</div>
+          <div class="quiz-card-title">${q.title}</div>
+          <div class="quiz-card-sub">${quizListMode === 'host' ? 'Host this quiz' : '10 questions'}</div>`;
+        card.onclick = () => {
+          if (quizListMode === 'host') { MP.createRoom(q.id); }
+          else { MP.roomCode = ''; startQuiz(q.id); }
+        };
+        grid.appendChild(card);
+      });
+    };
+
+    // Override submitQuiz to handle multiplayer scoring
+    const _submitQuiz = submitQuiz;
+    submitQuiz = async function() {
+      const score = userAnswers.filter((a,i) => a === currentQuiz.qs[i].a).length;
+      document.getElementById('quiz-progress-fill').style.width = '100%';
+      const trophy = score >= 9 ? '🏆' : score >= 7 ? '🥈' : score >= 5 ? '🥉' : '📋';
+      document.getElementById('result-trophy').textContent = trophy;
+      document.getElementById('result-score').textContent =
+        'You scored ' + score + ' out of ' + currentQuiz.qs.length + ' correct.';
+
+      let place;
+      if (MP.roomCode) {
+        place = await MP.submitScore(score);
+        document.getElementById('result-place').textContent =
+          'You are the ' + ordinal(place) + ' person to finish this room!';
+      } else {
+        const key = 'qc_' + currentQuiz.id;
+        const prev = parseInt(localStorage.getItem(key) || '0');
+        place = prev + 1;
+        localStorage.setItem(key, place);
+        document.getElementById('result-place').textContent =
+          'You are the ' + ordinal(place) + ' person to complete this quiz!';
+      }
+      showScreen('quiz-result');
     };
 
     /* ══════════════════════════════════
