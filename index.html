@@ -23,6 +23,81 @@
     .screen { display: none; width: 100%; min-height: 100vh; }
     .screen.active { display: flex; align-items: center; justify-content: center; }
 
+    /* ── GLOBAL CHAT ── */
+    #chat-bubble {
+      position: fixed; bottom: 22px; right: 22px; z-index: 9999;
+      width: 54px; height: 54px; border-radius: 50%;
+      background: linear-gradient(135deg,#a78bfa,#60a5fa);
+      border: none; cursor: pointer; font-size: 24px;
+      box-shadow: 0 4px 18px rgba(0,0,0,0.45);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform .2s;
+    }
+    #chat-bubble:hover { transform: scale(1.1); }
+    #chat-bubble .chat-badge {
+      position: absolute; top: 4px; right: 4px;
+      width: 12px; height: 12px; border-radius: 50%;
+      background: #f87171; display: none;
+    }
+    #chat-panel {
+      position: fixed; bottom: 88px; right: 22px; z-index: 9998;
+      width: 300px; height: 400px;
+      background: #1a1a2e; border: 1px solid rgba(167,139,250,0.4);
+      border-radius: 16px; display: flex; flex-direction: column;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+      transform: scale(0); transform-origin: bottom right;
+      transition: transform .25s cubic-bezier(.34,1.56,.64,1);
+      overflow: hidden;
+    }
+    #chat-panel.open { transform: scale(1); }
+    #chat-header {
+      padding: 12px 16px; font-weight: 700; font-size: 14px;
+      background: linear-gradient(90deg,rgba(167,139,250,0.2),rgba(96,165,250,0.2));
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      color: #e2e8f0; letter-spacing: .5px;
+    }
+    #chat-messages {
+      flex: 1; overflow-y: auto; padding: 10px 12px;
+      display: flex; flex-direction: column; gap: 6px;
+    }
+    #chat-messages::-webkit-scrollbar { width: 4px; }
+    #chat-messages::-webkit-scrollbar-thumb { background: rgba(167,139,250,0.4); border-radius: 2px; }
+    .chat-msg {
+      font-size: 12px; line-height: 1.4; padding: 6px 10px;
+      border-radius: 10px; max-width: 90%; word-break: break-word;
+    }
+    .chat-msg.system {
+      background: rgba(96,165,250,0.15); color: #93c5fd;
+      font-style: italic; align-self: center; text-align: center; max-width: 100%;
+    }
+    .chat-msg.user-own {
+      background: linear-gradient(135deg,rgba(167,139,250,0.35),rgba(96,165,250,0.25));
+      color: #e2e8f0; align-self: flex-end;
+    }
+    .chat-msg.user-other {
+      background: rgba(255,255,255,0.07); color: #cbd5e1; align-self: flex-start;
+    }
+    .chat-msg .msg-name {
+      font-size: 10px; font-weight: 700; margin-bottom: 2px;
+      color: #a78bfa;
+    }
+    #chat-input-row {
+      display: flex; gap: 6px; padding: 10px 12px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    #chat-input {
+      flex: 1; background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(167,139,250,0.3); border-radius: 20px;
+      color: #e2e8f0; font-size: 12px; padding: 6px 12px; outline: none;
+    }
+    #chat-input::placeholder { color: rgba(255,255,255,0.3); }
+    #chat-send {
+      background: linear-gradient(135deg,#a78bfa,#60a5fa);
+      border: none; border-radius: 50%; width: 32px; height: 32px;
+      cursor: pointer; font-size: 14px; color: #fff;
+      display: flex; align-items: center; justify-content: center;
+    }
+
     /* ── LANDING ── */
     #screen-landing {
       flex-direction: column;
@@ -736,7 +811,7 @@
       </button>
 
       <!-- QUIZZER BUTTON -->
-      <button class="quizzer-btn" onclick="showScreen('quizzer')">
+      <button class="quizzer-btn" onclick="startQuizzer()">
         <div class="quizzer-bg">
           <svg viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
             <circle cx="40" cy="40" r="22" fill="none" stroke="#fff" stroke-width="3"/>
@@ -1003,6 +1078,7 @@
     function enterGame(username) {
       document.getElementById('display-username').textContent = username;
       showScreen('game');
+      setTimeout(() => postSystemMsg(username + ' JOINED PANDAGAMES'), 800);
     }
 
     function logout() {
@@ -1017,9 +1093,17 @@
     const WINS = [[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
     let board, gameOver, playerTurn;
 
+    function startQuizzer() {
+      showScreen('quizzer');
+      const me = document.getElementById('display-username').textContent.trim();
+      if (me) postSystemMsg(me + ' JOINED QUIZZER');
+    }
+
     function startTTT() {
       showScreen('ttt');
       resetTTT();
+      const me = document.getElementById('display-username').textContent.trim();
+      if (me) postSystemMsg(me + ' JOINED TIC TAC TOE');
     }
 
     function quitTTT() {
@@ -1199,6 +1283,8 @@
 
     function startSlider() {
       showScreen('slider');
+      const me = document.getElementById('display-username').textContent.trim();
+      if (me) postSystemMsg(me + ' JOINED SLIDES');
       sliderImageIndex = 0;
       buildSliderDom();
       shuffleSlider();
@@ -1314,6 +1400,7 @@
        QUIZZER
     ══════════════════════════════════ */
     const QUIZZES = [
+      {id:'mystery',title:'Mystery Quiz',emoji:'🎲',qs:[]},
       {id:'panda',title:'Panda Quiz',emoji:'🐼',qs:[
         {q:'What do giant pandas mainly eat?',o:['Fish','Bamboo','Berries','Insects'],a:1},
         {q:'Where are giant pandas originally from?',o:['Japan','India','China','Thailand'],a:2},
@@ -1601,6 +1688,174 @@
         {q:'What makes humans unique among all animals?',o:['Walking upright','Using tools','Complex language and culture','Living in groups'],a:2},
         {q:'What is the most visited country in the world?',o:['USA','Spain','France','Italy'],a:2},
         {q:'How many countries are officially recognised in the world?',o:['175','185','195','210'],a:2}
+      ]},
+      {id:'sport2',title:'Sport 2 Quiz',emoji:'🏆',qs:[
+        {q:'Which country has won the most FIFA World Cups?',o:['Germany','Argentina','Brazil','France'],a:2},
+        {q:'How many players are on a rugby union team?',o:['11','13','15','17'],a:2},
+        {q:'In cricket, taking 3 wickets in 3 balls is called?',o:['Triple strike','Hat-trick','Perfect over','Triple play'],a:1},
+        {q:'In baseball, how many strikes equal an out?',o:['1','2','3','4'],a:2},
+        {q:'What is the diameter of a standard basketball hoop?',o:['14 inches','16 inches','18 inches','20 inches'],a:2},
+        {q:'In swimming, what is the longest individual Olympic event?',o:['800m freestyle','1000m freestyle','1500m freestyle','2000m freestyle'],a:2},
+        {q:'How many players are on a baseball team?',o:['7','8','9','10'],a:2},
+        {q:'What sport uses the term "birdie"?',o:['Tennis','Golf','Badminton','Cricket'],a:1},
+        {q:'In which sport do you perform a slam dunk?',o:['Volleyball','Netball','Basketball','Handball'],a:2},
+        {q:'What is the highest score in a single dart throw?',o:['50','57','60','100'],a:2}
+      ]},
+      {id:'prehistoric',title:'Prehistoric Animal Quiz',emoji:'🦣',qs:[
+        {q:'What modern animal is the woolly mammoth most closely related to?',o:['African elephant','Asian elephant','Rhino','Hippo'],a:1},
+        {q:'What is the scientific name for the saber-toothed cat?',o:['Dire wolf','Smilodon','Megalodon','Thylacosmilus'],a:1},
+        {q:'When did dinosaurs first appear on Earth?',o:['66 million years ago','130 million years ago','230 million years ago','400 million years ago'],a:2},
+        {q:'What was the largest prehistoric flying reptile?',o:['Pterodactyl','Pteranodon','Quetzalcoatlus','Dimorphodon'],a:2},
+        {q:'Which prehistoric fish species is still alive today?',o:['Megalodon','Coelacanth','Dunkleosteus','Xiphactinus'],a:1},
+        {q:'What caused the mass extinction of dinosaurs 66 million years ago?',o:['A giant volcano','Asteroid impact','Ice age','Disease'],a:1},
+        {q:'What prehistoric creature is known for its massive woolly coat and curved tusks?',o:['Mastodon','Glyptodon','Woolly mammoth','Giant ground sloth'],a:2},
+        {q:'What is a trilobite?',o:['A prehistoric bird','A prehistoric plant','An ancient sea arthropod','A type of dinosaur'],a:2},
+        {q:'The dodo bird went extinct in approximately what century?',o:['15th century','16th century','17th century','18th century'],a:2},
+        {q:'What was the largest prehistoric shark?',o:['Great white','Hammerhead','Megalodon','Bull shark'],a:2}
+      ]},
+      {id:'furniture',title:'Furniture Quiz',emoji:'🪑',qs:[
+        {q:'What piece of furniture is used for sleeping?',o:['Sofa','Armchair','Bed','Ottoman'],a:2},
+        {q:'What is an armoire?',o:['A type of bed','A large wardrobe cabinet','A coffee table','A rocking chair'],a:1},
+        {q:'What is an ottoman typically used as?',o:['A bookcase','A dining chair','A padded seat or footrest','A writing desk'],a:2},
+        {q:'What is a chaise longue?',o:['A tall bookshelf','A long reclining chair','A bunk bed','A folding table'],a:1},
+        {q:'What is a futon?',o:['A type of lamp','A rug','A sofa that folds into a bed','A bedside table'],a:2},
+        {q:'What wood is most commonly used in fine furniture?',o:['Pine','Balsa','Oak','Bamboo'],a:2},
+        {q:'What is a settee?',o:['A small dining table','A type of sofa','A wardrobe','A drawer unit'],a:1},
+        {q:'What piece of furniture has drawers for storing clothes?',o:['Bookcase','Chest of drawers','Wardrobe','Sideboard'],a:1},
+        {q:'What is a console table typically placed against?',o:['The ceiling','A wall','The floor only','A window'],a:1},
+        {q:'What is a daybed?',o:['A nightstand','A bunk bed','A bed usable as a sofa during the day','A folding cot'],a:2}
+      ]},
+      {id:'mythical',title:'Mythical Animal Quiz',emoji:'🐉',qs:[
+        {q:'What mythical creature is half-human, half-horse?',o:['Minotaur','Satyr','Centaur','Faun'],a:2},
+        {q:'What is a phoenix famous for?',o:['Breathing fire','Rising from its own ashes','Granting wishes','Turning things to gold'],a:1},
+        {q:'What creature in Greek myth has snakes for hair?',o:['Harpy','Gorgon Medusa','Sphinx','Hydra'],a:1},
+        {q:'What is a Kraken?',o:['A flying horse','A giant sea monster','A fire-breathing lizard','A sea siren'],a:1},
+        {q:'What mythical horse has a single horn on its forehead?',o:['Pegasus','Kirin','Unicorn','Alicorn'],a:2},
+        {q:'What is a griffin?',o:['Half man half bull','Half lion half eagle','Half horse half fish','Half human half snake'],a:1},
+        {q:'What does a basilisk kill with?',o:['Its bite','Its claws','Its gaze','Its roar'],a:2},
+        {q:'What is the Loch Ness Monster said to resemble?',o:['A giant spider','A sea serpent/plesiosaur','A giant fish','A water dragon'],a:1},
+        {q:'In Norse mythology, what is Fenrir?',o:['A giant eagle','A sea serpent','A giant wolf','A fire demon'],a:2},
+        {q:'What mythical creature is half-man, half-bull from Greek myth?',o:['Centaur','Satyr','Minotaur','Chimera'],a:2}
+      ]},
+      {id:'cleaning',title:'Cleaning Tools Quiz',emoji:'🧹',qs:[
+        {q:'What tool is used to sweep floors?',o:['Mop','Broom','Sponge','Duster'],a:1},
+        {q:'What is a mop used for?',o:['Sweeping dust','Washing windows','Cleaning floors with liquid','Scrubbing walls'],a:2},
+        {q:'What cleaning machine sucks up dust and dirt?',o:['Dishwasher','Pressure washer','Vacuum cleaner','Spin dryer'],a:2},
+        {q:'What is a squeegee primarily used for?',o:['Scrubbing toilets','Washing windows','Mopping floors','Dusting shelves'],a:1},
+        {q:'What chemical is commonly used to kill germs on surfaces?',o:['Vinegar only','Cooking oil','Disinfectant / bleach','Baking soda only'],a:2},
+        {q:'What tool is a dustpan always used together with?',o:['Mop','Sponge','Broom','Duster'],a:2},
+        {q:'What cloth is designed to trap dust without spreading it?',o:['Paper towel','Newspaper','Microfiber cloth','Cotton sheet'],a:2},
+        {q:'What machine automatically washes dishes?',o:['Washing machine','Dishwasher','Tumble dryer','Steamer'],a:1},
+        {q:'What is scrubbing brush most used for?',o:['Sweeping floors','Dusting shelves','Scrubbing hard surfaces','Polishing furniture'],a:2},
+        {q:'What is the purpose of a toilet brush?',o:['Cleaning sinks','Scrubbing the toilet bowl','Mopping floors','Washing walls'],a:1}
+      ]},
+      {id:'toy',title:'Toy Quiz',emoji:'🎠',qs:[
+        {q:'What toy is made of colored interlocking plastic bricks?',o:['Meccano','LEGO','K\'Nex','Duplo only'],a:1},
+        {q:'What popular doll was introduced by Mattel in 1959?',o:['Bratz','Sindy','Barbie','Jem'],a:2},
+        {q:'What toy is a handheld digital virtual pet?',o:['GameBoy','Tamagotchi','Furby','Neopet'],a:1},
+        {q:'What is a Rubik\'s Cube?',o:['A spinning top','A building block set','A 3D color-matching puzzle','A board game'],a:2},
+        {q:'What toy shoots foam darts?',o:['Super Soaker','Nerf gun','Silly String','Water balloon'],a:1},
+        {q:'What outdoor toy do children ride by pumping their legs on a seat?',o:['Pogo stick','Hula hoop','Swing','Seesaw'],a:2},
+        {q:'What spinning toy can perform tricks on a string?',o:['Boomerang','Spinning top','Yo-yo','Frisbee'],a:2},
+        {q:'What toy features miniature cars on a plastic track?',o:['Micro Machines','Hot Wheels','Matchbox','All of the above'],a:3},
+        {q:'What board game involves buying and selling properties?',o:['Scrabble','Chess','Monopoly','Cluedo'],a:2},
+        {q:'What toy is a flat disc thrown through the air?',o:['Boomerang','Javelin','Frisbee','Discus'],a:2}
+      ]},
+      {id:'stationary',title:'Stationery Quiz',emoji:'✏️',qs:[
+        {q:'What is the core of a pencil made from?',o:['Charcoal','Graphite','Lead','Carbon'],a:1},
+        {q:'What tool is used to remove pencil marks?',o:['White-out','Sharpener','Eraser','Tape'],a:2},
+        {q:'What stationery item holds multiple pages together permanently?',o:['Paper clip','Rubber band','Stapler','Binder clip'],a:2},
+        {q:'What is a sticky note also known as?',o:['Memo pad','Post-it note','Notecard','Label'],a:1},
+        {q:'What tool is used to measure and draw straight lines?',o:['Protractor','Set square','Ruler','Compass'],a:2},
+        {q:'What is correction fluid (like Tipp-Ex) used for?',o:['Highlighting text','Covering writing mistakes','Sticking paper','Erasing pencil'],a:1},
+        {q:'What do you call a marker that makes text stand out in bright color?',o:['Felt tip','Marker','Highlighter','Gel pen'],a:2},
+        {q:'What tool cuts paper in a straight line in offices?',o:['Scissors','Stanley knife','Paper trimmer/guillotine','Craft knife'],a:2},
+        {q:'What is a ring binder used for?',o:['Storing pens','Organizing loose papers','Mailing letters','Writing notes'],a:1},
+        {q:'What stationery item transfers ink onto paper without refilling?',o:['Fountain pen','Ballpoint pen','Quill','Stylus'],a:1}
+      ]},
+      {id:'politics',title:'Politics Quiz',emoji:'🗳️',qs:[
+        {q:'What is a democracy?',o:['Rule by a king','Government by the people','Rule by the military','Rule by one party'],a:1},
+        {q:'Who leads the government in the United Kingdom?',o:['The King','The President','The Prime Minister','The Chancellor'],a:2},
+        {q:'What does UN stand for?',o:['United Nations','Universal Network','United Neighbors','Union of Nations'],a:0},
+        {q:'What is a veto?',o:['A type of vote','A power to reject a decision','An election result','A government tax'],a:1},
+        {q:'What is the highest court in the United States?',o:['Federal Court','Appeals Court','Supreme Court','District Court'],a:2},
+        {q:'How long is a US presidential term?',o:['2 years','4 years','6 years','8 years'],a:1},
+        {q:'What does NATO stand for?',o:['National Army Treaty Organization','North Atlantic Treaty Organization','Nordic Alliance Treaty Organization','New Atlantic Trade Organization'],a:1},
+        {q:'What is a constitution?',o:['A type of election','A set of fundamental laws for a country','A political party','A government budget'],a:1},
+        {q:'What country has a parliament called the Riksdag?',o:['Norway','Denmark','Finland','Sweden'],a:3},
+        {q:'What is the process of removing a president from office called?',o:['Resignation','Veto','Impeachment','Dissolution'],a:2}
+      ]},
+      {id:'food',title:'Food Quiz',emoji:'🍕',qs:[
+        {q:'What country does sushi originate from?',o:['China','Korea','Japan','Thailand'],a:2},
+        {q:'What is the main ingredient in guacamole?',o:['Tomato','Avocado','Lime','Onion'],a:1},
+        {q:'What gas makes bread dough rise?',o:['Oxygen','Nitrogen','Carbon dioxide','Hydrogen'],a:2},
+        {q:'What fruit is used to make traditional wine?',o:['Apple','Plum','Grapes','Cherry'],a:2},
+        {q:'What nut is the main ingredient in Nutella?',o:['Almond','Hazelnut','Walnut','Peanut'],a:1},
+        {q:'What country invented pizza?',o:['Greece','Spain','France','Italy'],a:3},
+        {q:'What is tofu made from?',o:['Almond milk','Rice milk','Soy milk','Coconut milk'],a:2},
+        {q:'What is the most expensive spice in the world by weight?',o:['Vanilla','Cardamom','Saffron','Truffle'],a:2},
+        {q:'What vegetable is used to make traditional kimchi?',o:['Spinach','Cabbage','Broccoli','Lettuce'],a:1},
+        {q:'What is the primary ingredient in hummus?',o:['Lentils','Black beans','Chickpeas','Kidney beans'],a:2}
+      ]},
+      {id:'softtoy',title:'Soft Toy Quiz',emoji:'🧸',qs:[
+        {q:'What is the most classic soft toy?',o:['Rag doll','Teddy bear','Plush cat','Stuffed rabbit'],a:1},
+        {q:'What famous stuffed bear lives in the Hundred Acre Wood?',o:['Paddington Bear','Rupert Bear','Winnie the Pooh','Baloo'],a:2},
+        {q:'What material typically fills soft toys?',o:['Cotton wool','Foam chunks','Polyester stuffing','Feathers'],a:2},
+        {q:'What is the name of the stuffed rabbit in the classic story "The Velveteen Rabbit"?',o:['Peter','Flopsy','The Velveteen Rabbit','Bunnicula'],a:2},
+        {q:'What famous bear comes from Darkest Peru and loves marmalade?',o:['Winnie the Pooh','Paddington Bear','Rupert Bear','Baloo'],a:1},
+        {q:'What big purple dinosaur is a famous soft toy from a TV show?',o:['Barney','Dino','Rex','Grimace'],a:0},
+        {q:'What is Build-A-Bear Workshop?',o:['A toy repair shop','A store where you stuff your own animal','A factory tour','A children\'s museum'],a:1},
+        {q:'What soft toy villain appears in Toy Story 3?',o:['Stinky Pete','Emperor Zurg','Lotso','The Monkey'],a:2},
+        {q:'What is a plushie?',o:['A hard plastic toy','A remote-control toy','A soft stuffed toy','A wind-up toy'],a:2},
+        {q:'What iconic white cat brand makes soft toys with a big red bow?',o:['My Melody','Cinnamoroll','Hello Kitty','Pompompurin'],a:2}
+      ]},
+      {id:'elements',title:'Elements Quiz',emoji:'⚗️',qs:[
+        {q:'What is the chemical symbol for gold?',o:['Go','Gd','Au','Ag'],a:2},
+        {q:'What is the lightest element on the periodic table?',o:['Helium','Lithium','Hydrogen','Beryllium'],a:2},
+        {q:'What element does the symbol O represent?',o:['Osmium','Oganesson','Oxygen','Olivine'],a:2},
+        {q:'How many elements are currently on the periodic table?',o:['108','112','118','124'],a:2},
+        {q:'What is the most abundant element in the universe?',o:['Helium','Oxygen','Carbon','Hydrogen'],a:3},
+        {q:'What element has the symbol Fe?',o:['Fluorine','Francium','Iron','Fermium'],a:2},
+        {q:'What group of elements is known for being unreactive?',o:['Alkali metals','Halogens','Noble gases','Transition metals'],a:2},
+        {q:'What element has the atomic number 6?',o:['Boron','Nitrogen','Carbon','Oxygen'],a:2},
+        {q:'What element is used as the filament in traditional light bulbs?',o:['Copper','Aluminum','Tungsten','Silver'],a:2},
+        {q:'What is the symbol for silver?',o:['Si','Sr','Ag','Sv'],a:2}
+      ]},
+      {id:'art',title:'Art Quiz',emoji:'🖼️',qs:[
+        {q:'Who painted the Mona Lisa?',o:['Michelangelo','Raphael','Leonardo da Vinci','Donatello'],a:2},
+        {q:'What art movement did Pablo Picasso help create?',o:['Surrealism','Impressionism','Cubism','Dadaism'],a:2},
+        {q:'Who painted The Starry Night?',o:['Claude Monet','Paul Gauguin','Vincent van Gogh','Edvard Munch'],a:2},
+        {q:'Who painted the Sistine Chapel ceiling?',o:['Leonardo da Vinci','Raphael','Caravaggio','Michelangelo'],a:3},
+        {q:'What technique involves applying very thick layers of paint?',o:['Fresco','Watercolor wash','Impasto','Pointillism'],a:2},
+        {q:'What is the art of paper folding called?',o:['Ikebana','Calligraphy','Origami','Kirigami'],a:2},
+        {q:'What is a self-portrait?',o:['A portrait of nature','A group painting','A painting of oneself','An abstract piece'],a:2},
+        {q:'What is sculpture made from found everyday objects called?',o:['Collage','Mosaic','Assemblage','Relief'],a:2},
+        {q:'Who is famous for painting melting clocks in "The Persistence of Memory"?',o:['René Magritte','Salvador Dalí','Max Ernst','Joan Miró'],a:1},
+        {q:'What is the primary binder in oil paint?',o:['Water','Acrylic polymer','Linseed oil','Egg yolk'],a:2}
+      ]},
+      {id:'geography',title:'Geography Quiz',emoji:'🗺️',qs:[
+        {q:'What is the largest country in the world by area?',o:['Canada','China','USA','Russia'],a:3},
+        {q:'What is the capital city of Australia?',o:['Sydney','Melbourne','Brisbane','Canberra'],a:3},
+        {q:'Which continent is the Amazon River located on?',o:['Africa','Asia','North America','South America'],a:3},
+        {q:'What is the longest river in the world?',o:['Amazon','Congo','Yangtze','Nile'],a:3},
+        {q:'What is the smallest country in the world?',o:['Monaco','San Marino','Liechtenstein','Vatican City'],a:3},
+        {q:'Which mountain range contains Mount Everest?',o:['Andes','Alps','Rockies','Himalayas'],a:3},
+        {q:'What is the capital of Japan?',o:['Osaka','Kyoto','Hiroshima','Tokyo'],a:3},
+        {q:'What is the largest hot desert in the world?',o:['Arabian Desert','Gobi Desert','Sahara','Kalahari'],a:2},
+        {q:'How many continents are there on Earth?',o:['5','6','7','8'],a:2},
+        {q:'What country has the most natural lakes?',o:['Russia','USA','Finland','Canada'],a:3}
+      ]},
+      {id:'clothing',title:'Clothing Quiz',emoji:'👗',qs:[
+        {q:'What fabric comes from the fleece of sheep?',o:['Cotton','Linen','Wool','Silk'],a:2},
+        {q:'What natural fibre is denim traditionally made from?',o:['Wool','Polyester','Cotton','Linen'],a:2},
+        {q:'What is a kimono?',o:['An Indian garment','A Chinese robe','A Japanese traditional garment','A Korean dress'],a:2},
+        {q:'What country is the sari traditionally from?',o:['China','Japan','Pakistan','India'],a:3},
+        {q:'What fabric is produced by silkworms?',o:['Cotton','Linen','Wool','Silk'],a:3},
+        {q:'What is a tuxedo?',o:['A casual jacket','A sports uniform','A formal suit with satin lapels','A military coat'],a:2},
+        {q:'What is a beret?',o:['A tall pointed hat','A round flat cap','A wide-brimmed hat','A knitted beanie'],a:1},
+        {q:'What do you call shoes with a significantly raised heel?',o:['Flats','Loafers','Heels','Moccasins'],a:2},
+        {q:'What is the difference between a skirt and a dress?',o:['A skirt is longer','A dress has an attached top portion','A skirt is always formal','There is no difference'],a:1},
+        {q:'What is a poncho?',o:['A type of boot','A sleeveless jacket','A single piece of fabric with a head hole worn as a cloak','A wrap-around skirt'],a:2}
       ]}
     ];
 
@@ -1631,6 +1886,10 @@
     }
 
     function startQuiz(id) {
+      if (id === 'mystery') {
+        const real = QUIZZES.filter(q => q.id !== 'mystery');
+        id = real[Math.floor(Math.random() * real.length)].id;
+      }
       currentQuiz = QUIZZES.find(q => q.id === id);
       currentQIndex = 0;
       userAnswers = [];
@@ -1953,6 +2212,96 @@
         if (active.id === 'screen-login') login();
       }
     });
+  </script>
+
+  <!-- GLOBAL CHAT -->
+  <button id="chat-bubble" onclick="toggleChat()" title="Chat">💬<span class="chat-badge" id="chat-badge"></span></button>
+  <div id="chat-panel">
+    <div id="chat-header">🌐 PandaGames Chat</div>
+    <div id="chat-messages"></div>
+    <div id="chat-input-row">
+      <input id="chat-input" type="text" placeholder="Say something…" maxlength="120" onkeydown="if(event.key==='Enter')sendChat()"/>
+      <button id="chat-send" onclick="sendChat()">➤</button>
+    </div>
+  </div>
+
+  <script>
+    let chatOpen = false;
+    let chatUnread = false;
+    let chatListener = null;
+
+    function toggleChat() {
+      chatOpen = !chatOpen;
+      document.getElementById('chat-panel').classList.toggle('open', chatOpen);
+      if (chatOpen) {
+        chatUnread = false;
+        document.getElementById('chat-badge').style.display = 'none';
+        scrollChatToBottom();
+        if (!chatListener) initChatListener();
+        setTimeout(() => document.getElementById('chat-input').focus(), 200);
+      }
+    }
+
+    function initChatListener() {
+      const db = getDb();
+      if (!db) return;
+      chatListener = db.ref('chat').limitToLast(80);
+      chatListener.on('value', snap => {
+        const msgs = snap.val() || {};
+        const box = document.getElementById('chat-messages');
+        box.innerHTML = '';
+        const me = document.getElementById('display-username').textContent.trim();
+        Object.values(msgs).sort((a,b) => a.t - b.t).forEach(m => {
+          const div = document.createElement('div');
+          if (m.system) {
+            div.className = 'chat-msg system';
+            div.textContent = m.text;
+          } else if (m.user === me) {
+            div.className = 'chat-msg user-own';
+            div.innerHTML = '<div class="msg-name">You</div>' + escHtml(m.text);
+          } else {
+            div.className = 'chat-msg user-other';
+            div.innerHTML = '<div class="msg-name">' + escHtml(m.user) + '</div>' + escHtml(m.text);
+          }
+          box.appendChild(div);
+        });
+        scrollChatToBottom();
+        if (!chatOpen) {
+          chatUnread = true;
+          document.getElementById('chat-badge').style.display = 'block';
+        }
+      });
+    }
+
+    function scrollChatToBottom() {
+      const box = document.getElementById('chat-messages');
+      box.scrollTop = box.scrollHeight;
+    }
+
+    function sendChat() {
+      const input = document.getElementById('chat-input');
+      const text = input.value.trim();
+      if (!text) return;
+      const db = getDb();
+      if (!db) return;
+      const me = document.getElementById('display-username').textContent.trim();
+      if (!me) return;
+      db.ref('chat').push({ user: me, text, t: Date.now() });
+      input.value = '';
+    }
+
+    function postSystemMsg(text) {
+      const db = getDb();
+      if (!db) return;
+      db.ref('chat').push({ system: true, text, t: Date.now() });
+    }
+
+    function escHtml(s) {
+      return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    }
+
+    // start listening immediately so badge shows new messages even when closed
+    window.addEventListener('load', () => setTimeout(initChatListener, 1500));
   </script>
 </body>
 </html>
