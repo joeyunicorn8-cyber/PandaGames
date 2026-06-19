@@ -1941,7 +1941,7 @@
     // Single squiggly oval circuit — clockwise from bottom-centre
     const RACE_TRACKS = [{
       name: 'Squiggle Circuit',
-      trackW: 94,
+      trackW: 130,
       startAngle: Math.PI / 2,
       pts: [
         [.50,.88],[.64,.85],[.78,.76],[.86,.62],
@@ -2146,17 +2146,20 @@
         this.fbRef.off();
         const mk=this.myRole==='host'?'hpos':'jpos', tk=this.myRole==='host'?'jpos':'hpos';
         if(this._syncInterval) clearInterval(this._syncInterval);
+        // Positions are sent NORMALIZED (0-1) so they line up regardless of
+        // each player's screen/canvas size, then scaled to local W/H on receipt.
         this._syncInterval=setInterval(()=>{
           if(this.gameOver) return;
           const c=this.myCar;
-          this.fbRef.child(mk).set({x:Math.round(c.x),y:Math.round(c.y),a:+c.angle.toFixed(3),s:+c.speed.toFixed(2)});
+          this.fbRef.child(mk).set({x:+(c.x/this.W).toFixed(4),y:+(c.y/this.H).toFixed(4),a:+c.angle.toFixed(3),s:+c.speed.toFixed(2)});
         },33);
         this.fbRef.child(tk).on('value',snap=>{
           const r=snap.val(); if(!r) return;
           const o=this.otherCar;
-          const dist=Math.hypot(r.x-o.x,r.y-o.y);
-          if(!o._nr||dist>90){o.x=r.x;o.y=r.y;}
-          else{o.x+=(r.x-o.x)*.4;o.y+=(r.y-o.y)*.4;}
+          const rx=r.x*this.W, ry=r.y*this.H;
+          const dist=Math.hypot(rx-o.x,ry-o.y);
+          if(!o._nr||dist>90){o.x=rx;o.y=ry;}
+          else{o.x+=(rx-o.x)*.4;o.y+=(ry-o.y)*.4;}
           o.angle=r.a; o.speed=r.s; o._nr=true;
         });
         this.fbRef.child('winner').on('value',snap=>{
