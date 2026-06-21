@@ -2085,8 +2085,8 @@
         else                     c.speed*=fr;
         if(Math.abs(c.speed)>.12){
           const d=c.speed>0?1:-1;
-          if(this.keys.down) c.angle-=ts*(Math.abs(c.speed)/ms)*d;
-          if(this.keys.up)   c.angle+=ts*(Math.abs(c.speed)/ms)*d;
+          if(this.keys.up)   c.angle-=ts*(Math.abs(c.speed)/ms)*d;
+          if(this.keys.down) c.angle+=ts*(Math.abs(c.speed)/ms)*d;
         }
         const nx=c.x+Math.sin(c.angle)*c.speed;
         const ny=c.y-Math.cos(c.angle)*c.speed;
