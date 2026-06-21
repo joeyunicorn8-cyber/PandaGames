@@ -26,31 +26,25 @@
     /* ── ARTIST BUTTON ── */
     .artist-btn {
       position: relative; width: 240px; height: 240px;
-      cursor: pointer; border: 3px solid #fff; border-radius: 20px; overflow: hidden;
-      transition: transform .2s, box-shadow .2s;
+      cursor: pointer; background: #1a1a1a; border: 3px solid #444;
+      border-radius: 20px; overflow: hidden;
+      transition: transform .2s, border-color .2s, box-shadow .2s;
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-      background: #fff;
+      box-shadow: 0 0 30px rgba(255,255,255,0.05);
     }
-    .artist-btn:hover { transform: scale(1.06); box-shadow: 0 0 40px rgba(255,255,255,0.35); }
+    .artist-btn:hover { transform: scale(1.06); border-color: #fff; box-shadow: 0 0 40px rgba(255,255,255,0.2); }
     .artist-btn-bg {
-      position: absolute; inset: 0;
-      background:
-        radial-gradient(circle at 20% 25%, #ef4444 0%, transparent 35%),
-        radial-gradient(circle at 75% 20%, #3b82f6 0%, transparent 38%),
-        radial-gradient(circle at 30% 75%, #fbbf24 0%, transparent 36%),
-        radial-gradient(circle at 80% 78%, #22c55e 0%, transparent 38%),
-        radial-gradient(circle at 55% 50%, #a855f7 0%, transparent 40%);
-      opacity: 0.88;
+      position: absolute; inset: 0; opacity: 0.09;
+      background: repeating-linear-gradient(50deg, #fff, #fff 3px, transparent 3px, transparent 22px);
     }
     .artist-btn-label {
       position: relative; z-index: 2; font-size: 32px; font-weight: 900;
       color: #fff; letter-spacing: 3px; font-family: 'Arial Black', Impact, sans-serif;
-      text-shadow: 0 2px 8px rgba(0,0,0,0.55);
+      text-shadow: 0 0 24px rgba(255,255,255,0.35);
     }
     .artist-btn-sub {
       position: relative; z-index: 2; font-size: 11px;
-      color: rgba(255,255,255,0.92); letter-spacing: 3px; text-transform: uppercase;
-      text-shadow: 0 1px 4px rgba(0,0,0,0.55);
+      color: rgba(255,255,255,0.38); letter-spacing: 3px; text-transform: uppercase;
     }
 
     /* ── ARTIST SCREEN ── */
