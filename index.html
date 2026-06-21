@@ -23,6 +23,90 @@
     .screen { display: none; width: 100%; min-height: 100vh; }
     .screen.active { display: flex; align-items: center; justify-content: center; }
 
+    /* ── ARTIST BUTTON ── */
+    .artist-btn {
+      position: relative; width: 240px; height: 240px;
+      cursor: pointer; border: 3px solid #fff; border-radius: 20px; overflow: hidden;
+      transition: transform .2s, box-shadow .2s;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+      background: #fff;
+    }
+    .artist-btn:hover { transform: scale(1.06); box-shadow: 0 0 40px rgba(255,255,255,0.35); }
+    .artist-btn-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(circle at 20% 25%, #ef4444 0%, transparent 35%),
+        radial-gradient(circle at 75% 20%, #3b82f6 0%, transparent 38%),
+        radial-gradient(circle at 30% 75%, #fbbf24 0%, transparent 36%),
+        radial-gradient(circle at 80% 78%, #22c55e 0%, transparent 38%),
+        radial-gradient(circle at 55% 50%, #a855f7 0%, transparent 40%);
+      opacity: 0.88;
+    }
+    .artist-btn-label {
+      position: relative; z-index: 2; font-size: 32px; font-weight: 900;
+      color: #fff; letter-spacing: 3px; font-family: 'Arial Black', Impact, sans-serif;
+      text-shadow: 0 2px 8px rgba(0,0,0,0.55);
+    }
+    .artist-btn-sub {
+      position: relative; z-index: 2; font-size: 11px;
+      color: rgba(255,255,255,0.92); letter-spacing: 3px; text-transform: uppercase;
+      text-shadow: 0 1px 4px rgba(0,0,0,0.55);
+    }
+
+    /* ── ARTIST SCREEN ── */
+    #screen-artist { flex-direction: column; background: #1a1625; position: relative; overflow: hidden; }
+    .art-splatter-bg {
+      position: absolute; inset: 0; z-index: 0;
+      background:
+        radial-gradient(circle at 10% 15%, #ef4444 0%, transparent 14%),
+        radial-gradient(circle at 85% 10%, #3b82f6 0%, transparent 16%),
+        radial-gradient(circle at 25% 85%, #fbbf24 0%, transparent 15%),
+        radial-gradient(circle at 90% 80%, #22c55e 0%, transparent 16%),
+        radial-gradient(circle at 50% 50%, #a855f7 0%, transparent 12%),
+        radial-gradient(circle at 65% 30%, #ec4899 0%, transparent 13%),
+        radial-gradient(circle at 8% 60%, #06b6d4 0%, transparent 14%),
+        radial-gradient(circle at 45% 12%, #f97316 0%, transparent 12%);
+      opacity: 0.55;
+    }
+    .art-topbar {
+      position: relative; z-index: 2; width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 28px; background: rgba(0,0,0,0.35);
+    }
+    .art-topbar-title { font-size: 18px; font-weight: 900; letter-spacing: 2px; color: #fff; }
+    .art-main {
+      position: relative; z-index: 2; flex: 1; width: 100%;
+      display: flex; align-items: flex-start; justify-content: center; gap: 24px;
+      padding: 24px; overflow: auto;
+    }
+    .art-toolbar {
+      background: rgba(255,255,255,0.96); border-radius: 16px; padding: 18px;
+      display: flex; flex-direction: column; gap: 16px; min-width: 200px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.35); color: #222;
+    }
+    .art-tool-group { display: flex; flex-direction: column; gap: 6px; }
+    .art-tool-group label { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #555; }
+    #art-color { width: 100%; height: 42px; border: none; border-radius: 8px; cursor: pointer; }
+    .art-brush-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .art-brush-btn {
+      flex: 1 1 auto; padding: 8px 10px; font-size: 12px; font-weight: 700;
+      border: 2px solid #ddd; border-radius: 8px; background: #f7f7f7; cursor: pointer;
+      transition: all .15s; white-space: nowrap;
+    }
+    .art-brush-btn:hover { border-color: #a855f7; }
+    .art-brush-btn.active { background: #a855f7; color: #fff; border-color: #a855f7; }
+    #art-size { width: 100%; }
+    #art-canvas-size { width: 100%; padding: 8px; border-radius: 8px; border: 2px solid #ddd; font-weight: 700; }
+    .art-clear-btn {
+      padding: 12px; font-size: 14px; font-weight: 800; letter-spacing: 1px;
+      border: none; border-radius: 10px; background: #ef4444; color: #fff; cursor: pointer;
+    }
+    .art-clear-btn:hover { background: #dc2626; }
+    .art-canvas-wrap {
+      background: #fff; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.55);
+      overflow: auto; max-width: 80vw; max-height: 80vh;
+    }
+    #art-canvas { display: block; cursor: crosshair; touch-action: none; }
+
     /* ── TURBO BUTTON ── */
     .turbo-btn {
       position: relative; width: 240px; height: 240px;
@@ -1131,6 +1215,13 @@
         <div class="getaway-btn-label">GETAWAY</div>
         <div class="getaway-btn-sub">Chase &amp; Escape</div>
       </button>
+
+      <!-- ARTIST BUTTON -->
+      <button class="artist-btn" onclick="startArtist()">
+        <div class="artist-btn-bg"></div>
+        <div class="artist-btn-label">ARTIST</div>
+        <div class="artist-btn-sub">Draw &amp; Paint</div>
+      </button>
     </div>
   </div>
 
@@ -1247,6 +1338,50 @@
           <button class="gw-overlay-btn again" onclick="GW.cleanup();GW.startSolo()">Play Again</button>
           <button class="gw-overlay-btn quit"  onclick="GW.cleanup();showScreen('game')">Quit</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ARTIST -->
+  <div id="screen-artist" class="screen">
+    <div class="art-splatter-bg"></div>
+    <div class="art-topbar">
+      <div class="art-topbar-title">🎨 ARTIST</div>
+      <button class="btn-quit" onclick="showScreen('game')">QUIT</button>
+    </div>
+    <div class="art-main">
+      <div class="art-toolbar">
+        <div class="art-tool-group">
+          <label>Color</label>
+          <input type="color" id="art-color" value="#1a1a1a" oninput="ART.setColor(this.value)">
+        </div>
+        <div class="art-tool-group">
+          <label>Brush</label>
+          <div class="art-brush-row">
+            <button class="art-brush-btn active" data-brush="normal" onclick="ART.setBrush('normal',this)">🖌️ Brush</button>
+            <button class="art-brush-btn" data-brush="spray" onclick="ART.setBrush('spray',this)">💨 Spray</button>
+            <button class="art-brush-btn" data-brush="pencil" onclick="ART.setBrush('pencil',this)">✏️ Pencil</button>
+            <button class="art-brush-btn" data-brush="marker" onclick="ART.setBrush('marker',this)">🖊️ Marker</button>
+            <button class="art-brush-btn" data-brush="crayon" onclick="ART.setBrush('crayon',this)">🖍️ Crayon</button>
+          </div>
+        </div>
+        <div class="art-tool-group">
+          <label>Brush Size: <span id="art-size-val">8</span>px</label>
+          <input type="range" id="art-size" min="1" max="60" value="8" oninput="ART.setSize(this.value)">
+        </div>
+        <div class="art-tool-group">
+          <label>Canvas Size</label>
+          <select id="art-canvas-size" onchange="ART.resizeCanvas(this.value)">
+            <option value="small">Small</option>
+            <option value="medium" selected>Medium</option>
+            <option value="large">Large</option>
+            <option value="huge">Huge</option>
+          </select>
+        </div>
+        <button class="art-clear-btn" onclick="ART.clear()">🗑 Clear Canvas</button>
+      </div>
+      <div class="art-canvas-wrap" id="art-canvas-wrap">
+        <canvas id="art-canvas"></canvas>
       </div>
     </div>
   </div>
@@ -2331,6 +2466,135 @@
         this.keys={up:false,down:false,left:false,right:false};
       }
     };
+
+    /* ══════════════════════════════════
+       ARTIST
+    ══════════════════════════════════ */
+    const ART = {
+      canvas:null, ctx:null, drawing:false,
+      color:'#1a1a1a', brush:'normal', size:8,
+      lastX:0, lastY:0,
+
+      init(){
+        this.canvas=document.getElementById('art-canvas');
+        this.ctx=this.canvas.getContext('2d');
+        this.resizeCanvas('medium');
+        this._bind();
+      },
+
+      _pos(e){
+        const r=this.canvas.getBoundingClientRect();
+        const t=e.touches&&e.touches[0];
+        const cx=(t?t.clientX:e.clientX)-r.left;
+        const cy=(t?t.clientY:e.clientY)-r.top;
+        return [cx*(this.canvas.width/r.width), cy*(this.canvas.height/r.height)];
+      },
+
+      _bind(){
+        const c=this.canvas;
+        const start=e=>{
+          e.preventDefault(); this.drawing=true;
+          [this.lastX,this.lastY]=this._pos(e);
+          this._stroke(this.lastX,this.lastY,this.lastX,this.lastY);
+        };
+        const move=e=>{
+          if(!this.drawing) return;
+          e.preventDefault();
+          const [x,y]=this._pos(e);
+          this._stroke(this.lastX,this.lastY,x,y);
+          this.lastX=x; this.lastY=y;
+        };
+        const end=()=>{ this.drawing=false; };
+        c.addEventListener('mousedown',start);
+        c.addEventListener('mousemove',move);
+        c.addEventListener('mouseup',end);
+        c.addEventListener('mouseleave',end);
+        c.addEventListener('touchstart',start,{passive:false});
+        c.addEventListener('touchmove',move,{passive:false});
+        c.addEventListener('touchend',end);
+      },
+
+      setColor(c){ this.color=c; },
+      setSize(s){ this.size=+s; document.getElementById('art-size-val').textContent=s; },
+      setBrush(b,btn){
+        this.brush=b;
+        document.querySelectorAll('.art-brush-btn').forEach(x=>x.classList.remove('active'));
+        btn.classList.add('active');
+      },
+
+      resizeCanvas(sizeKey){
+        const sizes={small:[500,375],medium:[800,600],large:[1100,800],huge:[1400,1000]};
+        const [w,h]=sizes[sizeKey]||sizes.medium;
+        const old=this.canvas.width?this.canvas.toDataURL():null;
+        this.canvas.width=w; this.canvas.height=h;
+        this.ctx.fillStyle='#fff';
+        this.ctx.fillRect(0,0,w,h);
+        if(old){
+          const img=new Image();
+          img.onload=()=>this.ctx.drawImage(img,0,0);
+          img.src=old;
+        }
+      },
+
+      clear(){
+        this.ctx.fillStyle='#fff';
+        this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
+      },
+
+      _stroke(x0,y0,x1,y1){
+        switch(this.brush){
+          case 'spray':  this._spray(x1,y1); break;
+          case 'pencil': this._line(x0,y0,x1,y1,Math.max(1,this.size*0.35),1,'round'); break;
+          case 'marker': this._line(x0,y0,x1,y1,this.size*1.4,0.55,'square'); break;
+          case 'crayon': this._crayon(x0,y0,x1,y1); break;
+          default:       this._line(x0,y0,x1,y1,this.size,1,'round');
+        }
+      },
+
+      _line(x0,y0,x1,y1,w,alpha,cap){
+        const ctx=this.ctx;
+        ctx.globalAlpha=alpha; ctx.strokeStyle=this.color;
+        ctx.lineWidth=w; ctx.lineCap=cap; ctx.lineJoin='round';
+        ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1); ctx.stroke();
+        ctx.globalAlpha=1;
+      },
+
+      _spray(x,y){
+        const ctx=this.ctx, r=this.size;
+        ctx.fillStyle=this.color;
+        const density=Math.round(r*2.2);
+        for(let i=0;i<density;i++){
+          const ang=Math.random()*Math.PI*2, dist=Math.random()*r;
+          const px=x+Math.cos(ang)*dist, py=y+Math.sin(ang)*dist;
+          ctx.globalAlpha=0.35+Math.random()*0.3;
+          ctx.beginPath(); ctx.arc(px,py,0.8,0,Math.PI*2); ctx.fill();
+        }
+        ctx.globalAlpha=1;
+      },
+
+      _crayon(x0,y0,x1,y1){
+        const ctx=this.ctx, w=this.size;
+        const steps=Math.max(1,Math.ceil(Math.hypot(x1-x0,y1-y0)/2));
+        ctx.fillStyle=this.color;
+        for(let i=0;i<=steps;i++){
+          const t=i/steps;
+          const x=x0+(x1-x0)*t, y=y0+(y1-y0)*t;
+          for(let j=0;j<4;j++){
+            const ox=(Math.random()-0.5)*w*0.6, oy=(Math.random()-0.5)*w*0.6;
+            ctx.globalAlpha=0.18+Math.random()*0.15;
+            ctx.beginPath(); ctx.arc(x+ox,y+oy,w*0.22,0,Math.PI*2); ctx.fill();
+          }
+        }
+        ctx.globalAlpha=1;
+      }
+    };
+
+    function startArtist() {
+      showScreen('artist');
+      const me = document.getElementById('display-username').textContent.trim();
+      if (me) postSystemMsg(me + ' JOINED ARTIST');
+      if (!ART.canvas) ART.init();
+    }
 
     function startQuizzer() {
       showScreen('quizzer');
