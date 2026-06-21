@@ -2905,7 +2905,7 @@
       _resetPositions(){
         const W=this.W,H=this.H;
         this.player={x:W*0.28,y:H/2,r:15,vx:0,vy:0,faceX:1,faceY:0,color:'#3b82f6'};
-        this.bot={x:W*0.72,y:H/2,r:15,vx:0,vy:0,color:'#ef4444'};
+        this.bot={x:W*0.72,y:H/2,r:15,vx:0,vy:0,faceX:-1,faceY:0,color:'#ef4444'};
         this.ball={x:W/2,y:H/2,r:9,vx:0,vy:0};
       },
 
@@ -2950,34 +2950,37 @@
         p.vx=dx*sp; p.vy=dy*sp;
         p.x=Math.max(p.r,Math.min(this.W-p.r,p.x+p.vx));
         p.y=Math.max(p.r,Math.min(this.H-p.r,p.y+p.vy));
-        this._ballCollide(p, 8.5);
+        this._ballCollide(p, 8.5, this.keys.shoot);
+        this.keys.shoot=false;
       },
 
       _updateBot(){
-        const b=this.bot, ball=this.ball, sp=3.7;
-        const dx=ball.x-b.x, dy=ball.y-b.y, dist=Math.hypot(dx,dy);
-        if(dist>1){
-          b.vx=(dx/dist)*sp; b.vy=(dy/dist)*sp;
-        } else { b.vx=0; b.vy=0; }
+        const b=this.bot, ball=this.ball;
+        const distToBall=Math.hypot(ball.x-b.x, ball.y-b.y);
+        const hasBall = distToBall < b.r+ball.r+12;
+        const goalX=0, goalY=this.H/2;
+        let tx,ty;
+        if(hasBall){ tx=goalX; ty=goalY; } else { tx=ball.x; ty=ball.y; }
+        const dx=tx-b.x, dy=ty-b.y, dist=Math.hypot(dx,dy)||1;
+        const sp=hasBall?3.3:4.0;
+        b.vx=(dx/dist)*sp; b.vy=(dy/dist)*sp;
+        b.faceX=dx/dist; b.faceY=dy/dist;
         b.x=Math.max(b.r,Math.min(this.W-b.r,b.x+b.vx));
         b.y=Math.max(b.r,Math.min(this.H-b.r,b.y+b.vy));
-        if(dist<b.r+ball.r+10 && Math.random()<0.10){
-          const tx=0, ty=this.H/2;
-          const tdx=tx-ball.x, tdy=ty-ball.y, tlen=Math.hypot(tdx,tdy)||1;
-          ball.vx=(tdx/tlen)*7.5; ball.vy=(tdy/tlen)*7.5;
-        }
+        const distToGoal=Math.hypot(b.x-goalX,b.y-goalY);
+        const shootNow = hasBall && distToGoal<160 && Math.random()<0.06;
+        this._ballCollide(b, 7.8, shootNow);
       },
 
-      _ballCollide(p, power){
+      _ballCollide(p, power, shootNow){
         const ball=this.ball;
         const dx=ball.x-p.x, dy=ball.y-p.y, dist=Math.hypot(dx,dy)||0.01;
         const minD=p.r+ball.r;
         if(dist<minD){
           ball.x=p.x+(dx/dist)*minD; ball.y=p.y+(dy/dist)*minD;
           ball.vx+=p.vx*0.5; ball.vy+=p.vy*0.5;
-          if(this.keys.shoot){
+          if(shootNow){
             ball.vx=p.faceX*power; ball.vy=p.faceY*power;
-            this.keys.shoot=false;
           }
         }
       },
