@@ -2080,13 +2080,13 @@
 
       _updateCar(){
         const c=this.myCar, ms=4.2, ac=0.07, br=0.15, fr=0.988, ts=0.030;
-        if(this.keys.right)      c.speed=Math.min(c.speed+ac,ms);
-        else if(this.keys.left)  c.speed=Math.max(c.speed-br,-ms*.3);
-        else                     c.speed*=fr;
+        if(this.keys.up)        c.speed=Math.min(c.speed+ac,ms);
+        else if(this.keys.down) c.speed=Math.max(c.speed-br,-ms*.3);
+        else                    c.speed*=fr;
         if(Math.abs(c.speed)>.12){
           const d=c.speed>0?1:-1;
-          if(this.keys.up)   c.angle-=ts*(Math.abs(c.speed)/ms)*d;
-          if(this.keys.down) c.angle+=ts*(Math.abs(c.speed)/ms)*d;
+          if(this.keys.left)  c.angle-=ts*(Math.abs(c.speed)/ms)*d;
+          if(this.keys.right) c.angle+=ts*(Math.abs(c.speed)/ms)*d;
         }
         const nx=c.x+Math.sin(c.angle)*c.speed;
         const ny=c.y-Math.cos(c.angle)*c.speed;
