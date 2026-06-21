@@ -48,7 +48,7 @@
     }
 
     /* ── ARTIST SCREEN ── */
-    #screen-artist { flex-direction: column; background: #1a1625; position: relative; overflow: hidden; }
+    #screen-artist { flex-direction: column; background: #1a1625; position: relative; overflow: hidden; height: 100vh; }
     .art-splatter-bg {
       position: absolute; inset: 0; z-index: 0;
       background:
@@ -68,13 +68,14 @@
     }
     .art-topbar-title { font-size: 18px; font-weight: 900; letter-spacing: 2px; color: #fff; }
     .art-main {
-      position: relative; z-index: 2; flex: 1; width: 100%;
-      display: flex; align-items: flex-start; justify-content: center; gap: 24px;
-      padding: 24px; overflow: auto;
+      position: relative; z-index: 2; flex: 1; width: 100%; min-height: 0;
+      display: flex; align-items: stretch; justify-content: center; gap: 24px;
+      padding: 24px; overflow: hidden;
     }
     .art-toolbar {
       background: rgba(255,255,255,0.96); border-radius: 16px; padding: 18px;
-      display: flex; flex-direction: column; gap: 16px; min-width: 200px;
+      display: flex; flex-direction: column; gap: 16px; flex: 0 0 200px;
+      align-self: flex-start; overflow-y: auto; max-height: 100%;
       box-shadow: 0 8px 24px rgba(0,0,0,0.35); color: #222;
     }
     .art-tool-group { display: flex; flex-direction: column; gap: 6px; }
@@ -97,9 +98,11 @@
     .art-clear-btn:hover { background: #dc2626; }
     .art-canvas-wrap {
       background: #fff; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.55);
-      overflow: auto; max-width: 80vw; max-height: 80vh;
+      flex: 1; min-width: 0; min-height: 0;
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden;
     }
-    #art-canvas { display: block; cursor: crosshair; touch-action: none; }
+    #art-canvas { display: block; cursor: crosshair; touch-action: none; max-width: 100%; max-height: 100%; }
 
     /* ── TURBO BUTTON ── */
     .turbo-btn {
@@ -2474,6 +2477,9 @@
         this.ctx=this.canvas.getContext('2d');
         this.resizeCanvas('medium');
         this._bind();
+        window.addEventListener('resize',()=>{
+          if(document.getElementById('screen-artist').classList.contains('active')) this.resizeCanvas(this.sizeKey);
+        });
       },
 
       _pos(e){
@@ -2516,9 +2522,15 @@
         btn.classList.add('active');
       },
 
+      sizeKey:'medium',
+
       resizeCanvas(sizeKey){
-        const sizes={small:[500,375],medium:[800,600],large:[1100,800],huge:[1400,1000]};
-        const [w,h]=sizes[sizeKey]||sizes.medium;
+        this.sizeKey=sizeKey;
+        const wrap=document.getElementById('art-canvas-wrap');
+        const factors={small:0.45,medium:0.68,large:0.86,huge:1};
+        const f=factors[sizeKey]||factors.medium;
+        const maxW=wrap.clientWidth||800, maxH=wrap.clientHeight||600;
+        const w=Math.max(200,Math.round(maxW*f)), h=Math.max(150,Math.round(maxH*f));
         const old=this.canvas.width?this.canvas.toDataURL():null;
         this.canvas.width=w; this.canvas.height=h;
         this.ctx.fillStyle='#fff';
