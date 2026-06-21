@@ -37,6 +37,7 @@
       position: absolute; inset: 0; opacity: 0.09;
       background: repeating-linear-gradient(50deg, #fff, #fff 3px, transparent 3px, transparent 22px);
     }
+    .artist-btn-splatter { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
     .artist-btn-label {
       position: relative; z-index: 2; font-size: 32px; font-weight: 900;
       color: #fff; letter-spacing: 3px; font-family: 'Arial Black', Impact, sans-serif;
@@ -96,6 +97,42 @@
       border: none; border-radius: 10px; background: #ef4444; color: #fff; cursor: pointer;
     }
     .art-clear-btn:hover { background: #dc2626; }
+    .art-save-btn {
+      padding: 12px; font-size: 14px; font-weight: 800; letter-spacing: 1px;
+      border: none; border-radius: 10px; background: #22c55e; color: #fff; cursor: pointer;
+    }
+    .art-save-btn:hover { background: #16a34a; }
+    .art-gallery-btn {
+      padding: 12px; font-size: 14px; font-weight: 800; letter-spacing: 1px;
+      border: none; border-radius: 10px; background: #3b82f6; color: #fff; cursor: pointer;
+    }
+    .art-gallery-btn:hover { background: #2563eb; }
+    .art-gallery-grid {
+      position: relative; z-index: 2; flex: 1; width: 100%; overflow: auto;
+      padding: 28px; display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+      gap: 20px; align-content: start;
+    }
+    .art-gallery-card {
+      background: #fff; border-radius: 12px; overflow: hidden;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.35); display: flex; flex-direction: column;
+    }
+    .art-gallery-thumb {
+      width: 100%; aspect-ratio: 4/3; object-fit: contain; background: #f3f3f3;
+      cursor: pointer; display: block;
+    }
+    .art-gallery-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 10px; font-size: 11px; color: #555;
+    }
+    .art-gallery-del {
+      background: #ef4444; color: #fff; border: none; border-radius: 6px;
+      padding: 4px 9px; font-size: 11px; font-weight: 700; cursor: pointer;
+    }
+    .art-gallery-del:hover { background: #dc2626; }
+    .art-gallery-empty {
+      position: relative; z-index: 2; color: rgba(255,255,255,0.65);
+      text-align: center; margin-top: 70px; font-size: 15px; width: 100%;
+    }
     .art-canvas-wrap {
       background: #fff; border-radius: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.55);
       flex: 1; min-width: 0; min-height: 0;
@@ -1216,6 +1253,25 @@
       <!-- ARTIST BUTTON -->
       <button class="artist-btn" onclick="startArtist()">
         <div class="artist-btn-bg"></div>
+        <svg class="artist-btn-splatter" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="38" cy="48" r="11" fill="#fff" opacity="0.22"/>
+          <circle cx="68" cy="32" r="4" fill="#fff" opacity="0.28"/>
+          <circle cx="188" cy="58" r="15" fill="#fff" opacity="0.18"/>
+          <circle cx="212" cy="88" r="5" fill="#fff" opacity="0.26"/>
+          <circle cx="54" cy="192" r="10" fill="#fff" opacity="0.22"/>
+          <circle cx="28" cy="158" r="4" fill="#fff" opacity="0.28"/>
+          <circle cx="196" cy="182" r="13" fill="#fff" opacity="0.2"/>
+          <circle cx="164" cy="206" r="5" fill="#fff" opacity="0.26"/>
+          <circle cx="122" cy="28" r="3" fill="#fff" opacity="0.26"/>
+          <circle cx="98" cy="212" r="6" fill="#fff" opacity="0.22"/>
+          <circle cx="20" cy="100" r="3" fill="#fff" opacity="0.24"/>
+          <circle cx="222" cy="140" r="4" fill="#fff" opacity="0.24"/>
+          <g transform="translate(122,122) rotate(-35)">
+            <rect x="-6" y="-56" width="12" height="40" rx="3" fill="#fff" opacity="0.92"/>
+            <rect x="-7" y="-18" width="14" height="14" fill="#ccc" opacity="0.85"/>
+            <path d="M-8,-4 C-10,10 -6,28 0,34 C6,28 10,10 8,-4 Z" fill="#fff" opacity="0.92"/>
+          </g>
+        </svg>
         <div class="artist-btn-label">ARTIST</div>
         <div class="artist-btn-sub">Draw &amp; Paint</div>
       </button>
@@ -1360,6 +1416,7 @@
             <button class="art-brush-btn" data-brush="pencil" onclick="ART.setBrush('pencil',this)">✏️ Pencil</button>
             <button class="art-brush-btn" data-brush="marker" onclick="ART.setBrush('marker',this)">🖊️ Marker</button>
             <button class="art-brush-btn" data-brush="crayon" onclick="ART.setBrush('crayon',this)">🖍️ Crayon</button>
+            <button class="art-brush-btn" data-brush="eraser" onclick="ART.setBrush('eraser',this)">🧼 Eraser</button>
           </div>
         </div>
         <div class="art-tool-group">
@@ -1376,11 +1433,23 @@
           </select>
         </div>
         <button class="art-clear-btn" onclick="ART.clear()">🗑 Clear Canvas</button>
+        <button class="art-save-btn" onclick="ART.save()">💾 Save Artwork</button>
+        <button class="art-gallery-btn" onclick="ART.openGallery()">🖼 My Gallery</button>
       </div>
       <div class="art-canvas-wrap" id="art-canvas-wrap">
         <canvas id="art-canvas"></canvas>
       </div>
     </div>
+  </div>
+
+  <!-- ARTIST GALLERY -->
+  <div id="screen-artist-gallery" class="screen">
+    <div class="art-splatter-bg"></div>
+    <div class="art-topbar">
+      <div class="art-topbar-title">🖼 MY GALLERY</div>
+      <button class="btn-quit" onclick="showScreen('artist')">QUIT</button>
+    </div>
+    <div class="art-gallery-grid" id="art-gallery-grid"></div>
   </div>
 
   <!-- TTT GAME -->
@@ -2547,19 +2616,83 @@
         this.ctx.fillRect(0,0,this.canvas.width,this.canvas.height);
       },
 
+      _storeKey(){
+        const me=document.getElementById('display-username').textContent.trim()||'guest';
+        return 'pg_artist_'+me;
+      },
+
+      _loadSaves(){
+        try { return JSON.parse(localStorage.getItem(this._storeKey())||'[]'); }
+        catch(e) { return []; }
+      },
+
+      save(){
+        const saves=this._loadSaves();
+        saves.unshift({
+          id: Date.now(),
+          data: this.canvas.toDataURL('image/png'),
+          w: this.canvas.width, h: this.canvas.height
+        });
+        if(saves.length>30) saves.length=30;
+        localStorage.setItem(this._storeKey(), JSON.stringify(saves));
+        const btn=document.querySelector('.art-save-btn');
+        const prev=btn.textContent;
+        btn.textContent='✅ Saved!';
+        setTimeout(()=>{btn.textContent=prev;},1400);
+      },
+
+      openGallery(){
+        const grid=document.getElementById('art-gallery-grid');
+        const saves=this._loadSaves();
+        if(!saves.length){
+          grid.innerHTML='<div class="art-gallery-empty">No saved artwork yet — draw something and hit "Save Artwork"!</div>';
+        } else {
+          grid.innerHTML=saves.map(s=>`
+            <div class="art-gallery-card">
+              <img class="art-gallery-thumb" src="${s.data}" onclick="ART.loadArt(${s.id})">
+              <div class="art-gallery-meta">
+                <span>${new Date(s.id).toLocaleDateString()}</span>
+                <button class="art-gallery-del" onclick="ART.deleteArt(${s.id},event)">Delete</button>
+              </div>
+            </div>
+          `).join('');
+        }
+        showScreen('artist-gallery');
+      },
+
+      loadArt(id){
+        const saves=this._loadSaves();
+        const s=saves.find(x=>x.id===id);
+        if(!s) return;
+        showScreen('artist');
+        this.canvas.width=s.w; this.canvas.height=s.h;
+        const img=new Image();
+        img.onload=()=>this.ctx.drawImage(img,0,0);
+        img.src=s.data;
+      },
+
+      deleteArt(id,e){
+        if(e) e.stopPropagation();
+        let saves=this._loadSaves();
+        saves=saves.filter(x=>x.id!==id);
+        localStorage.setItem(this._storeKey(), JSON.stringify(saves));
+        this.openGallery();
+      },
+
       _stroke(x0,y0,x1,y1){
         switch(this.brush){
           case 'spray':  this._spray(x1,y1); break;
           case 'pencil': this._line(x0,y0,x1,y1,Math.max(1,this.size*0.35),1,'round'); break;
           case 'marker': this._line(x0,y0,x1,y1,this.size*1.4,0.55,'square'); break;
           case 'crayon': this._crayon(x0,y0,x1,y1); break;
+          case 'eraser': this._line(x0,y0,x1,y1,this.size*1.6,1,'round','#ffffff'); break;
           default:       this._line(x0,y0,x1,y1,this.size,1,'round');
         }
       },
 
-      _line(x0,y0,x1,y1,w,alpha,cap){
+      _line(x0,y0,x1,y1,w,alpha,cap,colorOverride){
         const ctx=this.ctx;
-        ctx.globalAlpha=alpha; ctx.strokeStyle=this.color;
+        ctx.globalAlpha=alpha; ctx.strokeStyle=colorOverride||this.color;
         ctx.lineWidth=w; ctx.lineCap=cap; ctx.lineJoin='round';
         ctx.beginPath(); ctx.moveTo(x0,y0); ctx.lineTo(x1,y1); ctx.stroke();
         ctx.globalAlpha=1;
