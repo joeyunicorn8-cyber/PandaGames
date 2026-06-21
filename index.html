@@ -146,6 +146,87 @@
       border: 4px solid #1a1a1a; box-shadow: 0 0 0 1px rgba(255,255,255,0.5), 0 10px 40px rgba(0,0,0,0.55);
     }
 
+    /* ── SOCCER BUTTON ── */
+    .soccer-btn {
+      position: relative; width: 240px; height: 240px;
+      cursor: pointer; background: #1a1a1a; border: 3px solid #444;
+      border-radius: 20px; overflow: hidden;
+      transition: transform .2s, border-color .2s, box-shadow .2s;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+      box-shadow: 0 0 30px rgba(255,255,255,0.05);
+    }
+    .soccer-btn:hover { transform: scale(1.06); border-color: #fff; box-shadow: 0 0 40px rgba(255,255,255,0.2); }
+    .soccer-btn-bg {
+      position: absolute; inset: 0; opacity: 0.1;
+      background-image:
+        radial-gradient(circle at 50% 50%, transparent 30px, #fff 31px, #fff 33px, transparent 34px),
+        repeating-conic-gradient(#fff 0deg 12deg, transparent 12deg 24deg);
+      background-position: center, 50% 50%;
+      background-size: 90px 90px, 14px 14px;
+      -webkit-mask-image: radial-gradient(circle, #fff 55px, transparent 56px);
+    }
+    .soccer-btn-label {
+      position: relative; z-index: 2; font-size: 34px; font-weight: 900;
+      color: #fff; letter-spacing: 3px; font-family: 'Arial Black', Impact, sans-serif;
+      text-shadow: 0 0 24px rgba(255,255,255,0.35);
+    }
+    .soccer-btn-sub {
+      position: relative; z-index: 2; font-size: 11px;
+      color: rgba(255,255,255,0.38); letter-spacing: 3px; text-transform: uppercase;
+    }
+
+    /* ── SOCCER SCREENS ── */
+    #screen-soccer { flex-direction: column; background: linear-gradient(135deg,#1b5e20,#2e7d32); }
+    .soc-title {
+      font-size: 70px; font-weight: 900; color: #fff; letter-spacing: 6px;
+      font-family: 'Arial Black', Impact, sans-serif; text-shadow: 0 4px 14px rgba(0,0,0,0.4); margin-bottom: 4px;
+    }
+    .soc-sub { font-size: 13px; color: rgba(255,255,255,0.7); letter-spacing: 4px; margin-bottom: 40px; }
+    .btn-soc-play {
+      padding: 18px 50px; font-size: 19px; font-weight: 900; letter-spacing: 2px;
+      border: none; border-radius: 50px; cursor: pointer; background: #fff; color: #1b5e20;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn-soc-play:hover { transform: scale(1.06); box-shadow: 0 8px 24px rgba(0,0,0,0.3); }
+    .btn-soc-back {
+      margin-top: 26px; padding: 10px 24px; font-size: 13px; font-weight: 700;
+      border: 2px solid rgba(255,255,255,0.6); border-radius: 10px; background: transparent;
+      color: #fff; cursor: pointer;
+    }
+    #screen-soccer-play { flex-direction: column; background: #14532d; position: relative; }
+    .soc-topbar {
+      width: 100%; display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 28px; background: rgba(0,0,0,0.35); z-index: 3;
+    }
+    .soc-topbar-title { font-size: 18px; font-weight: 900; letter-spacing: 2px; color: #fff; }
+    .soc-topbar-center { display: flex; align-items: center; gap: 18px; }
+    .soc-score { font-size: 20px; font-weight: 900; color: #fff; letter-spacing: 1px; }
+    .soc-score span.you { color: #60a5fa; }
+    .soc-score span.bot { color: #f87171; }
+    .soc-timer { font-size: 14px; font-weight: 700; color: rgba(255,255,255,0.7); }
+    #soc-wrap { position: relative; width: 100%; flex: 1; min-height: 0; }
+    #soccer-canvas { display: block; width: 100%; height: 100%; }
+    #soc-countdown-overlay {
+      position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+      z-index: 4; pointer-events: none;
+    }
+    #soc-countdown-num {
+      font-size: 120px; font-weight: 900; color: #fff; font-family: 'Arial Black', Impact, sans-serif;
+      text-shadow: 0 0 40px rgba(0,0,0,0.6);
+    }
+    #soc-overlay {
+      position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+      flex-direction: column; gap: 18px; background: rgba(0,0,0,0.72); z-index: 5;
+    }
+    #soc-result-text { font-size: 48px; font-weight: 900; font-family: 'Arial Black', Impact, sans-serif; }
+    .soc-overlay-btns { display: flex; gap: 16px; }
+    .btn-soc-again, .btn-soc-quit {
+      padding: 14px 30px; font-size: 14px; font-weight: 800; letter-spacing: 1px;
+      border: none; border-radius: 10px; cursor: pointer;
+    }
+    .btn-soc-again { background: #22c55e; color: #fff; }
+    .btn-soc-quit { background: rgba(255,255,255,0.15); color: #fff; border: 2px solid rgba(255,255,255,0.4); }
+
     /* ── TURBO BUTTON ── */
     .turbo-btn {
       position: relative; width: 240px; height: 240px;
@@ -1255,6 +1336,13 @@
         <div class="getaway-btn-sub">Chase &amp; Escape</div>
       </button>
 
+      <!-- SOCCER BUTTON -->
+      <button class="soccer-btn" onclick="showScreen('soccer')">
+        <div class="soccer-btn-bg"></div>
+        <div class="soccer-btn-label">SOCCER</div>
+        <div class="soccer-btn-sub">Score Goals</div>
+      </button>
+
       <!-- ARTIST BUTTON -->
       <button class="artist-btn" onclick="startArtist()">
         <div class="artist-btn-bg"></div>
@@ -1455,6 +1543,37 @@
       <button class="btn-quit" onclick="showScreen('artist')">QUIT</button>
     </div>
     <div class="art-gallery-grid" id="art-gallery-grid"></div>
+  </div>
+
+  <!-- SOCCER LOBBY -->
+  <div id="screen-soccer" class="screen">
+    <div class="soc-title">SOCCER</div>
+    <div class="soc-sub">FIRST TO 3 GOALS WINS</div>
+    <button class="btn-soc-play" onclick="SOC.startSolo()">▶ PLAY</button>
+    <button class="btn-soc-back" onclick="showScreen('game')">← Back</button>
+  </div>
+
+  <!-- SOCCER PLAY -->
+  <div id="screen-soccer-play" class="screen">
+    <div class="soc-topbar">
+      <div class="soc-topbar-title">⚽ SOCCER</div>
+      <div class="soc-topbar-center">
+        <div class="soc-score"><span class="you">YOU</span> <span id="soc-score-you">0</span> — <span id="soc-score-bot">0</span> <span class="bot">BOT</span></div>
+        <div class="soc-timer" id="soc-timer">1:30</div>
+      </div>
+      <button class="btn-quit" onclick="SOC.cleanup();showScreen('soccer')">QUIT</button>
+    </div>
+    <div id="soc-wrap">
+      <canvas id="soccer-canvas"></canvas>
+      <div id="soc-countdown-overlay"><div id="soc-countdown-num"></div></div>
+      <div id="soc-overlay">
+        <div id="soc-result-text"></div>
+        <div class="soc-overlay-btns">
+          <button class="btn-soc-again" onclick="SOC.cleanup();SOC.startSolo()">Play Again</button>
+          <button class="btn-soc-quit" onclick="SOC.cleanup();showScreen('game')">Quit</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- TTT GAME -->
@@ -2739,6 +2858,232 @@
       if (me) postSystemMsg(me + ' JOINED ARTIST');
       if (!ART.canvas) ART.init();
     }
+
+    /* ══════════════════════════════════
+       SOCCER
+    ══════════════════════════════════ */
+    const SOC = {
+      raf:null, gameOver:false, started:false, paused:false,
+      W:0, H:0, ctx:null,
+      player:null, bot:null, ball:null,
+      goalH:120, goalDepth:18,
+      score:{you:0, bot:0},
+      timeLeft:90, _timerInt:null,
+      keys:{up:false,down:false,left:false,right:false},
+      _kd:null, _ku:null,
+
+      startSolo(){
+        const me = document.getElementById('display-username').textContent.trim();
+        if (me) postSystemMsg(me + ' JOINED SOCCER');
+        showScreen('soccer-play');
+        const cv=document.getElementById('soccer-canvas');
+        const wrap=document.getElementById('soc-wrap');
+        cv.width=this.W=wrap.clientWidth||window.innerWidth;
+        cv.height=this.H=wrap.clientHeight||(window.innerHeight-56);
+        this.ctx=cv.getContext('2d');
+        this.gameOver=false; this.started=false; this.paused=false;
+        this.score={you:0,bot:0};
+        this.timeLeft=90;
+        document.getElementById('soc-score-you').textContent='0';
+        document.getElementById('soc-score-bot').textContent='0';
+        document.getElementById('soc-timer').textContent='1:30';
+        document.getElementById('soc-overlay').style.display='none';
+        this._resetPositions();
+        this._bindKeys();
+        this._countdown(Date.now()+3000);
+        if(this._timerInt) clearInterval(this._timerInt);
+        this._timerInt=setInterval(()=>{
+          if(this.gameOver||this.paused||!this.started) return;
+          this.timeLeft--;
+          const m=Math.floor(this.timeLeft/60), s=this.timeLeft%60;
+          document.getElementById('soc-timer').textContent=m+':'+String(s).padStart(2,'0');
+          if(this.timeLeft<=0) this._endMatch();
+        },1000);
+        this._loop();
+      },
+
+      _resetPositions(){
+        const W=this.W,H=this.H;
+        this.player={x:W*0.28,y:H/2,r:15,vx:0,vy:0,faceX:1,faceY:0,color:'#3b82f6'};
+        this.bot={x:W*0.72,y:H/2,r:15,vx:0,vy:0,color:'#ef4444'};
+        this.ball={x:W/2,y:H/2,r:9,vx:0,vy:0};
+      },
+
+      _countdown(startAt){
+        const el=document.getElementById('soc-countdown-num');
+        const ov=document.getElementById('soc-countdown-overlay');
+        this.paused=true;
+        const show=(t,c)=>{
+          ov.style.display='flex';
+          el.textContent=t; el.style.color=c||'#fff';
+        };
+        const now=Date.now(), delay=Math.max(0,startAt-now);
+        const t=(n,fn)=>setTimeout(fn,n);
+        t(delay>2500?delay-3000:0,()=>show('3'));
+        t(delay>1500?delay-2000:0,()=>show('2'));
+        t(delay>500?delay-1000:0,()=>show('1'));
+        t(delay,()=>{show('GO!','#22c55e'); this.started=true; this.paused=false;});
+        t(delay+700,()=>{ov.style.display='none';});
+      },
+
+      _loop(){
+        this.raf=requestAnimationFrame(()=>this._loop());
+        if(!this.gameOver && this.started && !this.paused){
+          this._updatePlayer();
+          this._updateBot();
+          this._updateBall();
+          this._checkGoal();
+        }
+        this._draw();
+      },
+
+      _updatePlayer(){
+        const p=this.player, sp=4.6;
+        let dx=0,dy=0;
+        if(this.keys.up) dy-=1; if(this.keys.down) dy+=1;
+        if(this.keys.left) dx-=1; if(this.keys.right) dx+=1;
+        if(dx||dy){
+          const len=Math.hypot(dx,dy);
+          dx/=len; dy/=len;
+          p.faceX=dx; p.faceY=dy;
+        }
+        p.vx=dx*sp; p.vy=dy*sp;
+        p.x=Math.max(p.r,Math.min(this.W-p.r,p.x+p.vx));
+        p.y=Math.max(p.r,Math.min(this.H-p.r,p.y+p.vy));
+        this._ballCollide(p, 8.5);
+      },
+
+      _updateBot(){
+        const b=this.bot, ball=this.ball, sp=3.7;
+        const dx=ball.x-b.x, dy=ball.y-b.y, dist=Math.hypot(dx,dy);
+        if(dist>1){
+          b.vx=(dx/dist)*sp; b.vy=(dy/dist)*sp;
+        } else { b.vx=0; b.vy=0; }
+        b.x=Math.max(b.r,Math.min(this.W-b.r,b.x+b.vx));
+        b.y=Math.max(b.r,Math.min(this.H-b.r,b.y+b.vy));
+        if(dist<b.r+ball.r+10 && Math.random()<0.10){
+          const tx=0, ty=this.H/2;
+          const tdx=tx-ball.x, tdy=ty-ball.y, tlen=Math.hypot(tdx,tdy)||1;
+          ball.vx=(tdx/tlen)*7.5; ball.vy=(tdy/tlen)*7.5;
+        }
+      },
+
+      _ballCollide(p, power){
+        const ball=this.ball;
+        const dx=ball.x-p.x, dy=ball.y-p.y, dist=Math.hypot(dx,dy)||0.01;
+        const minD=p.r+ball.r;
+        if(dist<minD){
+          ball.x=p.x+(dx/dist)*minD; ball.y=p.y+(dy/dist)*minD;
+          ball.vx+=p.vx*0.5; ball.vy+=p.vy*0.5;
+          if(this.keys.shoot){
+            ball.vx=p.faceX*power; ball.vy=p.faceY*power;
+            this.keys.shoot=false;
+          }
+        }
+      },
+
+      _updateBall(){
+        const ball=this.ball, fr=0.982;
+        ball.x+=ball.vx; ball.y+=ball.vy;
+        ball.vx*=fr; ball.vy*=fr;
+        const gy1=this.H/2-this.goalH/2, gy2=this.H/2+this.goalH/2;
+        if(ball.y-ball.r<0){ball.y=ball.r; ball.vy*=-0.8;}
+        if(ball.y+ball.r>this.H){ball.y=this.H-ball.r; ball.vy*=-0.8;}
+        if(ball.x-ball.r<0 && !(ball.y>gy1&&ball.y<gy2)){ball.x=ball.r; ball.vx*=-0.8;}
+        if(ball.x+ball.r>this.W && !(ball.y>gy1&&ball.y<gy2)){ball.x=this.W-ball.r; ball.vx*=-0.8;}
+      },
+
+      _checkGoal(){
+        const ball=this.ball;
+        const gy1=this.H/2-this.goalH/2, gy2=this.H/2+this.goalH/2;
+        if(ball.x+ball.r<0 && ball.y>gy1 && ball.y<gy2){ this._goal('bot'); return; }
+        if(ball.x-ball.r>this.W && ball.y>gy1 && ball.y<gy2){ this._goal('you'); return; }
+      },
+
+      _goal(who){
+        this.score[who]++;
+        document.getElementById('soc-score-you').textContent=this.score.you;
+        document.getElementById('soc-score-bot').textContent=this.score.bot;
+        if(this.score.you>=3){ this._endMatch(); return; }
+        if(this.score.bot>=3){ this._endMatch(); return; }
+        this._resetPositions();
+        this._countdown(Date.now()+1500);
+      },
+
+      _endMatch(){
+        if(this.gameOver) return;
+        this.gameOver=true;
+        const el=document.getElementById('soc-result-text');
+        if(this.score.you>this.score.bot){ el.textContent='🏆 YOU WIN!'; el.style.color='#fbbf24'; }
+        else if(this.score.bot>this.score.you){ el.textContent='😢 YOU LOST'; el.style.color='#94a3b8'; }
+        else { el.textContent='🤝 DRAW'; el.style.color='#e5e7eb'; }
+        document.getElementById('soc-overlay').style.display='flex';
+      },
+
+      _draw(){
+        const ctx=this.ctx, W=this.W, H=this.H;
+        ctx.fillStyle='#1b6b34'; ctx.fillRect(0,0,W,H);
+        ctx.strokeStyle='rgba(255,255,255,0.55)'; ctx.lineWidth=3;
+        ctx.strokeRect(8,8,W-16,H-16);
+        ctx.beginPath(); ctx.moveTo(W/2,8); ctx.lineTo(W/2,H-8); ctx.stroke();
+        ctx.beginPath(); ctx.arc(W/2,H/2,60,0,Math.PI*2); ctx.stroke();
+        const gy1=H/2-this.goalH/2, gy2=H/2+this.goalH/2;
+        ctx.fillStyle='rgba(255,255,255,0.18)';
+        ctx.fillRect(0,gy1,this.goalDepth,this.goalH);
+        ctx.fillRect(W-this.goalDepth,gy1,this.goalDepth,this.goalH);
+        ctx.strokeStyle='#fff'; ctx.lineWidth=3;
+        ctx.strokeRect(0,gy1,this.goalDepth,this.goalH);
+        ctx.strokeRect(W-this.goalDepth,gy1,this.goalDepth,this.goalH);
+        this._drawPerson(ctx,this.bot);
+        this._drawPerson(ctx,this.player);
+        const b=this.ball;
+        ctx.save();
+        ctx.shadowColor='rgba(0,0,0,0.4)'; ctx.shadowBlur=6;
+        ctx.fillStyle='#fff';
+        ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.fill();
+        ctx.restore();
+        ctx.strokeStyle='#222'; ctx.lineWidth=1.4;
+        ctx.beginPath(); ctx.arc(b.x,b.y,b.r,0,Math.PI*2); ctx.stroke();
+      },
+
+      _drawPerson(ctx,p){
+        ctx.save();
+        ctx.fillStyle='rgba(0,0,0,0.25)';
+        ctx.beginPath(); ctx.ellipse(p.x+2,p.y+p.r*0.7,p.r*0.8,p.r*0.35,0,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle=p.color;
+        ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle='#fcd9b8';
+        ctx.beginPath(); ctx.arc(p.x,p.y-p.r*0.55,p.r*0.5,0,Math.PI*2); ctx.fill();
+        ctx.restore();
+      },
+
+      _bindKeys(){
+        this._kd=e=>{
+          if(e.key==='ArrowUp'){this.keys.up=true;e.preventDefault();}
+          if(e.key==='ArrowDown'){this.keys.down=true;e.preventDefault();}
+          if(e.key==='ArrowLeft'){this.keys.left=true;e.preventDefault();}
+          if(e.key==='ArrowRight'){this.keys.right=true;e.preventDefault();}
+          if(e.key===' '){this.keys.shoot=true;e.preventDefault();}
+        };
+        this._ku=e=>{
+          if(e.key==='ArrowUp')this.keys.up=false;
+          if(e.key==='ArrowDown')this.keys.down=false;
+          if(e.key==='ArrowLeft')this.keys.left=false;
+          if(e.key==='ArrowRight')this.keys.right=false;
+        };
+        document.addEventListener('keydown',this._kd);
+        document.addEventListener('keyup',this._ku);
+      },
+
+      cleanup(){
+        this.gameOver=true;
+        if(this.raf) cancelAnimationFrame(this.raf);
+        if(this._timerInt) clearInterval(this._timerInt);
+        if(this._kd) document.removeEventListener('keydown',this._kd);
+        if(this._ku) document.removeEventListener('keyup',this._ku);
+        this.keys={up:false,down:false,left:false,right:false};
+      }
+    };
 
     function startQuizzer() {
       showScreen('quizzer');
