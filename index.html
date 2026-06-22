@@ -2950,7 +2950,7 @@
         p.vx=dx*sp; p.vy=dy*sp;
         p.x=Math.max(p.r,Math.min(this.W-p.r,p.x+p.vx));
         p.y=Math.max(p.r,Math.min(this.H-p.r,p.y+p.vy));
-        this._ballCollide(p, 8.5, this.keys.shoot);
+        this._ballCollide(p, 8.5, this.keys.shoot, p.r+this.ball.r+6);
         this.keys.shoot=false;
       },
 
@@ -2969,16 +2969,23 @@
         b.y=Math.max(b.r,Math.min(this.H-b.r,b.y+b.vy));
         const distToGoal=Math.hypot(b.x-goalX,b.y-goalY);
         const shootNow = hasBall && distToGoal<160 && Math.random()<0.06;
-        this._ballCollide(b, 7.8, shootNow);
+        this._ballCollide(b, 7.8, shootNow, b.r+ball.r+12);
       },
 
-      _ballCollide(p, power, shootNow){
+      _ballCollide(p, power, shootNow, controlRange){
         const ball=this.ball;
         const dx=ball.x-p.x, dy=ball.y-p.y, dist=Math.hypot(dx,dy)||0.01;
-        const minD=p.r+ball.r;
-        if(dist<minD){
-          ball.x=p.x+(dx/dist)*minD; ball.y=p.y+(dy/dist)*minD;
-          ball.vx+=p.vx*0.5; ball.vy+=p.vy*0.5;
+        const cr=controlRange||(p.r+ball.r+4);
+        if(dist<cr){
+          // Smoothly guide the ball to a point just ahead of the controller's
+          // facing direction instead of hard-snapping it to wherever it
+          // happened to be relative to them (that caused the jittery "shiver").
+          const holdD=p.r+ball.r+4;
+          const aheadX=p.x+p.faceX*holdD, aheadY=p.y+p.faceY*holdD;
+          ball.x+=(aheadX-ball.x)*0.4;
+          ball.y+=(aheadY-ball.y)*0.4;
+          ball.vx=ball.vx*0.2+p.vx*0.6;
+          ball.vy=ball.vy*0.2+p.vy*0.6;
           if(shootNow){
             ball.vx=p.faceX*power; ball.vy=p.faceY*power;
           }
