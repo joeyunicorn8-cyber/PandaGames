@@ -2966,7 +2966,7 @@
         let tx,ty;
         if(ownsBall){ tx=goalX; ty=goalY; } else { tx=ball.x; ty=ball.y; }
         const dx=tx-b.x, dy=ty-b.y, dist=Math.hypot(dx,dy)||1;
-        const sp=ownsBall?2.2:2.7;
+        const sp=ownsBall?1.95:2.4;
         b.vx=(dx/dist)*sp; b.vy=(dy/dist)*sp;
         b.faceX=dx/dist; b.faceY=dy/dist;
         b.x=Math.max(b.r,Math.min(this.W-b.r,b.x+b.vx));
