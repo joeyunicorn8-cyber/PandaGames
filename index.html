@@ -2904,6 +2904,7 @@
 
       _resetPositions(){
         const W=this.W,H=this.H;
+        this._owner=null;
         this.player={x:W*0.28,y:H/2,r:15,vx:0,vy:0,faceX:1,faceY:0,color:'#3b82f6'};
         this.bot={x:W*0.72,y:H/2,r:15,vx:0,vy:0,faceX:-1,faceY:0,color:'#ef4444'};
         this.ball={x:W/2,y:H/2,r:9,vx:0,vy:0};
@@ -2975,19 +2976,33 @@
         }
       },
 
-      // The human always wins the ball the instant they're within reach — the
-      // bot only ever gets to act on it when the player isn't close enough.
-      // This stops the ball feeling "glued" to the bot once it has possession.
+      // Possession is "sticky" with hysteresis to stop it flickering (which
+      // looked like shivering): once someone has the ball, the other side has
+      // to be CLEARLY closer to take it. The player gets the easier threshold
+      // to reclaim it, so the bot can't lock the ball away forever, but the
+      // bot can still occasionally win and hold it like a real opponent.
       _resolveBallControl(){
         const ball=this.ball, p=this.player, b=this.bot;
         const dp=Math.hypot(ball.x-p.x, ball.y-p.y);
         const db=Math.hypot(ball.x-b.x, ball.y-b.y);
-        const pCR=p.r+ball.r+10, bCR=b.r+ball.r+8;
-        if(dp<pCR){
-          this._ballCollide(p, 8.5, this.keys.shoot, pCR);
-        } else if(db<bCR){
-          this._ballCollide(b, this._botTap.power, this._botTap.tapNow, bCR);
+        const pCR=p.r+ball.r+8, bCR=b.r+ball.r+8;
+        const pIn=dp<pCR, bIn=db<bCR;
+
+        if(this._owner==='player'){
+          if(!pIn) this._owner=null;
+          else if(bIn && db<dp-8) this._owner='bot';
+        } else if(this._owner==='bot'){
+          if(!bIn) this._owner=null;
+          else if(pIn && dp<=db+10) this._owner='player';
         }
+        if(!this._owner){
+          if(pIn && bIn) this._owner = dp<=db ? 'player' : 'bot';
+          else if(pIn) this._owner='player';
+          else if(bIn) this._owner='bot';
+        }
+
+        if(this._owner==='player') this._ballCollide(p, 8.5, this.keys.shoot, pCR);
+        else if(this._owner==='bot') this._ballCollide(b, this._botTap.power, this._botTap.tapNow, bCR);
         this.keys.shoot=false;
       },
 
