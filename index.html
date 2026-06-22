@@ -2956,13 +2956,17 @@
 
       _updateBot(){
         const b=this.bot, ball=this.ball;
-        const distToBall=Math.hypot(ball.x-b.x, ball.y-b.y);
-        const hasBall = distToBall < b.r+ball.r+12;
+        // Use last frame's STABLE possession state (not raw distance) to pick
+        // a target. Raw distance flickers right at the contact boundary, which
+        // made the bot's target alternate between "ball" and "goal" every
+        // single frame — that oscillation was the shiver, and it stopped the
+        // bot from ever closing the last few pixels onto the ball.
+        const ownsBall = this._owner==='bot';
         const goalX=0, goalY=this.H/2;
         let tx,ty;
-        if(hasBall){ tx=goalX; ty=goalY; } else { tx=ball.x; ty=ball.y; }
+        if(ownsBall){ tx=goalX; ty=goalY; } else { tx=ball.x; ty=ball.y; }
         const dx=tx-b.x, dy=ty-b.y, dist=Math.hypot(dx,dy)||1;
-        const sp=hasBall?2.2:2.7; // eased up further so the human player can keep pace and steal
+        const sp=ownsBall?2.2:2.7;
         b.vx=(dx/dist)*sp; b.vy=(dy/dist)*sp;
         b.faceX=dx/dist; b.faceY=dy/dist;
         b.x=Math.max(b.r,Math.min(this.W-b.r,b.x+b.vx));
@@ -2970,7 +2974,7 @@
         const distToGoal=Math.hypot(b.x-goalX,b.y-goalY);
         this._botTapTimer=(this._botTapTimer||0)-1;
         this._botTap={tapNow:false,power:3.6};
-        if(hasBall){
+        if(ownsBall){
           if(distToGoal<150 && Math.random()<0.035){ this._botTap={tapNow:true,power:6.6}; }
           else if(this._botTapTimer<=0){ this._botTap={tapNow:true,power:3.6}; this._botTapTimer=24; }
         }
