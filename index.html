@@ -2961,7 +2961,7 @@
         let tx,ty;
         if(hasBall){ tx=goalX; ty=goalY; } else { tx=ball.x; ty=ball.y; }
         const dx=tx-b.x, dy=ty-b.y, dist=Math.hypot(dx,dy)||1;
-        const sp=hasBall?2.6:3.1; // eased up so the human player can keep pace
+        const sp=hasBall?2.2:2.7; // eased up further so the human player can keep pace and steal
         b.vx=(dx/dist)*sp; b.vy=(dy/dist)*sp;
         b.faceX=dx/dist; b.faceY=dy/dist;
         b.x=Math.max(b.r,Math.min(this.W-b.r,b.x+b.vx));
@@ -2975,18 +2975,17 @@
         }
       },
 
-      // Whoever is actually closer to the ball gets to act on it each frame — the
-      // human gets a small tie-break bonus so the bot can't permanently "own" the
-      // ball just by reaching its (slightly larger) control radius first.
+      // The human always wins the ball the instant they're within reach — the
+      // bot only ever gets to act on it when the player isn't close enough.
+      // This stops the ball feeling "glued" to the bot once it has possession.
       _resolveBallControl(){
         const ball=this.ball, p=this.player, b=this.bot;
         const dp=Math.hypot(ball.x-p.x, ball.y-p.y);
         const db=Math.hypot(ball.x-b.x, ball.y-b.y);
-        const pCR=p.r+ball.r+6, bCR=b.r+ball.r+12;
-        const pIn=dp<pCR, bIn=db<bCR;
-        if(pIn && (!bIn || dp<=db+6)){
+        const pCR=p.r+ball.r+10, bCR=b.r+ball.r+8;
+        if(dp<pCR){
           this._ballCollide(p, 8.5, this.keys.shoot, pCR);
-        } else if(bIn){
+        } else if(db<bCR){
           this._ballCollide(b, this._botTap.power, this._botTap.tapNow, bCR);
         }
         this.keys.shoot=false;
