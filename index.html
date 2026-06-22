@@ -2931,6 +2931,7 @@
         if(!this.gameOver && this.started && !this.paused){
           this._updatePlayer();
           this._updateBot();
+          this._resolveBallControl();
           this._updateBall();
           this._checkGoal();
         }
@@ -2950,8 +2951,6 @@
         p.vx=dx*sp; p.vy=dy*sp;
         p.x=Math.max(p.r,Math.min(this.W-p.r,p.x+p.vx));
         p.y=Math.max(p.r,Math.min(this.H-p.r,p.y+p.vy));
-        this._ballCollide(p, 8.5, this.keys.shoot, p.r+this.ball.r+6);
-        this.keys.shoot=false;
       },
 
       _updateBot(){
@@ -2962,19 +2961,35 @@
         let tx,ty;
         if(hasBall){ tx=goalX; ty=goalY; } else { tx=ball.x; ty=ball.y; }
         const dx=tx-b.x, dy=ty-b.y, dist=Math.hypot(dx,dy)||1;
-        const sp=hasBall?3.3:4.0;
+        const sp=hasBall?2.6:3.1; // eased up so the human player can keep pace
         b.vx=(dx/dist)*sp; b.vy=(dy/dist)*sp;
         b.faceX=dx/dist; b.faceY=dy/dist;
         b.x=Math.max(b.r,Math.min(this.W-b.r,b.x+b.vx));
         b.y=Math.max(b.r,Math.min(this.H-b.r,b.y+b.vy));
         const distToGoal=Math.hypot(b.x-goalX,b.y-goalY);
         this._botTapTimer=(this._botTapTimer||0)-1;
-        let tapNow=false, power=4.2;
+        this._botTap={tapNow:false,power:3.6};
         if(hasBall){
-          if(distToGoal<150 && Math.random()<0.05){ tapNow=true; power=7.8; }
-          else if(this._botTapTimer<=0){ tapNow=true; power=4.2; this._botTapTimer=18; }
+          if(distToGoal<150 && Math.random()<0.035){ this._botTap={tapNow:true,power:6.6}; }
+          else if(this._botTapTimer<=0){ this._botTap={tapNow:true,power:3.6}; this._botTapTimer=24; }
         }
-        this._ballCollide(b, power, tapNow, b.r+ball.r+12);
+      },
+
+      // Whoever is actually closer to the ball gets to act on it each frame — the
+      // human gets a small tie-break bonus so the bot can't permanently "own" the
+      // ball just by reaching its (slightly larger) control radius first.
+      _resolveBallControl(){
+        const ball=this.ball, p=this.player, b=this.bot;
+        const dp=Math.hypot(ball.x-p.x, ball.y-p.y);
+        const db=Math.hypot(ball.x-b.x, ball.y-b.y);
+        const pCR=p.r+ball.r+6, bCR=b.r+ball.r+12;
+        const pIn=dp<pCR, bIn=db<bCR;
+        if(pIn && (!bIn || dp<=db+6)){
+          this._ballCollide(p, 8.5, this.keys.shoot, pCR);
+        } else if(bIn){
+          this._ballCollide(b, this._botTap.power, this._botTap.tapNow, bCR);
+        }
+        this.keys.shoot=false;
       },
 
       // Touching the ball just keeps it from overlapping the controller — it only
