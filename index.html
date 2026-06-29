@@ -175,6 +175,111 @@
       color: rgba(255,255,255,0.38); letter-spacing: 3px; text-transform: uppercase;
     }
 
+    /* ── DUMB PEOPLES GAME BUTTON ── */
+    .dpg-btn {
+      position: relative; width: 240px; height: 240px;
+      cursor: pointer; border: 3px solid #b8860b;
+      border-radius: 20px; overflow: hidden;
+      transition: transform .2s, border-color .2s, box-shadow .2s;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+      background: linear-gradient(135deg, #8B6914 0%, #D4AF37 25%, #FFD700 50%, #D4AF37 75%, #8B6914 100%);
+      box-shadow: 0 0 30px rgba(212,175,55,0.35), inset 0 1px 0 rgba(255,255,255,0.3);
+    }
+    .dpg-btn:hover { transform: scale(1.06); border-color: #FFD700; box-shadow: 0 0 50px rgba(255,215,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3); }
+    .dpg-btn-shine {
+      position: absolute; inset: 0;
+      background: repeating-linear-gradient(45deg, transparent, transparent 6px, rgba(255,255,255,0.07) 6px, rgba(255,255,255,0.07) 8px);
+    }
+    .dpg-btn-label {
+      position: relative; z-index: 2; font-size: 18px; font-weight: 900;
+      color: #3d2200; letter-spacing: 1px; font-family: 'Arial Black', Impact, sans-serif;
+      text-shadow: 0 1px 2px rgba(255,255,255,0.4); text-align: center; line-height: 1.2; padding: 0 10px;
+    }
+    .dpg-btn-sub {
+      position: relative; z-index: 2; font-size: 10px;
+      color: rgba(61,34,0,0.65); letter-spacing: 2px; text-transform: uppercase;
+    }
+
+    /* ── DUMB PEOPLES GAME SCREENS ── */
+    #screen-dpg { flex-direction: column; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #5a3d00 0%, #9a6f00 20%, #D4AF37 45%, #FFD700 50%, #D4AF37 55%, #9a6f00 80%, #5a3d00 100%);
+      position: relative; overflow: hidden; }
+    #screen-dpg::before {
+      content: ''; position: absolute; inset: 0;
+      background: repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,255,255,0.05) 8px, rgba(255,255,255,0.05) 10px);
+    }
+    .dpg-title {
+      position: relative; z-index: 2;
+      font-size: 46px; font-weight: 900; color: #3d2200; letter-spacing: 4px;
+      font-family: 'Arial Black', Impact, sans-serif;
+      text-shadow: 0 2px 0 rgba(255,255,255,0.3), 0 -1px 0 rgba(0,0,0,0.4);
+      text-align: center; padding: 0 20px; margin-bottom: 8px;
+    }
+    .dpg-subtitle {
+      position: relative; z-index: 2;
+      font-size: 13px; color: rgba(61,34,0,0.7); letter-spacing: 3px; margin-bottom: 50px;
+    }
+    .dpg-choices { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 20px; align-items: center; }
+    .btn-dpg-dumb {
+      padding: 22px 40px; font-size: 18px; font-weight: 900; letter-spacing: 1px; text-align: center;
+      border: 3px solid #3d2200; border-radius: 16px; cursor: pointer;
+      background: linear-gradient(180deg, #ff6b35 0%, #c0392b 100%);
+      color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+      transition: transform .15s, box-shadow .15s; max-width: 360px;
+    }
+    .btn-dpg-dumb:hover { transform: scale(1.05); box-shadow: 0 10px 28px rgba(0,0,0,0.4); }
+    .btn-dpg-smart {
+      padding: 22px 40px; font-size: 18px; font-weight: 900; letter-spacing: 1px; text-align: center;
+      border: 3px solid #3d2200; border-radius: 16px; cursor: pointer;
+      background: linear-gradient(180deg, #27ae60 0%, #145a32 100%);
+      color: #fff; text-shadow: 0 1px 3px rgba(0,0,0,0.4);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.2);
+      transition: transform .15s, box-shadow .15s; max-width: 360px;
+    }
+    .btn-dpg-smart:hover { transform: scale(1.05); box-shadow: 0 10px 28px rgba(0,0,0,0.4); }
+    .btn-dpg-back {
+      position: relative; z-index: 2; margin-top: 36px;
+      padding: 10px 26px; font-size: 13px; font-weight: 700;
+      border: 2px solid rgba(61,34,0,0.6); border-radius: 10px; background: transparent;
+      color: #3d2200; cursor: pointer; letter-spacing: 1px;
+      transition: background .15s;
+    }
+    .btn-dpg-back:hover { background: rgba(61,34,0,0.12); }
+
+    /* ── DPG RESULT SCREENS ── */
+    #screen-dpg-dumb, #screen-dpg-smart {
+      flex-direction: column; align-items: center; justify-content: center;
+      background: linear-gradient(135deg, #5a3d00 0%, #9a6f00 20%, #D4AF37 45%, #FFD700 50%, #D4AF37 55%, #9a6f00 80%, #5a3d00 100%);
+      position: relative; overflow: hidden;
+    }
+    #screen-dpg-dumb::before, #screen-dpg-smart::before {
+      content: ''; position: absolute; inset: 0;
+      background: repeating-linear-gradient(45deg, transparent, transparent 8px, rgba(255,255,255,0.05) 8px, rgba(255,255,255,0.05) 10px);
+    }
+    .dpg-result-emoji { position: relative; z-index: 2; font-size: 90px; margin-bottom: 20px; }
+    .dpg-result-ordinal {
+      position: relative; z-index: 2;
+      font-size: 22px; font-weight: 900; color: #3d2200; letter-spacing: 2px;
+      font-family: 'Arial Black', Impact, sans-serif; text-align: center;
+      text-shadow: 0 1px 0 rgba(255,255,255,0.3);
+      margin-bottom: 6px;
+    }
+    .dpg-result-msg {
+      position: relative; z-index: 2;
+      font-size: 30px; font-weight: 900; color: #3d2200; letter-spacing: 3px;
+      font-family: 'Arial Black', Impact, sans-serif; text-align: center; padding: 0 20px;
+      text-shadow: 0 2px 0 rgba(255,255,255,0.3), 0 -1px 0 rgba(0,0,0,0.3);
+    }
+    .btn-dpg-result-back {
+      position: relative; z-index: 2; margin-top: 40px;
+      padding: 12px 30px; font-size: 14px; font-weight: 700; letter-spacing: 1px;
+      border: 3px solid #3d2200; border-radius: 12px; cursor: pointer;
+      background: rgba(61,34,0,0.15); color: #3d2200;
+      transition: background .15s;
+    }
+    .btn-dpg-result-back:hover { background: rgba(61,34,0,0.28); }
+
     /* ── SOCCER SCREENS ── */
     #screen-soccer { flex-direction: column; background: linear-gradient(135deg,#1b5e20,#2e7d32); }
     .soc-title {
@@ -1343,6 +1448,13 @@
         <div class="soccer-btn-sub">Score Goals</div>
       </button>
 
+      <!-- DUMB PEOPLES GAME BUTTON -->
+      <button class="dpg-btn" onclick="showScreen('dpg')">
+        <div class="dpg-btn-shine"></div>
+        <div class="dpg-btn-label">THE DUMB PEOPLES GAME</div>
+        <div class="dpg-btn-sub">Are you dumb?</div>
+      </button>
+
       <!-- ARTIST BUTTON -->
       <button class="artist-btn" onclick="startArtist()">
         <div class="artist-btn-bg"></div>
@@ -1574,6 +1686,33 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <!-- DUMB PEOPLES GAME LOBBY -->
+  <div id="screen-dpg" class="screen">
+    <div class="dpg-title">THE DUMB PEOPLES GAME</div>
+    <div class="dpg-subtitle">Choose wisely.</div>
+    <div class="dpg-choices">
+      <button class="btn-dpg-dumb" onclick="DPG.choose('dumb')">CLICK HERE IF YOU ARE DUMB</button>
+      <button class="btn-dpg-smart" onclick="DPG.choose('smart')">CLICK HERE IF YOU ARE SMART</button>
+    </div>
+    <button class="btn-dpg-back" onclick="showScreen('game')">← Back</button>
+  </div>
+
+  <!-- DPG DUMB RESULT -->
+  <div id="screen-dpg-dumb" class="screen">
+    <div class="dpg-result-emoji">🤪</div>
+    <div class="dpg-result-ordinal" id="dpg-dumb-ordinal"></div>
+    <div class="dpg-result-msg">TO ADMIT THAT YOU ARE DUMB</div>
+    <button class="btn-dpg-result-back" onclick="showScreen('dpg')">← Play Again</button>
+  </div>
+
+  <!-- DPG SMART RESULT -->
+  <div id="screen-dpg-smart" class="screen">
+    <div class="dpg-result-emoji">👎</div>
+    <div class="dpg-result-ordinal" id="dpg-smart-ordinal"></div>
+    <div class="dpg-result-msg">TO PRETEND THAT YOU ARE SMART</div>
+    <button class="btn-dpg-result-back" onclick="showScreen('dpg')">← Play Again</button>
   </div>
 
   <!-- TTT GAME -->
@@ -4235,6 +4374,27 @@
           'You are the ' + ordinal(place) + ' person to complete this quiz!';
       }
       showScreen('quiz-result');
+    };
+
+    /* ══════════════════════════════════
+       DUMB PEOPLES GAME
+    ══════════════════════════════════ */
+    const DPG = {
+      _ordinal(n) {
+        const s = ['th','st','nd','rd'], v = n % 100;
+        return n + (s[(v-20)%10] || s[v] || s[0]);
+      },
+      choose(type) {
+        const db = getDb(); if (!db) return;
+        const ref = db.ref('dpg/' + type);
+        ref.transaction(cur => (cur || 0) + 1, (err, committed, snap) => {
+          if (!committed) return;
+          const count = snap.val();
+          const ordEl = document.getElementById('dpg-' + type + '-ordinal');
+          ordEl.textContent = 'YOU ARE THE ' + this._ordinal(count);
+          showScreen('dpg-' + type);
+        });
+      }
     };
 
     /* ══════════════════════════════════
