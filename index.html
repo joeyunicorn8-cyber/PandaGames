@@ -2049,16 +2049,19 @@
 
         const dx = goalX - bx;
 
-        // High inertia — bot takes time to change direction (feels independent)
+        // When player is nearly still, commit harder — higher responsiveness to prevent oscillation stalemate
+        const playerStill = Math.abs(mem.vx) < 0.5;
+        const inertia = playerStill && Math.abs(dx) < 80 ? 0.18 : 0.08;
         const maxSpd = 3.0;
-        b.vx += (Math.sign(dx) * maxSpd - b.vx) * 0.08;
+        b.vx += (Math.sign(dx) * maxSpd - b.vx) * inertia;
         if (Math.abs(b.vx) > 0.6) b.facingRight = b.vx > 0;
 
         // Jump only for platform routing, NOT because the player jumped
         const dy = p.y - b.y;
         if (b.onGround) {
-          if (dy < -110) {
-            b.vy = -13; // player is on a platform well above — route upward
+          // Lower threshold when player is still so bot can reach slightly elevated positions
+          if (dy < (playerStill ? -55 : -110)) {
+            b.vy = -13; // player is on a platform above — route upward
           } else {
             const lookX = b.x + (b.facingRight ? b.w + 20 : -20);
             const hasFloor = this.platforms.some(pl =>
