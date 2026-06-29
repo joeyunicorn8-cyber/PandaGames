@@ -178,26 +178,26 @@
     /* ── DUMB PEOPLES GAME BUTTON ── */
     .dpg-btn {
       position: relative; width: 240px; height: 240px;
-      cursor: pointer; border: 3px solid #b8860b;
+      cursor: pointer; border: 3px solid #444;
       border-radius: 20px; overflow: hidden;
       transition: transform .2s, border-color .2s, box-shadow .2s;
       display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
-      background: linear-gradient(135deg, #8B6914 0%, #D4AF37 25%, #FFD700 50%, #D4AF37 75%, #8B6914 100%);
-      box-shadow: 0 0 30px rgba(212,175,55,0.35), inset 0 1px 0 rgba(255,255,255,0.3);
+      background: #1a1a1a;
+      box-shadow: 0 0 30px rgba(255,255,255,0.05);
     }
-    .dpg-btn:hover { transform: scale(1.06); border-color: #FFD700; box-shadow: 0 0 50px rgba(255,215,0,0.5), inset 0 1px 0 rgba(255,255,255,0.3); }
+    .dpg-btn:hover { transform: scale(1.06); border-color: #fff; box-shadow: 0 0 40px rgba(255,255,255,0.2); }
     .dpg-btn-shine {
       position: absolute; inset: 0;
-      background: repeating-linear-gradient(45deg, transparent, transparent 6px, rgba(255,255,255,0.07) 6px, rgba(255,255,255,0.07) 8px);
+      background: repeating-linear-gradient(45deg, transparent, transparent 6px, rgba(255,255,255,0.03) 6px, rgba(255,255,255,0.03) 8px);
     }
     .dpg-btn-label {
       position: relative; z-index: 2; font-size: 18px; font-weight: 900;
-      color: #3d2200; letter-spacing: 1px; font-family: 'Arial Black', Impact, sans-serif;
-      text-shadow: 0 1px 2px rgba(255,255,255,0.4); text-align: center; line-height: 1.2; padding: 0 10px;
+      color: #fff; letter-spacing: 1px; font-family: 'Arial Black', Impact, sans-serif;
+      text-shadow: 0 0 20px rgba(255,255,255,0.3); text-align: center; line-height: 1.2; padding: 0 10px;
     }
     .dpg-btn-sub {
       position: relative; z-index: 2; font-size: 10px;
-      color: rgba(61,34,0,0.65); letter-spacing: 2px; text-transform: uppercase;
+      color: rgba(255,255,255,0.38); letter-spacing: 2px; text-transform: uppercase;
     }
 
     /* ── DUMB PEOPLES GAME SCREENS ── */
