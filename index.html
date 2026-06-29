@@ -200,6 +200,152 @@
       color: rgba(255,255,255,0.38); letter-spacing: 2px; text-transform: uppercase;
     }
 
+    /* ── POP THE BALLOON BUTTON ── */
+    .balloon-btn {
+      position: relative; width: 240px; height: 240px;
+      cursor: pointer; background: #1a1a1a; border: 3px solid #444;
+      border-radius: 20px; overflow: hidden;
+      transition: transform .2s, border-color .2s, box-shadow .2s;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+      box-shadow: 0 0 30px rgba(255,255,255,0.05);
+    }
+    .balloon-btn:hover { transform: scale(1.06); border-color: #fff; box-shadow: 0 0 40px rgba(255,255,255,0.2); }
+    .balloon-btn-deco { position: absolute; inset: 0; pointer-events: none; }
+    .balloon-btn-label {
+      position: relative; z-index: 2; font-size: 28px; font-weight: 900;
+      color: #fff; letter-spacing: 3px; font-family: 'Arial Black', Impact, sans-serif;
+      text-shadow: 0 0 24px rgba(255,255,255,0.35);
+    }
+    .balloon-btn-sub {
+      position: relative; z-index: 2; font-size: 11px;
+      color: rgba(255,255,255,0.38); letter-spacing: 3px; text-transform: uppercase;
+    }
+
+    /* ── POP THE BALLOON SCREENS ── */
+    #screen-balloon { flex-direction: column; align-items: center; justify-content: center;
+      background: linear-gradient(160deg,#0f172a 0%,#1e293b 100%); }
+    .bln-lobby-title {
+      font-size: 52px; font-weight: 900; color: #fff; letter-spacing: 5px;
+      font-family: 'Arial Black', Impact, sans-serif;
+      text-shadow: 0 0 30px rgba(255,255,255,0.2); margin-bottom: 6px; text-align: center;
+    }
+    .bln-lobby-sub { font-size: 13px; color: rgba(255,255,255,0.45); letter-spacing: 3px; margin-bottom: 44px; }
+    .bln-lobby-btns { display: flex; flex-direction: column; gap: 14px; align-items: center; margin-bottom: 20px; }
+    .btn-bln-solo, .btn-bln-host, .btn-bln-join, .btn-bln-achiev {
+      padding: 16px 52px; font-size: 16px; font-weight: 800; letter-spacing: 2px;
+      border-radius: 14px; cursor: pointer; border: none; width: 280px;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .btn-bln-solo  { background:#fff; color:#0f172a; box-shadow:0 4px 18px rgba(0,0,0,0.4); }
+    .btn-bln-host  { background:transparent; color:#fff; border:2px solid rgba(255,255,255,0.5); }
+    .btn-bln-join  { background:transparent; color:#fff; border:2px solid rgba(255,255,255,0.5); }
+    .btn-bln-achiev{ background:linear-gradient(135deg,#d4af37,#f59e0b); color:#3d2200; border:none; box-shadow:0 4px 18px rgba(0,0,0,0.3); }
+    .btn-bln-solo:hover,.btn-bln-host:hover,.btn-bln-join:hover,.btn-bln-achiev:hover { transform:scale(1.04); box-shadow:0 8px 24px rgba(0,0,0,0.4); }
+    .btn-bln-back-lobby { margin-top:20px; padding:10px 26px; background:transparent; border:2px solid rgba(255,255,255,0.3);
+      border-radius:10px; color:rgba(255,255,255,0.6); cursor:pointer; font-weight:700; font-size:13px; }
+    .btn-bln-back-lobby:hover { border-color:rgba(255,255,255,0.7); color:#fff; }
+
+    /* host/join card screens */
+    #screen-balloon-host, #screen-balloon-join {
+      flex-direction: column; align-items: center; justify-content: center;
+      background: linear-gradient(160deg,#0f172a 0%,#1e293b 100%); }
+    .bln-card {
+      background: rgba(255,255,255,0.07); border: 2px solid rgba(255,255,255,0.15);
+      border-radius: 22px; padding: 38px 44px; display: flex; flex-direction: column;
+      align-items: center; gap: 18px; max-width: 400px; width: 90%;
+    }
+    .bln-card-title { font-size: 26px; font-weight: 900; color: #fff; letter-spacing: 3px; font-family:'Arial Black',Impact,sans-serif; }
+    .bln-code-display {
+      font-size: 52px; font-weight: 900; color: #FFD700; letter-spacing: 10px;
+      font-family: monospace; text-shadow: 0 0 20px rgba(255,215,0,0.5);
+    }
+    .bln-card-status { font-size: 14px; color: rgba(255,255,255,0.6); letter-spacing: 1px; text-align: center; }
+    .bln-timer-row { display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+    .btn-bln-timer {
+      padding:10px 18px; font-size:15px; font-weight:800; border-radius:10px;
+      border:2px solid rgba(255,255,255,0.3); background:transparent; color:#fff; cursor:pointer;
+      transition:background .15s,border-color .15s;
+    }
+    .btn-bln-timer.active { background:rgba(255,255,255,0.2); border-color:#fff; }
+    .bln-timer-label { font-size:12px; color:rgba(255,255,255,0.45); letter-spacing:2px; }
+    .bln-join-input {
+      padding:14px 20px; font-size:22px; font-weight:800; letter-spacing:6px; text-align:center;
+      border-radius:12px; border:2px solid rgba(255,255,255,0.3); background:rgba(255,255,255,0.08);
+      color:#fff; width:220px; text-transform:uppercase; outline:none;
+    }
+    .btn-bln-go {
+      padding:14px 40px; font-size:16px; font-weight:900; border-radius:12px; border:none;
+      background:#fff; color:#0f172a; cursor:pointer; letter-spacing:2px;
+      transition:transform .15s; box-shadow:0 4px 18px rgba(0,0,0,0.4);
+    }
+    .btn-bln-go:hover { transform:scale(1.05); }
+    .btn-bln-start {
+      padding:16px 44px; font-size:17px; font-weight:900; border-radius:14px; border:none;
+      background:linear-gradient(135deg,#22c55e,#15803d); color:#fff; cursor:pointer;
+      box-shadow:0 4px 18px rgba(0,0,0,0.4); letter-spacing:2px; transition:transform .15s;
+    }
+    .btn-bln-start:hover { transform:scale(1.05); }
+    .btn-bln-card-back {
+      margin-top:6px; padding:10px 24px; background:transparent; border:2px solid rgba(255,255,255,0.25);
+      border-radius:10px; color:rgba(255,255,255,0.55); cursor:pointer; font-weight:700; font-size:13px;
+    }
+
+    /* play screen */
+    #screen-balloon-play { flex-direction: column; background: #0f172a; position: relative; }
+    .bln-topbar {
+      width:100%; display:flex; align-items:center; justify-content:space-between;
+      padding:12px 22px; background:rgba(0,0,0,0.5); z-index:3; flex-shrink:0;
+    }
+    .bln-topbar-title { font-size:17px; font-weight:900; color:#fff; letter-spacing:2px; }
+    .bln-scores { display:flex; align-items:center; gap:14px; }
+    .bln-score-block { display:flex; flex-direction:column; align-items:center; }
+    .bln-score-label { font-size:9px; color:rgba(255,255,255,0.5); letter-spacing:2px; }
+    .bln-score-val { font-size:22px; font-weight:900; color:#fff; }
+    .bln-score-sep { font-size:18px; color:rgba(255,255,255,0.3); }
+    .bln-timer-display {
+      font-size:20px; font-weight:900; color:#FFD700;
+      text-shadow:0 0 12px rgba(255,215,0,0.6); min-width:44px; text-align:center;
+    }
+    #bln-wrap { position:relative; flex:1; overflow:hidden; }
+    #bln-canvas { width:100%; height:100%; display:block; cursor:crosshair; }
+    #bln-overlay {
+      display:none; position:absolute; inset:0;
+      background:rgba(0,0,0,0.7); backdrop-filter:blur(6px);
+      flex-direction:column; align-items:center; justify-content:center; gap:14px;
+    }
+    #bln-result-text { font-size:46px; font-weight:900; font-family:'Arial Black',Impact,sans-serif; letter-spacing:3px; text-align:center; }
+    #bln-result-scores { font-size:20px; color:rgba(255,255,255,0.8); font-weight:700; }
+    #bln-result-achiev { font-size:14px; color:#FFD700; font-weight:700; }
+    .bln-overlay-btns { display:flex; gap:14px; margin-top:10px; }
+    .btn-bln-again { padding:14px 32px; font-size:15px; font-weight:800; border-radius:12px; border:none;
+      background:#fff; color:#0f172a; cursor:pointer; transition:transform .15s; }
+    .btn-bln-again:hover { transform:scale(1.05); }
+    .btn-bln-overlay-quit { padding:14px 32px; font-size:15px; font-weight:800; border-radius:12px;
+      border:2px solid rgba(255,255,255,0.4); background:transparent; color:#fff; cursor:pointer; }
+
+    /* achievements */
+    #screen-balloon-achievements { flex-direction:column; background:linear-gradient(160deg,#0f172a,#1e293b); }
+    .bln-achiev-topbar {
+      width:100%; display:flex; align-items:center; justify-content:space-between;
+      padding:14px 22px; background:rgba(0,0,0,0.4);
+    }
+    .bln-achiev-topbar-title { font-size:18px; font-weight:900; color:#fff; letter-spacing:2px; }
+    #bln-total-pts { font-size:14px; color:#FFD700; font-weight:700; text-align:center; padding:14px 0 4px; }
+    #bln-achiev-grid {
+      display:flex; flex-wrap:wrap; gap:16px; padding:16px 22px;
+      justify-content:center; overflow-y:auto; flex:1;
+    }
+    .bln-achiev-card {
+      background:rgba(255,255,255,0.06); border:2px solid rgba(255,255,255,0.1);
+      border-radius:16px; padding:20px 22px; width:200px; display:flex; flex-direction:column; gap:8px;
+      opacity:0.55;
+    }
+    .bln-achiev-card.done { opacity:1; border-color:rgba(255,215,0,0.6); background:rgba(255,215,0,0.08); }
+    .bln-achiev-name { font-size:18px; font-weight:900; color:#fff; letter-spacing:1px; }
+    .bln-achiev-req { font-size:12px; color:rgba(255,255,255,0.55); }
+    .bln-achiev-card.done .bln-achiev-req { color:#FFD700; }
+    .bln-achiev-perk { font-size:12px; color:rgba(255,255,255,0.7); line-height:1.4; }
+
     /* ── DUMB PEOPLES GAME SCREENS ── */
     #screen-dpg { flex-direction: column; align-items: center; justify-content: center;
       background: linear-gradient(135deg, #5a3d00 0%, #9a6f00 20%, #D4AF37 45%, #FFD700 50%, #D4AF37 55%, #9a6f00 80%, #5a3d00 100%);
@@ -1448,6 +1594,22 @@
         <div class="soccer-btn-sub">Score Goals</div>
       </button>
 
+      <!-- POP THE BALLOON BUTTON -->
+      <button class="balloon-btn" onclick="showScreen('balloon')">
+        <svg class="balloon-btn-deco" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="60" cy="90" r="28" fill="#ef4444" opacity="0.18"/>
+          <circle cx="120" cy="60" r="22" fill="#fff" opacity="0.10"/>
+          <circle cx="185" cy="95" r="26" fill="#a855f7" opacity="0.15"/>
+          <circle cx="48" cy="160" r="18" fill="#3b82f6" opacity="0.13"/>
+          <circle cx="190" cy="165" r="20" fill="#22c55e" opacity="0.14"/>
+          <line x1="60" y1="118" x2="62" y2="145" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+          <line x1="120" y1="82" x2="122" y2="110" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+          <line x1="185" y1="121" x2="187" y2="150" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+        </svg>
+        <div class="balloon-btn-label">BALLOON</div>
+        <div class="balloon-btn-sub">Pop &amp; Score</div>
+      </button>
+
       <!-- DUMB PEOPLES GAME BUTTON -->
       <button class="dpg-btn" onclick="showScreen('dpg')">
         <div class="dpg-btn-shine"></div>
@@ -1713,6 +1875,91 @@
     <div class="dpg-result-ordinal" id="dpg-smart-ordinal"></div>
     <div class="dpg-result-msg">TO PRETEND THAT YOU ARE SMART</div>
     <button class="btn-dpg-result-back" onclick="showScreen('dpg')">← Play Again</button>
+  </div>
+
+  <!-- BALLOON LOBBY -->
+  <div id="screen-balloon" class="screen">
+    <div class="bln-lobby-title">🎈 POP THE BALLOON</div>
+    <div class="bln-lobby-sub">Aim. Click. Score.</div>
+    <div class="bln-lobby-btns">
+      <button class="btn-bln-solo" onclick="BLN.startSolo()">🤖 SOLO vs BOT</button>
+      <button class="btn-bln-host" onclick="BLN.hostRoom()">📡 HOST GAME</button>
+      <button class="btn-bln-join" onclick="BLN.openJoin()">🔗 JOIN GAME</button>
+      <button class="btn-bln-achiev" onclick="BLN.openAchievements()">🏆 ACHIEVEMENTS</button>
+    </div>
+    <button class="btn-bln-back-lobby" onclick="showScreen('game')">← Back</button>
+  </div>
+
+  <!-- BALLOON HOST -->
+  <div id="screen-balloon-host" class="screen">
+    <div class="bln-card">
+      <div class="bln-card-title">HOST GAME</div>
+      <div class="bln-timer-label">SET TIMER</div>
+      <div class="bln-timer-row" id="bln-timer-btns">
+        <button class="btn-bln-timer" onclick="BLN.setTimer(15,this)">15s</button>
+        <button class="btn-bln-timer" onclick="BLN.setTimer(20,this)">20s</button>
+        <button class="btn-bln-timer active" onclick="BLN.setTimer(30,this)">30s</button>
+        <button class="btn-bln-timer" onclick="BLN.setTimer(45,this)">45s</button>
+      </div>
+      <div class="bln-timer-label">ROOM CODE</div>
+      <div class="bln-code-display" id="bln-host-code">——</div>
+      <div class="bln-card-status" id="bln-host-status">Waiting for a player to join…</div>
+      <button class="btn-bln-start" id="bln-host-start" style="display:none" onclick="BLN.startMultiplayer()">▶ START GAME</button>
+      <button class="btn-bln-card-back" onclick="BLN.cleanup();showScreen('balloon')">← Back</button>
+    </div>
+  </div>
+
+  <!-- BALLOON JOIN -->
+  <div id="screen-balloon-join" class="screen">
+    <div class="bln-card">
+      <div class="bln-card-title">JOIN GAME</div>
+      <input class="bln-join-input" id="bln-join-input" placeholder="CODE" maxlength="5"/>
+      <button class="btn-bln-go" onclick="BLN.joinRoom()">JOIN →</button>
+      <div class="bln-card-status" id="bln-join-status"></div>
+      <button class="btn-bln-card-back" onclick="BLN.cleanup();showScreen('balloon')">← Back</button>
+    </div>
+  </div>
+
+  <!-- BALLOON PLAY -->
+  <div id="screen-balloon-play" class="screen">
+    <div class="bln-topbar">
+      <div class="bln-topbar-title">🎈 BALLOON</div>
+      <div class="bln-scores">
+        <div class="bln-score-block">
+          <div class="bln-score-label">YOU</div>
+          <div class="bln-score-val" id="bln-score-me">0</div>
+        </div>
+        <div class="bln-score-sep">—</div>
+        <div class="bln-score-block">
+          <div class="bln-score-label" id="bln-label-opp">BOT</div>
+          <div class="bln-score-val" id="bln-score-opp">0</div>
+        </div>
+      </div>
+      <div class="bln-timer-display" id="bln-timer">30s</div>
+      <button class="btn-quit" onclick="BLN.cleanup();showScreen('balloon')">QUIT</button>
+    </div>
+    <div id="bln-wrap">
+      <canvas id="bln-canvas"></canvas>
+      <div id="bln-overlay">
+        <div id="bln-result-text"></div>
+        <div id="bln-result-scores"></div>
+        <div id="bln-result-achiev"></div>
+        <div class="bln-overlay-btns">
+          <button class="btn-bln-again" onclick="BLN.cleanup();BLN.startSolo()" id="bln-again-btn">Play Again</button>
+          <button class="btn-bln-overlay-quit" onclick="BLN.cleanup();showScreen('balloon')">Quit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- BALLOON ACHIEVEMENTS -->
+  <div id="screen-balloon-achievements" class="screen">
+    <div class="bln-achiev-topbar">
+      <div class="bln-achiev-topbar-title">🏆 ACHIEVEMENTS</div>
+      <button class="btn-quit" onclick="showScreen('balloon')">BACK</button>
+    </div>
+    <div id="bln-total-pts">Total points earned: 0</div>
+    <div id="bln-achiev-grid"></div>
   </div>
 
   <!-- TTT GAME -->
@@ -4374,6 +4621,372 @@
           'You are the ' + ordinal(place) + ' person to complete this quiz!';
       }
       showScreen('quiz-result');
+    };
+
+    /* ══════════════════════════════════
+       POP THE BALLOON
+    ══════════════════════════════════ */
+    const BLN = {
+      mode: 'solo', myRole: 'host', fbRef: null, roomCode: '',
+      configTimer: 30, balloons: [], poppedIds: null,
+      myScore: 0, oppScore: 0, timeLeft: 0, _nextId: 0,
+      _spawnTmr: null, _gameTmr: null, _botTmr: null, _raf: null,
+      W: 0, H: 0, canvas: null, ctx: null,
+      gameOver: false, _resultShown: false, _popParticles: [],
+
+      /* ── achievement perks ── */
+      _totalPts() { return parseInt(localStorage.getItem('pg_bln_total')||'0'); },
+      _level() {
+        const p=this._totalPts();
+        if(p>=1000) return 5; if(p>=600) return 4;
+        if(p>=300)  return 3; if(p>=150) return 2;
+        if(p>=50)   return 1; return 0;
+      },
+      _spawnMult()  { return [1,1.3,2,2,2,3][this._level()]; },
+      _rareBoost()  { return [1,1,1,1.5,1.5,2][this._level()]; },
+      _radiusMult() { return [1,1,1,1,1.2,1.2][this._level()]; },
+
+      /* ── navigation ── */
+      setTimer(secs, btn) {
+        this.configTimer = secs;
+        document.querySelectorAll('#bln-timer-btns .btn-bln-timer').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        if(this.fbRef) this.fbRef.child('config/timer').set(secs);
+      },
+
+      startSolo() {
+        this.mode='solo'; this.myRole='host';
+        document.getElementById('bln-again-btn').onclick = ()=>{ BLN.cleanup(); BLN.startSolo(); };
+        showScreen('balloon-play');
+        this._initCanvas();
+        this._startGame(this.configTimer);
+      },
+
+      hostRoom() {
+        this.mode='host'; this.myRole='host';
+        const code = Math.random().toString(36).substr(2,5).toUpperCase();
+        this.roomCode = code;
+        document.getElementById('bln-host-code').textContent = code;
+        document.getElementById('bln-host-status').textContent = 'Waiting for a player to join…';
+        document.getElementById('bln-host-start').style.display = 'none';
+        showScreen('balloon-host');
+        const db=getDb(); if(!db) return;
+        this.fbRef = db.ref('balloon/'+code);
+        this.fbRef.set({ config:{ timer:this.configTimer }, players:{ host: document.getElementById('display-username').textContent.trim()||'Host' } });
+        this.fbRef.child('players/join').on('value', snap=>{
+          if(!snap.val()) return;
+          document.getElementById('bln-host-status').textContent = snap.val()+' joined! Ready to start.';
+          document.getElementById('bln-host-start').style.display = 'block';
+        });
+      },
+
+      startMultiplayer() {
+        const ts = Date.now();
+        this.fbRef.child('started').set(ts);
+        document.getElementById('bln-again-btn').onclick = ()=>{ BLN.cleanup(); showScreen('balloon'); };
+        showScreen('balloon-play');
+        this._initCanvas();
+        this._listenPops();
+        this._startGame(this.configTimer);
+      },
+
+      openJoin() {
+        showScreen('balloon-join');
+        document.getElementById('bln-join-input').value='';
+        document.getElementById('bln-join-status').textContent='';
+      },
+
+      joinRoom() {
+        const code = document.getElementById('bln-join-input').value.trim().toUpperCase();
+        if(!code) return;
+        this.mode='join'; this.myRole='join'; this.roomCode=code;
+        const db=getDb(); if(!db) return;
+        this.fbRef = db.ref('balloon/'+code);
+        const me = document.getElementById('display-username').textContent.trim()||'Guest';
+        this.fbRef.child('config').once('value', snap=>{
+          if(!snap.val()){ document.getElementById('bln-join-status').textContent='Room not found!'; return; }
+          this.configTimer = snap.val().timer||30;
+          this.fbRef.child('players/join').set(me);
+          document.getElementById('bln-join-status').textContent='Joined! Waiting for host…';
+          this.fbRef.child('started').on('value', snap2=>{
+            if(!snap2.val()) return;
+            document.getElementById('bln-again-btn').onclick = ()=>{ BLN.cleanup(); showScreen('balloon'); };
+            showScreen('balloon-play');
+            this._initCanvas();
+            this._listenPops();
+            this._listenHostBalloons();
+            this._startGame(this.configTimer);
+          });
+        });
+      },
+
+      /* ── canvas ── */
+      _initCanvas() {
+        this.canvas = document.getElementById('bln-canvas');
+        const wrap = document.getElementById('bln-wrap');
+        this.W = wrap.clientWidth||600; this.H = wrap.clientHeight||500;
+        this.canvas.width=this.W; this.canvas.height=this.H;
+        this.ctx = this.canvas.getContext('2d');
+        this.canvas.onclick = e=>{
+          if(this.gameOver) return;
+          const rect=this.canvas.getBoundingClientRect();
+          const sx=this.W/rect.width, sy=this.H/rect.height;
+          this._tryPop((e.clientX-rect.left)*sx, (e.clientY-rect.top)*sy);
+        };
+        this.canvas.addEventListener('touchstart', e=>{
+          e.preventDefault();
+          if(this.gameOver) return;
+          const rect=this.canvas.getBoundingClientRect();
+          const sx=this.W/rect.width, sy=this.H/rect.height;
+          const t=e.touches[0];
+          this._tryPop((t.clientX-rect.left)*sx, (t.clientY-rect.top)*sy);
+        },{passive:false});
+      },
+
+      /* ── game start ── */
+      _startGame(secs) {
+        this.balloons=[]; this.poppedIds=new Set(); this._popParticles=[];
+        this.myScore=0; this.oppScore=0; this.timeLeft=secs;
+        this._nextId=0; this.gameOver=false; this._resultShown=false;
+        document.getElementById('bln-score-me').textContent='0';
+        document.getElementById('bln-score-opp').textContent='0';
+        document.getElementById('bln-label-opp').textContent = this.mode==='solo'?'BOT':'THEM';
+        document.getElementById('bln-timer').textContent=secs+'s';
+        document.getElementById('bln-overlay').style.display='none';
+
+        const spawnFn = ()=>{
+          if(this.gameOver) return;
+          if(this.mode!=='join') {
+            const n = Math.max(1, Math.round(this._spawnMult()));
+            for(let i=0;i<n;i++) this._spawnBalloon();
+          }
+        };
+        this._spawnTmr = setInterval(spawnFn, 900);
+        spawnFn();
+
+        this._gameTmr = setInterval(()=>{
+          this.timeLeft--;
+          document.getElementById('bln-timer').textContent = this.timeLeft+'s';
+          if(this.timeLeft<=0) this._endGame();
+        }, 1000);
+
+        if(this.mode==='solo') this._botTmr = setInterval(()=>this._botTick(), 700);
+
+        const loop=()=>{ if(this.gameOver) return; this._update(); this._draw(); this._raf=requestAnimationFrame(loop); };
+        loop();
+      },
+
+      /* ── balloon spawn ── */
+      _spawnBalloon(data) {
+        const rb = this._rareBoost(), r2 = Math.random();
+        let pts = 1;
+        if(r2 < 0.04*rb) pts=5; else if(r2 < 0.10*rb) pts=4;
+        else if(r2 < 0.20*rb) pts=3; else if(r2 < 0.38) pts=2;
+        const clr = {1:'#ef4444',2:'#3b82f6',3:'#22c55e',4:'#a855f7',5:'#f59e0b'};
+        const rad = Math.round((26 + pts*3) * this._radiusMult());
+        const id  = data ? data.id : this._nextId++;
+        const x   = data ? data.x*this.W : rad + Math.random()*(this.W-rad*2);
+        const pv  = data ? data.pts : pts;
+        const b = { id, x, y:this.H+rad, vy:-(1.1+Math.random()*0.9), wobble:Math.random()*Math.PI*2, pts:pv, radius:rad, color:clr[pv], popped:false, popAnim:0 };
+        this.balloons.push(b);
+
+        if(this.mode==='host' && this.fbRef)
+          this.fbRef.child('blns/'+id).set({ id, x:+(x/this.W).toFixed(4), pts:pv });
+
+        if(this.mode==='solo') {
+          const delay = 1400 + Math.random()*2200;
+          setTimeout(()=>{ if(!this.poppedIds.has(id)&&!this.gameOver&&Math.random()<0.52) this._popBalloon(id,'bot'); }, delay);
+        }
+        return b;
+      },
+
+      _botTick() {
+        // Occasionally pick a visible balloon the delayed timer might have missed
+        const alive = this.balloons.filter(b=>!b.popped&&!this.poppedIds.has(b.id)&&b.y<this.H*0.8);
+        if(!alive.length) return;
+        if(Math.random()<0.18) {
+          const pick = alive[Math.floor(Math.random()*alive.length)];
+          this._popBalloon(pick.id,'bot');
+        }
+      },
+
+      /* ── multiplayer listeners ── */
+      _listenHostBalloons() {
+        if(!this.fbRef) return;
+        this.fbRef.child('blns').on('child_added', snap=>{
+          const d=snap.val(); if(!d||this.poppedIds.has(d.id)) return;
+          if(!this.balloons.find(b=>b.id===d.id)) this._spawnBalloon(d);
+        });
+      },
+
+      _listenPops() {
+        if(!this.fbRef) return;
+        this.fbRef.child('pops').on('child_added', snap=>{
+          const d=snap.val(); if(!d) return;
+          const {id,by,pts}=d;
+          if(this.poppedIds.has(id)) return;
+          this.poppedIds.add(id);
+          const b=this.balloons.find(b=>b.id===id);
+          if(b) this._doPop(b);
+          if(by===this.myRole){ this.myScore+=pts; document.getElementById('bln-score-me').textContent=this.myScore; }
+          else                { this.oppScore+=pts; document.getElementById('bln-score-opp').textContent=this.oppScore; }
+        });
+        this.fbRef.child('result').on('value', snap=>{
+          const d=snap.val(); if(!d||this._resultShown) return;
+          this._showResult(d);
+        });
+      },
+
+      /* ── pop ── */
+      _tryPop(cx,cy) {
+        for(let i=this.balloons.length-1;i>=0;i--) {
+          const b=this.balloons[i];
+          if(b.popped||this.poppedIds.has(b.id)) continue;
+          if((cx-b.x)**2+(cy-b.y)**2 <= b.radius**2) { this._popBalloon(b.id,this.myRole); break; }
+        }
+      },
+
+      _popBalloon(id, by) {
+        if(this.poppedIds.has(id)) return;
+        const b=this.balloons.find(bl=>bl.id===id); if(!b||b.popped) return;
+        this.poppedIds.add(id);
+        this._doPop(b);
+        if(by===this.myRole){ this.myScore+=b.pts; document.getElementById('bln-score-me').textContent=this.myScore; }
+        else if(by==='bot') { this.oppScore+=b.pts; document.getElementById('bln-score-opp').textContent=this.oppScore; }
+        if(this.mode!=='solo'&&this.fbRef&&by===this.myRole)
+          this.fbRef.child('pops/'+id).set({id,by,pts:b.pts});
+      },
+
+      _doPop(b) {
+        b.popped=true; b.popAnim=1.0;
+        for(let i=0;i<10;i++) {
+          const a=(i/10)*Math.PI*2;
+          this._popParticles.push({x:b.x,y:b.y,vx:Math.cos(a)*(2+Math.random()*4),vy:Math.sin(a)*(2+Math.random()*4),color:b.color,life:1.0});
+        }
+      },
+
+      /* ── update & draw ── */
+      _update() {
+        this.balloons = this.balloons.filter(b=>{
+          if(b.popped){ b.popAnim-=0.1; return b.popAnim>0; }
+          b.wobble+=0.04; b.x+=Math.sin(b.wobble)*0.5; b.y+=b.vy;
+          return b.y > -b.radius;
+        });
+        this._popParticles = this._popParticles.filter(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=0.15; p.life-=0.055; return p.life>0; });
+      },
+
+      _draw() {
+        const ctx=this.ctx, W=this.W, H=this.H;
+        const g=ctx.createLinearGradient(0,0,0,H);
+        g.addColorStop(0,'#87CEEB'); g.addColorStop(1,'#dff0ff');
+        ctx.fillStyle=g; ctx.fillRect(0,0,W,H);
+
+        // clouds (static decorations)
+        ctx.fillStyle='rgba(255,255,255,0.55)';
+        [[W*0.12,H*0.12,55],[W*0.62,H*0.08,70],[W*0.85,H*0.2,45]].forEach(([cx,cy,r])=>{
+          ctx.beginPath(); ctx.arc(cx,cy,r,0,Math.PI*2); ctx.fill();
+          ctx.beginPath(); ctx.arc(cx+r*0.6,cy+4,r*0.7,0,Math.PI*2); ctx.fill();
+          ctx.beginPath(); ctx.arc(cx-r*0.5,cy+6,r*0.6,0,Math.PI*2); ctx.fill();
+        });
+
+        for(const b of this.balloons) {
+          if(b.popped) {
+            ctx.save(); ctx.globalAlpha=b.popAnim;
+            ctx.translate(b.x,b.y); ctx.scale(1+(1-b.popAnim)*2,1+(1-b.popAnim)*2);
+            ctx.fillStyle=b.color; ctx.beginPath(); ctx.arc(0,0,b.radius*0.6,0,Math.PI*2); ctx.fill();
+            ctx.restore(); ctx.globalAlpha=1;
+          } else {
+            // string
+            ctx.strokeStyle='rgba(0,0,0,0.25)'; ctx.lineWidth=1.5;
+            ctx.beginPath(); ctx.moveTo(b.x,b.y+b.radius);
+            ctx.quadraticCurveTo(b.x+6,b.y+b.radius+18,b.x,b.y+b.radius+36); ctx.stroke();
+            // body
+            ctx.fillStyle=b.color; ctx.beginPath(); ctx.arc(b.x,b.y,b.radius,0,Math.PI*2); ctx.fill();
+            // shine
+            ctx.fillStyle='rgba(255,255,255,0.32)';
+            ctx.beginPath(); ctx.ellipse(b.x-b.radius*0.28,b.y-b.radius*0.28,b.radius*0.32,b.radius*0.2,-Math.PI/4,0,Math.PI*2); ctx.fill();
+            // label
+            ctx.fillStyle='#fff'; ctx.font=`bold ${Math.round(b.radius*0.68)}px Arial`;
+            ctx.textAlign='center'; ctx.textBaseline='middle';
+            ctx.fillText(b.pts===1?'1':'+'+b.pts, b.x, b.y);
+          }
+        }
+
+        ctx.globalAlpha=1;
+        for(const p of this._popParticles) {
+          ctx.globalAlpha=p.life; ctx.fillStyle=p.color;
+          ctx.beginPath(); ctx.arc(p.x,p.y,4*p.life,0,Math.PI*2); ctx.fill();
+        }
+        ctx.globalAlpha=1;
+      },
+
+      /* ── end ── */
+      _endGame() {
+        if(this.gameOver) return;
+        this.gameOver=true;
+        clearInterval(this._spawnTmr); clearInterval(this._gameTmr); clearInterval(this._botTmr);
+        cancelAnimationFrame(this._raf);
+        const prev=this._totalPts();
+        localStorage.setItem('pg_bln_total', prev+this.myScore);
+        let result;
+        if(this.mode==='solo') {
+          result={winner:this.myScore>this.oppScore?'host':this.myScore===this.oppScore?'tie':'bot', hostScore:this.myScore, joinScore:this.oppScore};
+        } else {
+          const iWin=this.myScore>this.oppScore, tie=this.myScore===this.oppScore;
+          const oppRole=this.myRole==='host'?'join':'host';
+          result={winner:tie?'tie':iWin?this.myRole:oppRole, hostScore:this.myRole==='host'?this.myScore:this.oppScore, joinScore:this.myRole==='join'?this.myScore:this.oppScore};
+          if(this.myRole==='host'&&this.fbRef) this.fbRef.child('result').set(result);
+        }
+        this._showResult(result);
+      },
+
+      _showResult(result) {
+        if(this._resultShown) return; this._resultShown=true;
+        const iWin=(this.mode==='solo'&&result.winner==='host')||(this.mode!=='solo'&&result.winner===this.myRole);
+        const tie=result.winner==='tie';
+        const el=document.getElementById('bln-result-text');
+        el.textContent=tie?"IT'S A TIE! 🎈":iWin?'YOU WIN! 🎉':'YOU LOSE 😢';
+        el.style.color=tie?'#f59e0b':iWin?'#22c55e':'#ef4444';
+        document.getElementById('bln-result-scores').textContent=`You: ${this.myScore} — ${this.mode==='solo'?'Bot':'Them'}: ${this.oppScore}`;
+        const total=this._totalPts();
+        const lvl=this._level();
+        const names=['','🥉 Beginner','🥈 Popper','🥇 Pro','💎 Expert','👑 Master'];
+        const nxt=[50,50,150,300,600,1000];
+        document.getElementById('bln-result-achiev').textContent = lvl>0
+          ? 'Achievement: '+names[lvl]+' ('+total+' pts total)'
+          : 'Earn '+(50-total)+' more pts to unlock Beginner!';
+        document.getElementById('bln-overlay').style.display='flex';
+      },
+
+      /* ── achievements screen ── */
+      openAchievements() {
+        const total=this._totalPts();
+        const tiers=[
+          {name:'🥉 Beginner', req:50,   perk:'More balloons fall each round'},
+          {name:'🥈 Popper',   req:150,  perk:'2× balloon spawn rate'},
+          {name:'🥇 Pro',      req:300,  perk:'Rare 4pt & 5pt balloons appear 50% more'},
+          {name:'💎 Expert',   req:600,  perk:'Balloons are bigger — easier to pop!'},
+          {name:'👑 Master',   req:1000, perk:'3× balloon spawn + rarest balloons doubled'},
+        ];
+        document.getElementById('bln-total-pts').textContent='Total points earned: '+total;
+        document.getElementById('bln-achiev-grid').innerHTML = tiers.map(t=>{
+          const done=total>=t.req;
+          return `<div class="bln-achiev-card${done?' done':''}">
+            <div class="bln-achiev-name">${t.name}</div>
+            <div class="bln-achiev-req">${done?'✅ Unlocked':''+total+' / '+t.req+' pts'}</div>
+            <div class="bln-achiev-perk">🎁 ${t.perk}</div>
+          </div>`;
+        }).join('');
+        showScreen('balloon-achievements');
+      },
+
+      cleanup() {
+        this.gameOver=true;
+        clearInterval(this._spawnTmr); clearInterval(this._gameTmr); clearInterval(this._botTmr);
+        cancelAnimationFrame(this._raf);
+        this._resultShown=false; this.balloons=[]; this._popParticles=[];
+        if(this.fbRef){ this.fbRef.off(); this.fbRef=null; }
+      },
     };
 
     /* ══════════════════════════════════
