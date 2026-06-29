@@ -306,7 +306,7 @@
       font-size:20px; font-weight:900; color:#FFD700;
       text-shadow:0 0 12px rgba(255,215,0,0.6); min-width:44px; text-align:center;
     }
-    #bln-wrap { position:relative; flex:1; overflow:hidden; }
+    #bln-wrap { position:relative; flex:1; overflow:hidden; width:100vw; }
     #bln-canvas { width:100%; height:100%; display:block; cursor:crosshair; }
     #bln-overlay {
       display:none; position:absolute; inset:0;
@@ -4783,7 +4783,7 @@
         if(r2 < 0.04*rb) pts=5; else if(r2 < 0.10*rb) pts=4;
         else if(r2 < 0.20*rb) pts=3; else if(r2 < 0.38) pts=2;
         const clr = {1:'#ef4444',2:'#3b82f6',3:'#22c55e',4:'#a855f7',5:'#f59e0b'};
-        const rad = Math.round((26 + pts*3) * this._radiusMult());
+        const rad = Math.round((38 - pts*4) * this._radiusMult()); // higher pts = smaller & harder to hit
         const id  = data ? data.id : this._nextId++;
         const x   = data ? data.x*this.W : rad + Math.random()*(this.W-rad*2);
         const pv  = data ? data.pts : pts;
