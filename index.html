@@ -2063,6 +2063,8 @@
       <div class="bsim-toolbar-label">BLOCKS</div>
       <div id="bsim-block-btns"></div>
       <div class="bsim-toolbar-sep"></div>
+      <button id="bsim-orient-btn" class="btn-bsim-clear" onclick="BS.toggleOrientation()" style="white-space:nowrap">↔ HORIZONTAL</button>
+      <div class="bsim-toolbar-sep"></div>
       <div class="bsim-toolbar-label">COLOUR</div>
       <label class="bsim-color-wrap" title="Pick colour">
         <input type="color" id="bsim-color-picker" value="#e74c3c" oninput="BS.setCustomColor(this.value)">
@@ -5742,7 +5744,7 @@
        BLOCK SIMULATOR
     ══════════════════════════════════ */
     const BS = {
-      blocks:[], _nextId:0, gridSize:48, selectedType:1,
+      blocks:[], _nextId:0, gridSize:48, selectedType:1, vertical:false,
       dragging:null, _mousePos:null,
       canvas:null, ctx:null, W:0, H:0, _raf:null,
       customColor:'#e74c3c',
@@ -5753,6 +5755,9 @@
         showScreen('bsim');
         document.getElementById('bsim-color-swatch').style.background = this.customColor;
         document.getElementById('bsim-color-picker').value = this.customColor;
+        this.vertical = false;
+        const ob = document.getElementById('bsim-orient-btn');
+        if (ob) { ob.textContent = '↔ HORIZONTAL'; ob.style.borderColor = 'rgba(255,255,255,0.2)'; }
         // Build toolbar buttons once
         const wrap = document.getElementById('bsim-block-btns');
         if (!wrap.children.length) {
@@ -5799,6 +5804,13 @@
         document.getElementById('bsim-color-swatch').style.background = c;
       },
 
+      toggleOrientation() {
+        this.vertical = !this.vertical;
+        const btn = document.getElementById('bsim-orient-btn');
+        btn.textContent = this.vertical ? '↕ VERTICAL' : '↔ HORIZONTAL';
+        btn.style.borderColor = this.vertical ? '#fff' : 'rgba(255,255,255,0.2)';
+      },
+
       _lighten(hex) {
         let r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
         r=Math.min(255,r+70); g=Math.min(255,g+70); b=Math.min(255,b+70);
@@ -5818,11 +5830,11 @@
         return { x:(e.clientX-r.left)*sx, y:(e.clientY-r.top)*sy };
       },
 
-      _snap(rx, ry, w) {
+      _snap(rx, ry, bw, bh) {
         const g = this.gridSize;
         return {
-          gx: Math.max(0, Math.min(Math.floor((this.W - w*g)/g), Math.round(rx/g))),
-          gy: Math.max(0, Math.min(Math.floor((this.H - g)/g),   Math.round(ry/g)))
+          gx: Math.max(0, Math.min(Math.floor((this.W - bw*g)/g), Math.round(rx/g))),
+          gy: Math.max(0, Math.min(Math.floor((this.H - bh*g)/g), Math.round(ry/g)))
         };
       },
 
@@ -5830,7 +5842,7 @@
         const g = this.gridSize;
         for (let i = this.blocks.length-1; i >= 0; i--) {
           const b = this.blocks[i];
-          if (x >= b.gx*g && x < (b.gx+b.w)*g && y >= b.gy*g && y < (b.gy+1)*g) return b;
+          if (x >= b.gx*g && x < (b.gx+b.w)*g && y >= b.gy*g && y < (b.gy+b.h)*g) return b;
         }
         return null;
       },
@@ -5843,9 +5855,10 @@
           this.blocks.push(hit);
           this.dragging = {block:hit, ox:x-hit.gx*g, oy:y-hit.gy*g};
         } else {
-          const w = this.selectedType;
-          const {gx,gy} = this._snap(x - w*g/2, y - g/2, w);
-          const block = {id:this._nextId++, gx, gy, w, type:this.selectedType, color:this.customColor};
+          const bw = this.vertical ? 1 : this.selectedType;
+          const bh = this.vertical ? this.selectedType : 1;
+          const {gx,gy} = this._snap(x - bw*g/2, y - bh*g/2, bw, bh);
+          const block = {id:this._nextId++, gx, gy, w:bw, h:bh, type:this.selectedType, color:this.customColor};
           this.blocks.push(block);
           this.dragging = {block, ox:x-gx*g, oy:y-gy*g};
         }
@@ -5855,7 +5868,7 @@
         const {x,y} = this._pos(e); this._mousePos = {x,y};
         if (!this.dragging) return;
         const g = this.gridSize, b = this.dragging.block;
-        const {gx,gy} = this._snap(x-this.dragging.ox, y-this.dragging.oy, b.w);
+        const {gx,gy} = this._snap(x-this.dragging.ox, y-this.dragging.oy, b.w, b.h);
         b.gx = gx; b.gy = gy;
       },
 
@@ -5872,19 +5885,20 @@
         for (let i = 0; i < this.blocks.length; i++) {
           for (let j = i+1; j < this.blocks.length; j++) {
             const a = this.blocks[i], b = this.blocks[j];
-            // Vertically stacked (a on top of b or vice versa)
-            [[a,b],[b,a]].forEach(([top,bot]) => {
-              if (top.gy+1 === bot.gy) {
-                const x1 = Math.max(top.gx,bot.gx)*g;
+            const ah = a.h||1, bh = b.h||1;
+            // Vertically stacked
+            [[a,ah,b,bh],[b,bh,a,ah]].forEach(([top,th,bot,boh]) => {
+              if (top.gy+th === bot.gy) {
+                const x1 = Math.max(top.gx, bot.gx)*g;
                 const x2 = Math.min(top.gx+top.w, bot.gx+bot.w)*g;
                 if (x1 < x2) res.push({x1,y1:bot.gy*g,x2,y2:bot.gy*g});
               }
             });
-            // Side by side (a left of b or vice versa)
-            [[a,b],[b,a]].forEach(([left,right]) => {
+            // Side by side
+            [[a,ah,b,bh],[b,bh,a,ah]].forEach(([left,lh,right,rh]) => {
               if (left.gx+left.w === right.gx) {
-                const y1 = Math.max(left.gy,right.gy)*g;
-                const y2 = Math.min(left.gy+1,right.gy+1)*g;
+                const y1 = Math.max(left.gy, right.gy)*g;
+                const y2 = Math.min(left.gy+lh, right.gy+rh)*g;
                 if (y1 < y2) res.push({x1:right.gx*g,y1,x2:right.gx*g,y2});
               }
             });
@@ -5905,11 +5919,12 @@
 
         // Ghost block preview
         if (this._mousePos && !this.dragging) {
-          const {x,y}=this._mousePos, w=this.selectedType;
-          const {gx,gy}=this._snap(x-w*g/2, y-g/2, w);
+          const {x,y}=this._mousePos;
+          const bw=this.vertical?1:this.selectedType, bh=this.vertical?this.selectedType:1;
+          const {gx,gy}=this._snap(x-bw*g/2, y-bh*g/2, bw, bh);
           ctx.globalAlpha=0.25;
-          ctx.fillStyle=this._COLORS[this.selectedType-1];
-          ctx.fillRect(gx*g+2, gy*g+2, w*g-4, g-4);
+          ctx.fillStyle=this.customColor;
+          ctx.fillRect(gx*g+2, gy*g+2, bw*g-4, bh*g-4);
           ctx.globalAlpha=1;
         }
 
@@ -5924,7 +5939,7 @@
 
         // Blocks
         for (const b of this.blocks) {
-          const bx=b.gx*g, by=b.gy*g, bw=b.w*g, bh=g;
+          const bx=b.gx*g, by=b.gy*g, bw=b.w*g, bh=(b.h||1)*g;
           const col=b.color||this._COLORS[b.type-1];
           const lit=this._lighten(col);
           // Drop shadow
@@ -5939,10 +5954,10 @@
           ctx.fillStyle='rgba(0,0,0,0.28)'; ctx.fillRect(bx,by+bh-5,bw,5);
           // Right shadow
           ctx.fillStyle='rgba(0,0,0,0.15)'; ctx.fillRect(bx+bw-4,by,4,bh);
-          // Studs
+          // Studs — one per grid cell across width and height
           const sr=g*0.17;
-          for (let s=0; s<b.w; s++) {
-            const sx=bx+(s+0.5)*g, sy=by+10;
+          for (let sw=0; sw<b.w; sw++) for (let sh=0; sh<(b.h||1); sh++) {
+            const sx=bx+(sw+0.5)*g, sy=by+(sh*g)+10;
             ctx.fillStyle='rgba(0,0,0,0.2)';
             ctx.beginPath(); ctx.arc(sx+1,sy+1,sr,0,Math.PI*2); ctx.fill();
             ctx.fillStyle=lit;
