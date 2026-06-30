@@ -175,6 +175,67 @@
       color: rgba(255,255,255,0.38); letter-spacing: 3px; text-transform: uppercase;
     }
 
+    /* ── BLOCK SIMULATOR BUTTON ── */
+    .bsim-btn {
+      position:relative; width:240px; height:240px; cursor:pointer;
+      background:#1a1a1a; border:3px solid #444; border-radius:20px; overflow:hidden;
+      transition:transform .2s,border-color .2s,box-shadow .2s;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+      box-shadow:0 0 30px rgba(255,255,255,0.05);
+    }
+    .bsim-btn:hover { transform:scale(1.06); border-color:#fff; box-shadow:0 0 40px rgba(255,255,255,0.2); }
+    .bsim-btn-bg { position:absolute; inset:0; pointer-events:none; }
+    .bsim-btn-label {
+      position:relative; z-index:2; font-size:26px; font-weight:900; font-style:italic;
+      font-family:Georgia,'Times New Roman',serif; color:#fff; letter-spacing:2px;
+      text-align:center; line-height:1.18;
+      text-shadow:3px 3px 0 rgba(0,0,0,0.6),-1px -1px 0 rgba(255,255,255,0.08);
+    }
+    .bsim-btn-sub {
+      position:relative; z-index:2; font-size:10px;
+      color:rgba(255,255,255,0.35); letter-spacing:3px; text-transform:uppercase;
+    }
+
+    /* ── BLOCK SIMULATOR SCREEN ── */
+    #screen-bsim { flex-direction:column; background:#12121f; }
+    .bsim-topbar {
+      width:100%; display:flex; align-items:center; justify-content:space-between;
+      padding:12px 22px; background:rgba(0,0,0,0.55); flex-shrink:0; gap:14px;
+    }
+    .bsim-topbar-title {
+      font-size:17px; font-weight:900; font-style:italic;
+      font-family:Georgia,serif; color:#fff; letter-spacing:2px; white-space:nowrap;
+    }
+    .bsim-hint-top { font-size:11px; color:rgba(255,255,255,0.35); letter-spacing:.5px; flex:1; text-align:center; }
+    .btn-bsim-clear {
+      padding:8px 18px; font-size:12px; font-weight:700; border-radius:8px;
+      background:rgba(255,255,255,0.08); border:1px solid rgba(255,255,255,0.2);
+      color:#fff; cursor:pointer; transition:background .15s;
+    }
+    .btn-bsim-clear:hover { background:rgba(255,255,255,0.18); }
+    #bsim-canvas-wrap { flex:1; position:relative; overflow:hidden; min-height:0; }
+    #bsim-canvas { width:100%; height:100%; display:block; cursor:crosshair; touch-action:none; }
+    #bsim-toolbar {
+      height:90px; background:rgba(0,0,0,0.65); border-top:1px solid rgba(255,255,255,0.08);
+      display:flex; align-items:center; gap:12px; padding:0 20px; flex-shrink:0; overflow-x:auto;
+    }
+    .bsim-toolbar-label {
+      font-size:10px; font-weight:800; color:rgba(255,255,255,0.35);
+      letter-spacing:2px; text-transform:uppercase; white-space:nowrap;
+    }
+    #bsim-block-btns { display:flex; gap:10px; align-items:center; }
+    .bsim-block-btn {
+      display:flex; flex-direction:column; align-items:center; gap:5px;
+      padding:8px 10px; border-radius:10px; cursor:pointer;
+      border:2px solid rgba(255,255,255,0.12); background:rgba(255,255,255,0.04);
+      transition:border-color .15s,background .15s; flex-shrink:0;
+    }
+    .bsim-block-btn.active { border-color:#fff; background:rgba(255,255,255,0.12); }
+    .bsim-block-btn:hover:not(.active) { border-color:rgba(255,255,255,0.4); }
+    .bsim-block-preview { height:20px; border-radius:3px; }
+    .bsim-block-lbl { font-size:10px; font-weight:700; color:rgba(255,255,255,0.65); letter-spacing:.5px; }
+    .bsim-toolbar-hint { margin-left:auto; font-size:10px; color:rgba(255,255,255,0.2); text-align:right; line-height:1.7; white-space:nowrap; }
+
     /* ── DUMB PEOPLES GAME BUTTON ── */
     .dpg-btn {
       position: relative; width: 240px; height: 240px;
@@ -1669,6 +1730,25 @@
         <div class="soccer-btn-sub">Score Goals</div>
       </button>
 
+      <!-- BLOCK SIMULATOR BUTTON -->
+      <button class="bsim-btn" onclick="BS.open()">
+        <svg class="bsim-btn-bg" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
+          <rect x="10" y="28"  width="48" height="22" rx="3" fill="none" stroke="rgba(255,255,255,0.09)" stroke-width="1.5"/>
+          <rect x="68" y="18"  width="72" height="22" rx="3" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1.5"/>
+          <rect x="152" y="32" width="24" height="22" rx="3" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1.5"/>
+          <rect x="185" y="20" width="48" height="22" rx="3" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1.5"/>
+          <rect x="6"  y="66"  width="96" height="22" rx="3" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1.5"/>
+          <rect x="112" y="62" width="48" height="22" rx="3" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1.5"/>
+          <rect x="170" y="68" width="66" height="22" rx="3" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1.5"/>
+          <rect x="18" y="188" width="36" height="22" rx="3" fill="none" stroke="rgba(255,255,255,0.07)" stroke-width="1.5"/>
+          <rect x="64" y="194" width="24" height="22" rx="3" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="1.5"/>
+          <rect x="100" y="186" width="72" height="22" rx="3" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="1.5"/>
+          <rect x="183" y="190" width="48" height="22" rx="3" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="1.5"/>
+        </svg>
+        <div class="bsim-btn-label">BLOCK<br>SIMULATOR</div>
+        <div class="bsim-btn-sub">Build &amp; Stack</div>
+      </button>
+
       <!-- POP THE BALLOON BUTTON -->
       <button class="balloon-btn" onclick="showScreen('balloon')">
         <svg class="balloon-btn-deco" viewBox="0 0 240 240" xmlns="http://www.w3.org/2000/svg">
@@ -1950,6 +2030,24 @@
     <div class="dpg-result-ordinal" id="dpg-smart-ordinal"></div>
     <div class="dpg-result-msg">TO PRETEND THAT YOU ARE SMART</div>
     <button class="btn-dpg-result-back" onclick="showScreen('dpg')">← Play Again</button>
+  </div>
+
+  <!-- BLOCK SIMULATOR -->
+  <div id="screen-bsim" class="screen">
+    <div class="bsim-topbar">
+      <div class="bsim-topbar-title">🧱 BLOCK SIMULATOR</div>
+      <div class="bsim-hint-top">Click to place · Drag to move · Right-click to delete</div>
+      <button class="btn-bsim-clear" onclick="BS.clear()">🗑 CLEAR</button>
+      <button class="btn-quit" onclick="BS.cleanup();showScreen('game')">QUIT</button>
+    </div>
+    <div id="bsim-canvas-wrap">
+      <canvas id="bsim-canvas"></canvas>
+    </div>
+    <div id="bsim-toolbar">
+      <div class="bsim-toolbar-label">BLOCKS</div>
+      <div id="bsim-block-btns"></div>
+      <div class="bsim-toolbar-hint">Click → place<br>Drag → move<br>Right-click → delete</div>
+    </div>
   </div>
 
   <!-- BALLOON LOBBY -->
@@ -5616,6 +5714,215 @@
         this._stopMusic();
         if(this.fbRef){ this.fbRef.off(); this.fbRef=null; }
       },
+    };
+
+    /* ══════════════════════════════════
+       BLOCK SIMULATOR
+    ══════════════════════════════════ */
+    const BS = {
+      blocks:[], _nextId:0, gridSize:48, selectedType:1,
+      dragging:null, _mousePos:null,
+      canvas:null, ctx:null, W:0, H:0, _raf:null,
+      _COLORS:['#e74c3c','#3498db','#2ecc71','#f39c12','#9b59b6'],
+      _LIGHTS:['#f1948a','#85c1e9','#82e0aa','#fad7a0','#c39bd3'],
+
+      open() {
+        showScreen('bsim');
+        // Build toolbar buttons once
+        const wrap = document.getElementById('bsim-block-btns');
+        if (!wrap.children.length) {
+          wrap.innerHTML = this._COLORS.map((col,i) => {
+            const w = (i+1)*26;
+            return `<button class="bsim-block-btn${i===0?' active':''}" onclick="BS.selectType(${i+1})">
+              <div class="bsim-block-preview" style="width:${w}px;background:${col};box-shadow:inset 0 3px 0 rgba(255,255,255,0.3),inset 0 -3px 0 rgba(0,0,0,0.3)"></div>
+              <div class="bsim-block-lbl">${i+1}×1</div>
+            </button>`;
+          }).join('');
+        }
+        requestAnimationFrame(() => this._init());
+      },
+
+      _init() {
+        const wrap = document.getElementById('bsim-canvas-wrap');
+        this.W = wrap.clientWidth || window.innerWidth;
+        this.H = wrap.clientHeight || window.innerHeight - 56 - 90;
+        // Replace canvas to clear listeners
+        const old = document.getElementById('bsim-canvas');
+        const cv = document.createElement('canvas');
+        cv.id = 'bsim-canvas'; cv.width = this.W; cv.height = this.H;
+        cv.style.cssText = 'width:100%;height:100%;display:block;cursor:crosshair;touch-action:none;';
+        old.replaceWith(cv);
+        this.canvas = cv; this.ctx = cv.getContext('2d');
+        this.blocks = []; this._nextId = 0; this.dragging = null; this._mousePos = null;
+
+        cv.addEventListener('mousedown',   e => this._onDown(e));
+        cv.addEventListener('mousemove',   e => this._onMove(e));
+        cv.addEventListener('mouseup',     ()  => this._onUp());
+        cv.addEventListener('mouseleave',  ()  => { this._mousePos = null; });
+        cv.addEventListener('contextmenu', e => { e.preventDefault(); this._onRight(e); });
+        cv.addEventListener('touchstart',  e => { e.preventDefault(); this._onDown(e.touches[0]); }, {passive:false});
+        cv.addEventListener('touchmove',   e => { e.preventDefault(); this._onMove(e.touches[0]); }, {passive:false});
+        cv.addEventListener('touchend',    e => { e.preventDefault(); this._onUp(); }, {passive:false});
+
+        cancelAnimationFrame(this._raf);
+        const loop = () => { this._draw(); this._raf = requestAnimationFrame(loop); };
+        loop();
+      },
+
+      selectType(t) {
+        this.selectedType = t;
+        document.querySelectorAll('.bsim-block-btn').forEach((b,i) => b.classList.toggle('active', i+1===t));
+      },
+
+      clear() { this.blocks = []; },
+
+      _pos(e) {
+        const r = this.canvas.getBoundingClientRect();
+        const sx = this.W/r.width, sy = this.H/r.height;
+        return { x:(e.clientX-r.left)*sx, y:(e.clientY-r.top)*sy };
+      },
+
+      _snap(rx, ry, w) {
+        const g = this.gridSize;
+        return {
+          gx: Math.max(0, Math.min(Math.floor((this.W - w*g)/g), Math.round(rx/g))),
+          gy: Math.max(0, Math.min(Math.floor((this.H - g)/g),   Math.round(ry/g)))
+        };
+      },
+
+      _blockAt(x, y) {
+        const g = this.gridSize;
+        for (let i = this.blocks.length-1; i >= 0; i--) {
+          const b = this.blocks[i];
+          if (x >= b.gx*g && x < (b.gx+b.w)*g && y >= b.gy*g && y < (b.gy+1)*g) return b;
+        }
+        return null;
+      },
+
+      _onDown(e) {
+        const {x,y} = this._pos(e); const g = this.gridSize;
+        const hit = this._blockAt(x,y);
+        if (hit) {
+          this.blocks = this.blocks.filter(b => b!==hit);
+          this.blocks.push(hit);
+          this.dragging = {block:hit, ox:x-hit.gx*g, oy:y-hit.gy*g};
+        } else {
+          const w = this.selectedType;
+          const {gx,gy} = this._snap(x - w*g/2, y - g/2, w);
+          const block = {id:this._nextId++, gx, gy, w, type:this.selectedType};
+          this.blocks.push(block);
+          this.dragging = {block, ox:x-gx*g, oy:y-gy*g};
+        }
+      },
+
+      _onMove(e) {
+        const {x,y} = this._pos(e); this._mousePos = {x,y};
+        if (!this.dragging) return;
+        const g = this.gridSize, b = this.dragging.block;
+        const {gx,gy} = this._snap(x-this.dragging.ox, y-this.dragging.oy, b.w);
+        b.gx = gx; b.gy = gy;
+      },
+
+      _onUp() { this.dragging = null; },
+
+      _onRight(e) {
+        const {x,y} = this._pos(e);
+        const b = this._blockAt(x,y);
+        if (b) this.blocks = this.blocks.filter(bl => bl!==b);
+      },
+
+      _connections() {
+        const g = this.gridSize, res = [];
+        for (let i = 0; i < this.blocks.length; i++) {
+          for (let j = i+1; j < this.blocks.length; j++) {
+            const a = this.blocks[i], b = this.blocks[j];
+            // Vertically stacked (a on top of b or vice versa)
+            [[a,b],[b,a]].forEach(([top,bot]) => {
+              if (top.gy+1 === bot.gy) {
+                const x1 = Math.max(top.gx,bot.gx)*g;
+                const x2 = Math.min(top.gx+top.w, bot.gx+bot.w)*g;
+                if (x1 < x2) res.push({x1,y1:bot.gy*g,x2,y2:bot.gy*g});
+              }
+            });
+            // Side by side (a left of b or vice versa)
+            [[a,b],[b,a]].forEach(([left,right]) => {
+              if (left.gx+left.w === right.gx) {
+                const y1 = Math.max(left.gy,right.gy)*g;
+                const y2 = Math.min(left.gy+1,right.gy+1)*g;
+                if (y1 < y2) res.push({x1:right.gx*g,y1,x2:right.gx*g,y2});
+              }
+            });
+          }
+        }
+        return res;
+      },
+
+      _draw() {
+        const ctx=this.ctx, W=this.W, H=this.H, g=this.gridSize;
+        ctx.fillStyle='#12121f'; ctx.fillRect(0,0,W,H);
+
+        // Dot grid
+        ctx.fillStyle='rgba(255,255,255,0.055)';
+        for (let x=g; x<W; x+=g)
+          for (let y=g; y<H; y+=g)
+            ctx.fillRect(x-1.5, y-1.5, 3, 3);
+
+        // Ghost block preview
+        if (this._mousePos && !this.dragging) {
+          const {x,y}=this._mousePos, w=this.selectedType;
+          const {gx,gy}=this._snap(x-w*g/2, y-g/2, w);
+          ctx.globalAlpha=0.25;
+          ctx.fillStyle=this._COLORS[this.selectedType-1];
+          ctx.fillRect(gx*g+2, gy*g+2, w*g-4, g-4);
+          ctx.globalAlpha=1;
+        }
+
+        // Connection lines
+        ctx.save();
+        ctx.strokeStyle='rgba(255,255,255,0.5)';
+        ctx.lineWidth=2; ctx.setLineDash([5,4]); ctx.lineCap='round';
+        for (const c of this._connections()) {
+          ctx.beginPath(); ctx.moveTo(c.x1,c.y1); ctx.lineTo(c.x2,c.y2); ctx.stroke();
+        }
+        ctx.setLineDash([]); ctx.restore();
+
+        // Blocks
+        for (const b of this.blocks) {
+          const bx=b.gx*g, by=b.gy*g, bw=b.w*g, bh=g;
+          const col=this._COLORS[b.type-1], lit=this._LIGHTS[b.type-1];
+          // Drop shadow
+          ctx.fillStyle='rgba(0,0,0,0.28)'; ctx.fillRect(bx+4,by+5,bw,bh);
+          // Body
+          ctx.fillStyle=col; ctx.fillRect(bx,by,bw,bh);
+          // Top highlight
+          ctx.fillStyle='rgba(255,255,255,0.2)'; ctx.fillRect(bx,by,bw,5);
+          // Left highlight
+          ctx.fillStyle='rgba(255,255,255,0.1)'; ctx.fillRect(bx,by,4,bh);
+          // Bottom shadow
+          ctx.fillStyle='rgba(0,0,0,0.28)'; ctx.fillRect(bx,by+bh-5,bw,5);
+          // Right shadow
+          ctx.fillStyle='rgba(0,0,0,0.15)'; ctx.fillRect(bx+bw-4,by,4,bh);
+          // Studs
+          const sr=g*0.17;
+          for (let s=0; s<b.w; s++) {
+            const sx=bx+(s+0.5)*g, sy=by+10;
+            ctx.fillStyle='rgba(0,0,0,0.2)';
+            ctx.beginPath(); ctx.arc(sx+1,sy+1,sr,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle=lit;
+            ctx.beginPath(); ctx.arc(sx,sy,sr,0,Math.PI*2); ctx.fill();
+            ctx.fillStyle='rgba(255,255,255,0.45)';
+            ctx.beginPath(); ctx.arc(sx-sr*0.32,sy-sr*0.32,sr*0.44,0,Math.PI*2); ctx.fill();
+          }
+          // Border
+          ctx.strokeStyle='rgba(0,0,0,0.45)'; ctx.lineWidth=1.5;
+          ctx.strokeRect(bx+0.5,by+0.5,bw-1,bh-1);
+        }
+      },
+
+      cleanup() {
+        cancelAnimationFrame(this._raf); this._raf=null;
+        this.blocks=[]; this.dragging=null; this._mousePos=null;
+      }
     };
 
     /* ══════════════════════════════════
