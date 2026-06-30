@@ -346,6 +346,48 @@
     .bln-achiev-card.done .bln-achiev-req { color:#FFD700; }
     .bln-achiev-perk { font-size:12px; color:rgba(255,255,255,0.7); line-height:1.4; }
 
+    /* ── BALLOON SETTINGS SCREEN ── */
+    #screen-balloon-settings { flex-direction:column; background:linear-gradient(160deg,#0f172a,#1e293b); }
+    .bln-cfg-topbar {
+      width:100%; display:flex; align-items:center; justify-content:space-between;
+      padding:14px 22px; background:rgba(0,0,0,0.4); flex-shrink:0;
+    }
+    .bln-cfg-topbar-title { font-size:18px; font-weight:900; color:#fff; letter-spacing:2px; }
+    .bln-cfg-body {
+      flex:1; overflow-y:auto; padding:24px 22px;
+      display:flex; flex-direction:column; gap:14px; max-width:520px; align-self:center; width:100%;
+    }
+    .bln-cfg-row {
+      display:flex; align-items:center; justify-content:space-between;
+      background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1);
+      border-radius:14px; padding:16px 20px; gap:16px;
+    }
+    .bln-cfg-info { display:flex; flex-direction:column; gap:4px; }
+    .bln-cfg-label { font-size:15px; font-weight:800; color:#fff; letter-spacing:.5px; }
+    .bln-cfg-desc  { font-size:11px; color:rgba(255,255,255,0.45); line-height:1.4; }
+    /* toggle switch */
+    .bln-toggle { position:relative; width:52px; height:28px; flex-shrink:0; }
+    .bln-toggle input { opacity:0; width:0; height:0; }
+    .bln-toggle-slider {
+      position:absolute; inset:0; background:rgba(255,255,255,0.15);
+      border-radius:28px; cursor:pointer; transition:background .2s;
+    }
+    .bln-toggle-slider::before {
+      content:''; position:absolute; height:22px; width:22px;
+      left:3px; top:3px; background:#fff; border-radius:50%;
+      transition:transform .2s;
+    }
+    .bln-toggle input:checked + .bln-toggle-slider { background:#22c55e; }
+    .bln-toggle input:checked + .bln-toggle-slider::before { transform:translateX(24px); }
+    /* speed selector */
+    .bln-speed-row { display:flex; gap:8px; }
+    .btn-bln-speed {
+      padding:8px 16px; font-size:13px; font-weight:700; border-radius:8px;
+      border:2px solid rgba(255,255,255,0.25); background:transparent; color:rgba(255,255,255,0.6);
+      cursor:pointer; transition:all .15s;
+    }
+    .btn-bln-speed.active { border-color:#fff; color:#fff; background:rgba(255,255,255,0.15); }
+
     /* ── DUMB PEOPLES GAME SCREENS ── */
     #screen-dpg { flex-direction: column; align-items: center; justify-content: center;
       background: linear-gradient(135deg, #5a3d00 0%, #9a6f00 20%, #D4AF37 45%, #FFD700 50%, #D4AF37 55%, #9a6f00 80%, #5a3d00 100%);
@@ -1886,6 +1928,7 @@
       <button class="btn-bln-host" onclick="BLN.hostRoom()">📡 HOST GAME</button>
       <button class="btn-bln-join" onclick="BLN.openJoin()">🔗 JOIN GAME</button>
       <button class="btn-bln-achiev" onclick="BLN.openAchievements()">🏆 ACHIEVEMENTS</button>
+      <button class="btn-bln-host" onclick="BLN.openSettings()" style="border-color:rgba(255,255,255,0.35)">⚙️ SETTINGS</button>
     </div>
     <button class="btn-bln-back-lobby" onclick="showScreen('game')">← Back</button>
   </div>
@@ -1960,6 +2003,73 @@
     </div>
     <div id="bln-total-pts">Total points earned: 0</div>
     <div id="bln-achiev-grid"></div>
+  </div>
+
+  <!-- BALLOON SETTINGS -->
+  <div id="screen-balloon-settings" class="screen">
+    <div class="bln-cfg-topbar">
+      <div class="bln-cfg-topbar-title">⚙️ BALLOON SETTINGS</div>
+      <button class="btn-quit" onclick="showScreen('balloon')">BACK</button>
+    </div>
+    <div class="bln-cfg-body">
+
+      <div class="bln-cfg-row">
+        <div class="bln-cfg-info">
+          <div class="bln-cfg-label">🎯 Hitboxes</div>
+          <div class="bln-cfg-desc">Outlines every balloon with a bright white ring so you can see exactly what you can click.</div>
+        </div>
+        <label class="bln-toggle">
+          <input type="checkbox" id="cfg-hitboxes" onchange="BLN.saveCfg()">
+          <span class="bln-toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="bln-cfg-row">
+        <div class="bln-cfg-info">
+          <div class="bln-cfg-label">🎵 Background Music</div>
+          <div class="bln-cfg-desc">Plays a cheerful looping melody while you pop balloons.</div>
+        </div>
+        <label class="bln-toggle">
+          <input type="checkbox" id="cfg-music" onchange="BLN.saveCfg();BLN.toggleMusic()">
+          <span class="bln-toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="bln-cfg-row">
+        <div class="bln-cfg-info">
+          <div class="bln-cfg-label">💥 Pop Sound Effects</div>
+          <div class="bln-cfg-desc">Plays a satisfying pop sound each time you burst a balloon.</div>
+        </div>
+        <label class="bln-toggle">
+          <input type="checkbox" id="cfg-sfx" onchange="BLN.saveCfg()">
+          <span class="bln-toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="bln-cfg-row">
+        <div class="bln-cfg-info">
+          <div class="bln-cfg-label">✨ Score Floaters</div>
+          <div class="bln-cfg-desc">Shows floating +1, +2… text when you pop a balloon.</div>
+        </div>
+        <label class="bln-toggle">
+          <input type="checkbox" id="cfg-floaters" onchange="BLN.saveCfg()">
+          <span class="bln-toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="bln-cfg-row">
+        <div class="bln-cfg-info">
+          <div class="bln-cfg-label">🚀 Balloon Speed</div>
+          <div class="bln-cfg-desc">How fast balloons float upward.</div>
+        </div>
+        <div class="bln-speed-row">
+          <button class="btn-bln-speed" id="spd-slow"   onclick="BLN.setSpeed('slow')">Slow</button>
+          <button class="btn-bln-speed" id="spd-normal" onclick="BLN.setSpeed('normal')">Normal</button>
+          <button class="btn-bln-speed" id="spd-fast"   onclick="BLN.setSpeed('fast')">Fast</button>
+        </div>
+      </div>
+
+    </div>
   </div>
 
   <!-- TTT GAME -->
@@ -4638,6 +4748,101 @@
       W: 0, H: 0, canvas: null, ctx: null,
       gameOver: false, _resultShown: false, _popParticles: [],
 
+      /* ── settings ── */
+      _cfgKey: 'pg_bln_cfg',
+      _cfg: null,
+      _audioCtx: null,
+      _musicNodes: [],
+      _floaters: [],
+
+      _loadCfg() {
+        try { this._cfg = JSON.parse(localStorage.getItem(this._cfgKey)) || {}; } catch(e) { this._cfg = {}; }
+        if(this._cfg.hitboxes  === undefined) this._cfg.hitboxes  = false;
+        if(this._cfg.music     === undefined) this._cfg.music     = false;
+        if(this._cfg.sfx       === undefined) this._cfg.sfx       = true;
+        if(this._cfg.floaters  === undefined) this._cfg.floaters  = true;
+        if(this._cfg.speed     === undefined) this._cfg.speed     = 'normal';
+      },
+      saveCfg() {
+        this._cfg.hitboxes  = document.getElementById('cfg-hitboxes').checked;
+        this._cfg.music     = document.getElementById('cfg-music').checked;
+        this._cfg.sfx       = document.getElementById('cfg-sfx').checked;
+        this._cfg.floaters  = document.getElementById('cfg-floaters').checked;
+        localStorage.setItem(this._cfgKey, JSON.stringify(this._cfg));
+      },
+      setSpeed(s) {
+        this._cfg.speed = s;
+        localStorage.setItem(this._cfgKey, JSON.stringify(this._cfg));
+        ['slow','normal','fast'].forEach(id => document.getElementById('spd-'+id).classList.toggle('active', id===s));
+      },
+      openSettings() {
+        if(!this._cfg) this._loadCfg();
+        document.getElementById('cfg-hitboxes').checked = this._cfg.hitboxes;
+        document.getElementById('cfg-music').checked    = this._cfg.music;
+        document.getElementById('cfg-sfx').checked      = this._cfg.sfx;
+        document.getElementById('cfg-floaters').checked = this._cfg.floaters;
+        ['slow','normal','fast'].forEach(id => document.getElementById('spd-'+id).classList.toggle('active', id===this._cfg.speed));
+        showScreen('balloon-settings');
+      },
+
+      /* ── audio ── */
+      _getAudio() {
+        if(!this._audioCtx) this._audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+        return this._audioCtx;
+      },
+      playPop(pts) {
+        if(!this._cfg || !this._cfg.sfx) return;
+        try {
+          const ac = this._getAudio();
+          const o = ac.createOscillator(), g = ac.createGain();
+          o.connect(g); g.connect(ac.destination);
+          const freq = 300 + pts * 120;
+          o.frequency.setValueAtTime(freq, ac.currentTime);
+          o.frequency.exponentialRampToValueAtTime(freq * 0.3, ac.currentTime + 0.12);
+          g.gain.setValueAtTime(0.28, ac.currentTime);
+          g.gain.exponentialRampToValueAtTime(0.001, ac.currentTime + 0.14);
+          o.start(); o.stop(ac.currentTime + 0.15);
+        } catch(e) {}
+      },
+      toggleMusic() {
+        if(!this._cfg) return;
+        if(this._cfg.music) this._startMusic(); else this._stopMusic();
+      },
+      _startMusic() {
+        this._stopMusic();
+        try {
+          const ac = this._getAudio();
+          // simple looping melody: C4 E4 G4 A4 G4 E4 C4 E4
+          const notes = [261.63, 329.63, 392.00, 440.00, 392.00, 329.63, 261.63, 329.63];
+          const bpm = 140, beat = 60 / bpm;
+          let t = ac.currentTime + 0.05;
+          const scheduleBar = () => {
+            notes.forEach((freq, i) => {
+              const o = ac.createOscillator(), g = ac.createGain();
+              o.type = 'sine'; o.frequency.value = freq;
+              o.connect(g); g.connect(ac.destination);
+              g.gain.setValueAtTime(0, t + i*beat);
+              g.gain.linearRampToValueAtTime(0.07, t + i*beat + 0.02);
+              g.gain.exponentialRampToValueAtTime(0.001, t + i*beat + beat*0.85);
+              o.start(t + i*beat); o.stop(t + i*beat + beat);
+              this._musicNodes.push(o);
+            });
+            t += notes.length * beat;
+          };
+          // pre-schedule several bars and loop
+          for(let b=0; b<4; b++) scheduleBar();
+          this._musicLoop = setInterval(() => {
+            if(!this._cfg.music){ this._stopMusic(); return; }
+            scheduleBar();
+          }, (notes.length * beat * 1000));
+        } catch(e) {}
+      },
+      _stopMusic() {
+        clearInterval(this._musicLoop);
+        this._musicNodes.forEach(o => { try{ o.stop(); }catch(e){} });
+        this._musicNodes = [];
+      },
+
       /* ── achievement perks ── */
       _totalPts() { return parseInt(localStorage.getItem('pg_bln_total')||'0'); },
       _level() {
@@ -4660,10 +4865,13 @@
 
       startSolo() {
         this.mode='solo'; this.myRole='host';
+        if(!this._cfg) this._loadCfg();
+        this._floaters=[];
         document.getElementById('bln-again-btn').onclick = ()=>{ BLN.cleanup(); BLN.startSolo(); };
         showScreen('balloon-play');
         const me=document.getElementById('display-username').textContent.trim();
         if(me) postSystemMsg(me+' IS PLAYING POP THE BALLOON vs BOT');
+        if(this._cfg.music) this._startMusic();
         this._initCanvas();
         this._startGame(this.configTimer);
       },
@@ -4687,12 +4895,15 @@
       },
 
       startMultiplayer() {
+        if(!this._cfg) this._loadCfg();
+        this._floaters=[];
         const ts = Date.now();
         this.fbRef.child('started').set(ts);
         document.getElementById('bln-again-btn').onclick = ()=>{ BLN.cleanup(); showScreen('balloon'); };
         showScreen('balloon-play');
         const me=document.getElementById('display-username').textContent.trim();
         if(me) postSystemMsg(me+' STARTED A BALLOON GAME (Room: '+this.roomCode+')');
+        if(this._cfg.music) this._startMusic();
         this._initCanvas();
         this._listenPops();
         this._startGame(this.configTimer);
@@ -4720,11 +4931,14 @@
           this.fbRef.child('started').on('value', snap2=>{
             if(!snap2.val()) return;
             document.getElementById('bln-again-btn').onclick = ()=>{ BLN.cleanup(); showScreen('balloon'); };
+            if(!this._cfg) this._loadCfg();
+            this._floaters=[];
             showScreen('balloon-play');
             this._initCanvas();
             this._listenPops();
             this._listenHostBalloons();
             this._startGame(this.configTimer);
+            if(this._cfg.music) this._startMusic();
           });
         });
       },
@@ -4796,7 +5010,8 @@
         const id  = data ? data.id : this._nextId++;
         const x   = data ? data.x*this.W : rad + Math.random()*(this.W-rad*2);
         const pv  = data ? data.pts : pts;
-        const b = { id, x, y:this.H+rad, vy:-(1.1+Math.random()*0.9), wobble:Math.random()*Math.PI*2, pts:pv, radius:rad, color:clr[pv], popped:false, popAnim:0 };
+        const spd = this._cfg ? {slow:0.65,normal:1,fast:1.6}[this._cfg.speed]||1 : 1;
+        const b = { id, x, y:this.H+rad, vy:-(1.1+Math.random()*0.9)*spd, wobble:Math.random()*Math.PI*2, pts:pv, radius:rad, color:clr[pv], popped:false, popAnim:0 };
         this.balloons.push(b);
 
         if(this.mode==='host' && this.fbRef)
@@ -4872,6 +5087,9 @@
           const a=(i/10)*Math.PI*2;
           this._popParticles.push({x:b.x,y:b.y,vx:Math.cos(a)*(2+Math.random()*4),vy:Math.sin(a)*(2+Math.random()*4),color:b.color,life:1.0});
         }
+        this.playPop(b.pts);
+        if(this._cfg && this._cfg.floaters)
+          this._floaters.push({x:b.x,y:b.y,pts:b.pts,life:1.0,vy:-1.8});
       },
 
       /* ── update & draw ── */
@@ -4882,6 +5100,7 @@
           return b.y > -b.radius;
         });
         this._popParticles = this._popParticles.filter(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=0.15; p.life-=0.055; return p.life>0; });
+        this._floaters = this._floaters.filter(f=>{ f.y+=f.vy; f.life-=0.022; return f.life>0; });
       },
 
       _draw() {
@@ -4905,6 +5124,11 @@
             ctx.fillStyle=b.color; ctx.beginPath(); ctx.arc(0,0,b.radius*0.6,0,Math.PI*2); ctx.fill();
             ctx.restore(); ctx.globalAlpha=1;
           } else {
+            // hitbox ring
+            if(this._cfg && this._cfg.hitboxes) {
+              ctx.strokeStyle='rgba(255,255,255,0.85)'; ctx.lineWidth=2.5;
+              ctx.beginPath(); ctx.arc(b.x,b.y,b.radius+4,0,Math.PI*2); ctx.stroke();
+            }
             // string
             ctx.strokeStyle='rgba(0,0,0,0.25)'; ctx.lineWidth=1.5;
             ctx.beginPath(); ctx.moveTo(b.x,b.y+b.radius);
@@ -4921,6 +5145,14 @@
           }
         }
 
+        // score floaters
+        for(const f of this._floaters) {
+          ctx.globalAlpha=f.life;
+          ctx.fillStyle='#fff';
+          ctx.font=`bold ${18+f.pts*2}px Arial`;
+          ctx.textAlign='center'; ctx.textBaseline='middle';
+          ctx.fillText('+'+f.pts, f.x, f.y);
+        }
         ctx.globalAlpha=1;
         for(const p of this._popParticles) {
           ctx.globalAlpha=p.life; ctx.fillStyle=p.color;
@@ -4994,6 +5226,7 @@
         clearInterval(this._spawnTmr); clearInterval(this._gameTmr); clearInterval(this._botTmr);
         cancelAnimationFrame(this._raf);
         this._resultShown=false; this.balloons=[]; this._popParticles=[];
+        this._stopMusic();
         if(this.fbRef){ this.fbRef.off(); this.fbRef=null; }
       },
     };
