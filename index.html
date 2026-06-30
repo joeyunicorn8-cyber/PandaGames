@@ -2293,6 +2293,8 @@
       /* ── INIT ── */
       _launch() {
         showScreen('getaway-play');
+        const me = document.getElementById('display-username').textContent.trim();
+        if (me) postSystemMsg(me + (this.mode === 'solo' ? ' IS PLAYING GETAWAY vs BOT' : ' JOINED GETAWAY'));
         const cv = document.getElementById('getaway-canvas');
         const wrap = document.getElementById('getaway-wrap');
         cv.width  = this.W = wrap.clientWidth  || window.innerWidth;
@@ -2737,6 +2739,8 @@
 
       _launch(ti,startAt){
         showScreen('turbo-race');
+        const me=document.getElementById('display-username').textContent.trim();
+        if(me) postSystemMsg(me+' JOINED TURBO RACING');
         const cv=document.getElementById('turbo-canvas');
         const wrap=document.getElementById('tr-wrap');
         cv.width=this.W=wrap.clientWidth||window.innerWidth;
@@ -4658,6 +4662,8 @@
         this.mode='solo'; this.myRole='host';
         document.getElementById('bln-again-btn').onclick = ()=>{ BLN.cleanup(); BLN.startSolo(); };
         showScreen('balloon-play');
+        const me=document.getElementById('display-username').textContent.trim();
+        if(me) postSystemMsg(me+' IS PLAYING POP THE BALLOON vs BOT');
         this._initCanvas();
         this._startGame(this.configTimer);
       },
@@ -4685,6 +4691,8 @@
         this.fbRef.child('started').set(ts);
         document.getElementById('bln-again-btn').onclick = ()=>{ BLN.cleanup(); showScreen('balloon'); };
         showScreen('balloon-play');
+        const me=document.getElementById('display-username').textContent.trim();
+        if(me) postSystemMsg(me+' STARTED A BALLOON GAME (Room: '+this.roomCode+')');
         this._initCanvas();
         this._listenPops();
         this._startGame(this.configTimer);
@@ -4707,6 +4715,7 @@
           if(!snap.val()){ document.getElementById('bln-join-status').textContent='Room not found!'; return; }
           this.configTimer = snap.val().timer||30;
           this.fbRef.child('players/join').set(me);
+          postSystemMsg(me+' JOINED BALLOON ROOM '+code);
           document.getElementById('bln-join-status').textContent='Joined! Waiting for host…';
           this.fbRef.child('started').on('value', snap2=>{
             if(!snap2.val()) return;
@@ -4999,6 +5008,7 @@
       },
       choose(type) {
         const db = getDb(); if (!db) return;
+        const me = document.getElementById('display-username').textContent.trim();
         const ref = db.ref('dpg/' + type);
         ref.transaction(cur => (cur || 0) + 1, (err, committed, snap) => {
           if (!committed) return;
@@ -5006,6 +5016,7 @@
           const ordEl = document.getElementById('dpg-' + type + '-ordinal');
           ordEl.textContent = 'YOU ARE THE ' + this._ordinal(count);
           showScreen('dpg-' + type);
+          if (me) postSystemMsg(me + (type === 'dumb' ? ' ADMITTED THEY ARE DUMB 🤪' : ' PRETENDED TO BE SMART 👎'));
         });
       }
     };
