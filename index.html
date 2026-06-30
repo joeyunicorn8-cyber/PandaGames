@@ -5308,17 +5308,60 @@
           _badge(ctx,x,y,r,pts);
 
         } else if(shape==='dirt') {
-          const s=r*1.65;
-          ctx.fillStyle='#7d4e1b'; ctx.fillRect(x-s/2,y-s/2,s,s);
-          ctx.fillStyle='#3a7a1e'; ctx.fillRect(x-s/2,y-s/2,s,s*0.22);
-          ctx.fillStyle='#5a3210';
-          [[0.08,0.3],[0.52,0.38],[0.25,0.62],[0.68,0.58]].forEach(([px,py])=>ctx.fillRect(x-s/2+px*s,y-s/2+py*s,s*0.18,s*0.15));
-          ctx.fillStyle='#2d5e12';
-          [[0.15,0.04],[0.55,0.06],[0.72,0.02]].forEach(([px,py])=>ctx.fillRect(x-s/2+px*s,y-s/2+py*s,s*0.14,s*0.12));
-          if(texture==='neon'||texture==='chrome'||texture==='galaxy'){
-            ctx.strokeStyle=texture==='neon'?'#0ff':texture==='chrome'?'#aaa':'#a0f'; ctx.lineWidth=2.5;
-            ctx.strokeRect(x-s/2,y-s/2,s,s);
-          } else { ctx.strokeStyle='#111'; ctx.lineWidth=1.2; ctx.strokeRect(x-s/2,y-s/2,s,s); }
+          // Minecraft-style pixel art dirt block
+          const s=Math.round(r*1.9), half=s>>1;
+          const ox=Math.round(x)-half, oy=Math.round(y)-half;
+          const p=Math.max(1,Math.round(s/16)); // one "pixel" in the 16×16 grid
+
+          // ── dirt base ──
+          ctx.fillStyle='#8a6040'; ctx.fillRect(ox,oy+p*4,s,s-p*4);
+          // ── grass base ──
+          ctx.fillStyle='#74b13c'; ctx.fillRect(ox,oy,s,p*3);
+          // ── dark edge between grass and dirt ──
+          ctx.fillStyle='#4d7c10'; ctx.fillRect(ox,oy+p*3,s,p);
+
+          // ── grass texture pixels (rows 0-2) ──
+          ctx.fillStyle='#5a9015';
+          [[1,0],[4,0],[8,0],[12,0],[15,0],
+           [2,1],[6,1],[10,1],[14,1],
+           [0,2],[5,2],[9,2],[13,2]].forEach(([gx,gy])=>ctx.fillRect(ox+gx*p,oy+gy*p,p,p));
+          ctx.fillStyle='#9de050';
+          [[2,0],[6,0],[10,0],[0,1],[4,1],[8,1],[12,1],[3,2],[7,2],[11,2],[15,2]].forEach(([gx,gy])=>ctx.fillRect(ox+gx*p,oy+gy*p,p,p));
+
+          // ── dirt dark patches (rows 4-15) — splotchy Minecraft pattern ──
+          ctx.fillStyle='#5c3a1a';
+          [[1,4],[2,4],[9,4],[10,4],
+           [5,5],[6,5],[13,5],[14,5],
+           [0,6],[7,6],[8,6],[15,6],
+           [3,7],[4,7],[11,7],[12,7],
+           [1,8],[2,8],[9,8],[10,8],
+           [5,9],[6,9],[13,9],[14,9],
+           [0,10],[7,10],[8,10],[15,10],
+           [3,11],[4,11],[11,11],[12,11],
+           [1,12],[2,12],[9,12],[10,12],
+           [5,13],[6,13],[13,13],[14,13],
+           [0,14],[7,14],[8,14],[15,14],
+           [3,15],[4,15],[11,15],[12,15]].forEach(([gx,gy])=>ctx.fillRect(ox+gx*p,oy+gy*p,p,p));
+
+          // ── dirt light spots (pebble highlights) ──
+          ctx.fillStyle='#b08858';
+          [[3,4],[4,4],[11,4],[12,4],
+           [1,5],[2,5],[7,5],[8,5],
+           [4,6],[5,6],[11,6],[12,6],
+           [1,7],[2,7],[9,7],[10,7],
+           [3,8],[4,8],[13,8],[14,8],
+           [0,9],[1,9],[9,9],[10,9],
+           [3,10],[4,10],[11,10],[12,10],
+           [1,11],[2,11],[9,11],[10,11],
+           [3,12],[4,12],[13,12],[14,12],
+           [0,13],[1,13],[9,13],[10,13],
+           [3,14],[4,14],[11,14],[12,14],
+           [1,15],[2,15],[9,15],[10,15]].forEach(([gx,gy])=>ctx.fillRect(ox+gx*p,oy+gy*p,p,p));
+
+          // ── black pixel border ──
+          const bclr=texture==='neon'?'#0ff':texture==='chrome'?'#ccc':texture==='galaxy'?'#a0f':'#000';
+          ctx.strokeStyle=bclr; ctx.lineWidth=Math.max(1.5,p*0.9);
+          ctx.strokeRect(ox+0.5,oy+0.5,s-1,s-1);
           _badge(ctx,x,y,r,pts);
 
         } else if(shape==='tree') {
