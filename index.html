@@ -4799,7 +4799,7 @@
         {id:'chair',   name:'Chair',      emoji:'🪑', price:120},
         {id:'tree',    name:'Tree',       emoji:'🌳', price:150},
         {id:'cup',     name:'Cup',        emoji:'🥤', price:180},
-        {id:'dirt',    name:'Dirt Block', emoji:'🧱', price:220},
+        {id:'dirt',    name:'Dirt Block', emoji:'', canvasPreview:true, price:220},
         {id:'monkey',  name:'Monkey',     emoji:'🐒', price:280},
         {id:'panda',   name:'Panda',      emoji:'🐼', price:500},
       ],
@@ -4847,8 +4847,11 @@
             : owned
               ? `<button class="btn-bln-equip" onclick="BLN.equipShape('${s.id}')">Equip</button>`
               : `<button class="btn-bln-buy" ${w<s.price?'disabled':''} onclick="BLN.buyShape('${s.id}')">${s.price} pts</button>`;
+          const preview = s.canvasPreview
+            ? `<canvas id="bln-preview-${s.id}" width="40" height="40" style="image-rendering:pixelated;border-radius:6px"></canvas>`
+            : `<div class="bln-shop-emoji">${s.emoji}</div>`;
           return `<div class="bln-shop-item${eq?' active':owned?' owned':''}">
-            <div class="bln-shop-emoji">${s.emoji}</div>
+            ${preview}
             <div class="bln-shop-name">${s.name}</div>
             ${owned&&!eq?'':''+(!owned?`<div class="bln-shop-price">${s.price} pts</div>`:'')}
             ${btn}
@@ -4869,6 +4872,37 @@
             ${btn}
           </div>`;
         }).join('');
+        setTimeout(()=>this._drawCanvasPreviews(), 0);
+      },
+
+      _drawCanvasPreviews() {
+        const cv = document.getElementById('bln-preview-dirt');
+        if(!cv) return;
+        const ctx = cv.getContext('2d');
+        const s=40, p=Math.max(1,Math.round(s/16));
+        ctx.clearRect(0,0,s,s);
+        ctx.fillStyle='#74b13c'; ctx.fillRect(0,0,s,p*3);
+        ctx.fillStyle='#4d7c10'; ctx.fillRect(0,p*3,s,p);
+        ctx.fillStyle='#8a6040'; ctx.fillRect(0,p*4,s,s-p*4);
+        ctx.fillStyle='#5a9015';
+        [[1,0],[4,0],[8,0],[12,0],[15,0],[2,1],[6,1],[10,1],[14,1],[0,2],[5,2],[9,2],[13,2]]
+          .forEach(([gx,gy])=>ctx.fillRect(gx*p,gy*p,p,p));
+        ctx.fillStyle='#9de050';
+        [[2,0],[6,0],[10,0],[0,1],[4,1],[8,1],[12,1],[3,2],[7,2],[11,2],[15,2]]
+          .forEach(([gx,gy])=>ctx.fillRect(gx*p,gy*p,p,p));
+        ctx.fillStyle='#5c3a1a';
+        [[1,4],[2,4],[9,4],[10,4],[5,5],[6,5],[13,5],[14,5],[0,6],[7,6],[8,6],[15,6],
+         [3,7],[4,7],[11,7],[12,7],[1,8],[2,8],[9,8],[10,8],[5,9],[6,9],[13,9],[14,9],
+         [0,10],[7,10],[8,10],[15,10],[3,11],[4,11],[11,11],[12,11],[1,12],[2,12],[9,12],[10,12],
+         [5,13],[6,13],[13,13],[14,13],[0,14],[7,14],[8,14],[15,14],[3,15],[4,15],[11,15],[12,15]]
+          .forEach(([gx,gy])=>ctx.fillRect(gx*p,gy*p,p,p));
+        ctx.fillStyle='#b08858';
+        [[3,4],[4,4],[11,4],[12,4],[1,5],[2,5],[7,5],[8,5],[4,6],[5,6],[11,6],[12,6],
+         [1,7],[2,7],[9,7],[10,7],[3,8],[4,8],[13,8],[14,8],[0,9],[1,9],[9,9],[10,9],
+         [3,10],[4,10],[11,10],[12,10],[1,11],[2,11],[9,11],[10,11],[3,12],[4,12],[13,12],[14,12],
+         [0,13],[1,13],[9,13],[10,13],[3,14],[4,14],[11,14],[12,14],[1,15],[2,15],[9,15],[10,15]]
+          .forEach(([gx,gy])=>ctx.fillRect(gx*p,gy*p,p,p));
+        ctx.strokeStyle='#000'; ctx.lineWidth=1; ctx.strokeRect(0.5,0.5,s-1,s-1);
       },
 
       /* ── settings ── */
