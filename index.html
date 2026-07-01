@@ -314,6 +314,7 @@
     .witm-verdict-emoji { font-size:80px; }
     .witm-verdict-title { font-size:36px; font-weight:900; color:#fff; font-family:'Arial Black',sans-serif; letter-spacing:3px; text-align:center; }
     .witm-verdict-sub { font-size:15px; color:rgba(255,255,255,0.6); text-align:center; max-width:400px; line-height:1.7; }
+    .witm-score-display { font-size:64px; font-weight:900; font-family:'Arial Black',sans-serif; color:#fff; letter-spacing:4px; }
     .witm-result-btn {
       padding:12px 36px; border-radius:12px; border:2px solid #fff;
       background:transparent; color:#fff; font-size:14px; font-weight:800;
@@ -2130,38 +2131,35 @@
     <div class="witm-bars"></div>
     <div class="witm-topbar">
       <div class="witm-title">🔪 WHO IS THE MURDERER?</div>
-      <div class="witm-level-badge">EASY &nbsp;·&nbsp; L1</div>
+      <div class="witm-level-badge" id="witm-level-badge">EASY &nbsp;·&nbsp; L1</div>
       <button class="btn-quit" onclick="showScreen('game')">QUIT</button>
     </div>
     <div id="witm-stage">
       <canvas id="witm-canvas"></canvas>
-      <div id="witm-label-row">
-        <button class="witm-label-btn" onclick="WITM.accuse(0)">THE BUTCHER</button>
-        <button class="witm-label-btn" onclick="WITM.accuse(1)">THE OLD MAN</button>
-        <button class="witm-label-btn" onclick="WITM.accuse(2)">THE RICH WOMAN</button>
-      </div>
+      <div id="witm-label-row"></div>
     </div>
   </div>
 
-  <!-- WHO IS THE MURDERER — INNOCENT -->
-  <div id="screen-witm-innocent" class="screen witm-verdict-screen">
+  <!-- WHO IS THE MURDERER — VERDICT -->
+  <div id="screen-witm-verdict" class="screen witm-verdict-screen">
     <div class="witm-bars"></div>
     <div class="witm-verdict-content">
-      <div class="witm-verdict-emoji">🕊️</div>
-      <div class="witm-verdict-title">INNOCENT</div>
-      <div class="witm-verdict-sub" id="witm-innocent-sub"></div>
-      <button class="witm-result-btn" onclick="WITM.open()">TRY AGAIN</button>
+      <div class="witm-verdict-emoji" id="witm-v-emoji"></div>
+      <div class="witm-verdict-title" id="witm-v-title"></div>
+      <div class="witm-verdict-sub" id="witm-v-sub"></div>
+      <button class="witm-result-btn" id="witm-v-next" onclick="WITM.nextLevel()">NEXT LEVEL →</button>
       <button class="witm-result-btn" onclick="showScreen('game')">QUIT</button>
     </div>
   </div>
 
-  <!-- WHO IS THE MURDERER — MURDERER IDENTIFIED -->
-  <div id="screen-witm-guilty" class="screen witm-verdict-screen">
-    <div class="witm-bars" style="opacity:0.4"></div>
+  <!-- WHO IS THE MURDERER — FINAL SCORE -->
+  <div id="screen-witm-score" class="screen witm-verdict-screen">
+    <div class="witm-bars" style="opacity:0.3"></div>
     <div class="witm-verdict-content">
-      <div class="witm-verdict-emoji">🎉</div>
-      <div class="witm-verdict-title" style="color:#ff4444">MURDERER IDENTIFIED</div>
-      <div class="witm-verdict-sub">She did it. The blood on her shoes is fresh. She was standing at the scene and pretending not to care — the classic move of a cold-blooded killer.</div>
+      <div class="witm-verdict-emoji" id="witm-score-emoji"></div>
+      <div class="witm-verdict-title" id="witm-score-title"></div>
+      <div class="witm-score-display" id="witm-score-display"></div>
+      <div class="witm-verdict-sub" id="witm-score-sub"></div>
       <button class="witm-result-btn" onclick="WITM.open()">PLAY AGAIN</button>
       <button class="witm-result-btn" onclick="showScreen('game')">QUIT</button>
     </div>
@@ -5863,55 +5861,193 @@
        WHO IS THE MURDERER
     ══════════════════════════════════ */
     const WITM = {
-      // The correct answer is always suspect index 1 (the old man with the staff)
-      // - Butcher: blood on knife (explained)
-      // - Old man: blood on "walking stick" — no explanation for blood
-      // - Rich woman: blood on shoes (looking away, unconcerned — guilty behaviour, but wrong)
-      // Actually let's make it the RICH WOMAN — she's the most suspicious (looking away, doesn't care)
-      // We'll reveal her as the murderer.
-      ANSWER: 2, // 0=butcher, 1=old man, 2=rich woman
+      level: 1, score: 0,
+
+      LEVELS: [
+        {
+          diff:'EASY', label:'L1', answer:2,
+          labels:['THE BUTCHER','THE OLD MAN','THE RICH WOMAN'],
+          draw:'_drawL1',
+          clues: [
+            'The Butcher is innocent. His knife is bloody from slaughtering animals — that is literally his job.',
+            'The Old Man is innocent. The blood on his staff is old and dried. He had nothing to do with it.',
+            'She did it. The blood on her shoes is fresh, and she is pretending not to care. Classic cold-blooded killer.',
+          ],
+        },
+        {
+          diff:'MEDIUM', label:'L2', answer:1,
+          labels:['THE CHEF','THE BUTLER','THE NERVOUS GUEST'],
+          draw:'_drawL2',
+          clues: [
+            'The Chef is innocent. His blood stains are tomato sauce — you can see chunks on the apron. He was cooking all evening.',
+            'The Butler did it. His candlestick has a dark stain at the base — blood, not wax. And there is a smear on his white glove he tried to wipe off.',
+            'The Nervous Guest is just nervous. He has terrible social anxiety and always sweats at dinner parties. Innocent.',
+          ],
+        },
+        {
+          diff:'HARD', label:'L3', answer:0,
+          labels:['THE GARDENER','THE NURSE','THE PRIEST'],
+          draw:'_drawL3',
+          clues: [
+            'The Gardener did it. The mud on his boots matches the flower bed where the body was buried. And the shovel in his hand is freshly used — not for gardening.',
+            'The Nurse is innocent. The blood on her scrubs is from a patient she treated earlier. She was on shift at the hospital all night.',
+            'The Priest is innocent. He was leading evening mass when the murder happened. Thirty witnesses confirm it.',
+          ],
+        },
+        {
+          diff:'EXPERT', label:'L4', answer:2,
+          labels:['THE JOGGER','THE DOG WALKER','THE ICE CREAM VENDOR'],
+          draw:'_drawL4',
+          clues: [
+            'The Jogger is innocent. Sweaty and out of breath, but his hands are clean and his route is tracked on his smartwatch — he never went near the scene.',
+            'The Dog Walker is innocent. Her dog found something in the bushes, explaining the dog\'s muddy paws. She called it in herself.',
+            'The Ice Cream Vendor did it. Look closely — the scratch marks on his neck are from the victim fighting back. And his "chocolate sauce" drizzle bottle? That is not chocolate.',
+          ],
+        },
+      ],
 
       open() {
-        showScreen('witm');
+        this.level = 1; this.score = 0;
         const me = document.getElementById('display-username')?.textContent.trim();
         if (me) postSystemMsg(me + ' JOINED WHO IS THE MURDERER? 🔪');
+        this._loadLevel();
+      },
+
+      _loadLevel() {
+        showScreen('witm');
+        const lv = this.LEVELS[this.level - 1];
+        document.getElementById('witm-level-badge').innerHTML = `${lv.diff} &nbsp;·&nbsp; ${lv.label}`;
+        const row = document.getElementById('witm-label-row');
+        row.innerHTML = lv.labels.map((l,i) =>
+          `<button class="witm-label-btn" onclick="WITM.accuse(${i})">${l}</button>`
+        ).join('');
         const cv = document.getElementById('witm-canvas');
         const stage = document.getElementById('witm-stage');
         cv.width  = stage.clientWidth  || window.innerWidth;
         cv.height = (stage.clientHeight || window.innerHeight) - 110;
-        this._draw(cv);
+        this[lv.draw](cv);
       },
 
-      _zones: [], // [{x,y,w,h,index}]
+      accuse(index) {
+        const lv = this.LEVELS[this.level - 1];
+        const correct = index === lv.answer;
+        if (correct) this.score++;
+        const isLast = this.level === 4;
+        document.getElementById('witm-v-emoji').textContent  = correct ? '✅' : '❌';
+        document.getElementById('witm-v-title').textContent  = correct ? 'MURDERER IDENTIFIED!' : 'WRONG — INNOCENT!';
+        document.getElementById('witm-v-title').style.color  = correct ? '#4ade80' : '#f87171';
+        document.getElementById('witm-v-sub').textContent    = lv.clues[index];
+        document.getElementById('witm-v-next').textContent   = isLast ? 'SEE YOUR SCORE →' : 'NEXT LEVEL →';
+        showScreen('witm-verdict');
+      },
 
-      _draw(cv) {
-        const ctx = cv.getContext('2d');
-        const W = cv.width, H = cv.height;
-        this._zones = [];
+      nextLevel() {
+        if (this.level >= 4) { this._showScore(); return; }
+        this.level++;
+        this._loadLevel();
+      },
 
-        // Background — dull stone grey
-        ctx.fillStyle = '#3a3a3a'; ctx.fillRect(0,0,W,H);
-        // Stone texture lines
-        ctx.strokeStyle = 'rgba(0,0,0,0.18)'; ctx.lineWidth = 1;
-        for (let y=0; y<H; y+=28) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
-        for (let x=0; x<W; x+=56) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+      _showScore() {
+        const s = this.score;
+        const msgs = ['Keep practising, detective…','Not bad, but the killer got away twice.','Good eye — you spotted most of them!','PERFECT SCORE! Master detective! 🕵️'];
+        const emojis = ['😬','🤔','🕵️','🏆'];
+        document.getElementById('witm-score-emoji').textContent   = emojis[s];
+        document.getElementById('witm-score-title').textContent   = msgs[s];
+        document.getElementById('witm-score-display').textContent = `${s} / 4`;
+        document.getElementById('witm-score-sub').textContent     = s === 4 ? 'You caught every murderer. Impressive work, detective.' : `You got ${s} out of 4 correct. Can you beat your score?`;
+        showScreen('witm-score');
+      },
 
-        // Floor line
-        const floor = H * 0.78;
-        ctx.fillStyle = '#2a2a2a'; ctx.fillRect(0, floor, W, H - floor);
-        ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 3;
+      _drawL1(cv) {
+        const ctx = cv.getContext('2d'), W = cv.width, H = cv.height;
+        ctx.fillStyle='#3a3a3a'; ctx.fillRect(0,0,W,H);
+        ctx.strokeStyle='rgba(0,0,0,0.18)'; ctx.lineWidth=1;
+        for(let y=0;y<H;y+=28){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+        for(let x=0;x<W;x+=56){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+        const floor=H*0.78;
+        ctx.fillStyle='#2a2a2a'; ctx.fillRect(0,floor,W,H-floor);
+        ctx.strokeStyle='#1a1a1a'; ctx.lineWidth=3;
         ctx.beginPath(); ctx.moveTo(0,floor); ctx.lineTo(W,floor); ctx.stroke();
+        const pos=[W*0.2,W*0.5,W*0.8];
+        [this._drawButcher,this._drawOldMan,this._drawWoman].forEach((fn,i)=>fn.call(this,ctx,pos[i],floor));
+      },
 
-        // Draw 3 suspects spaced evenly
-        const positions = [W*0.2, W*0.5, W*0.8];
-        const suspects = [
-          s => this._drawButcher(ctx, s, floor),
-          s => this._drawOldMan(ctx, s, floor),
-          s => this._drawWoman(ctx, s, floor),
-        ];
-        positions.forEach((sx, i) => {
-          suspects[i](sx);
+      /* ── L2: THE DINNER PARTY ── */
+      _drawL2(cv) {
+        const ctx=cv.getContext('2d'), W=cv.width, H=cv.height;
+        // Warm dark dining room
+        ctx.fillStyle='#1e1208'; ctx.fillRect(0,0,W,H);
+        // Wallpaper stripes
+        ctx.strokeStyle='rgba(180,140,60,0.08)'; ctx.lineWidth=18;
+        for(let x=0;x<W;x+=36){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+        // Wooden floor
+        const floor=H*0.78;
+        ctx.fillStyle='#3d2409'; ctx.fillRect(0,floor,W,H-floor);
+        ctx.strokeStyle='#2a1800'; ctx.lineWidth=2;
+        for(let x=0;x<W;x+=60){ctx.beginPath();ctx.moveTo(x,floor);ctx.lineTo(x,H);ctx.stroke();}
+        ctx.strokeStyle='#2a1800'; ctx.lineWidth=3;
+        ctx.beginPath();ctx.moveTo(0,floor);ctx.lineTo(W,floor);ctx.stroke();
+        // Chandelier hint
+        ctx.fillStyle='rgba(255,220,80,0.12)';
+        ctx.beginPath();ctx.ellipse(W/2,0,W*0.4,H*0.3,0,0,Math.PI*2);ctx.fill();
+        const pos=[W*0.2,W*0.5,W*0.8];
+        this._drawChef(ctx,pos[0],floor);
+        this._drawButler(ctx,pos[1],floor);
+        this._drawNervousGuest(ctx,pos[2],floor);
+      },
+
+      /* ── L3: THE CHURCHYARD ── */
+      _drawL3(cv) {
+        const ctx=cv.getContext('2d'), W=cv.width, H=cv.height;
+        // Night sky
+        ctx.fillStyle='#0c0f1a'; ctx.fillRect(0,0,W,H);
+        // Stars
+        ctx.fillStyle='rgba(255,255,255,0.7)';
+        [[W*.1,H*.1],[W*.3,H*.05],[W*.6,H*.08],[W*.75,H*.15],[W*.9,H*.06],[W*.45,H*.2],[W*.2,H*.25]].forEach(([sx,sy])=>{
+          ctx.beginPath();ctx.arc(sx,sy,1.2,0,Math.PI*2);ctx.fill();
         });
+        // Grass
+        const floor=H*0.78;
+        ctx.fillStyle='#0d1f0a'; ctx.fillRect(0,floor,W,H-floor);
+        ctx.strokeStyle='#0a1808'; ctx.lineWidth=3;
+        ctx.beginPath();ctx.moveTo(0,floor);ctx.lineTo(W,floor);ctx.stroke();
+        // Gravestones bg
+        ctx.fillStyle='rgba(255,255,255,0.04)';
+        [[W*.08,floor-55,22,50],[W*.92,floor-45,18,42],[W*.38,floor-35,16,36]].forEach(([gx,gy,gw,gh])=>{
+          ctx.fillRect(gx,gy,gw,gh);
+          ctx.beginPath();ctx.arc(gx+gw/2,gy,gw/2,Math.PI,0);ctx.fill();
+        });
+        const pos=[W*0.2,W*0.5,W*0.8];
+        this._drawGardener(ctx,pos[0],floor);
+        this._drawNurse(ctx,pos[1],floor);
+        this._drawPriest(ctx,pos[2],floor);
+      },
+
+      /* ── L4: THE PARK ── */
+      _drawL4(cv) {
+        const ctx=cv.getContext('2d'), W=cv.width, H=cv.height;
+        // Daytime park
+        ctx.fillStyle='#87ceeb'; ctx.fillRect(0,0,W,H*0.6);
+        // Clouds
+        ctx.fillStyle='rgba(255,255,255,0.8)';
+        [[W*.2,H*.1,40],[W*.6,H*.08,30],[W*.8,H*.15,25]].forEach(([cx,cy,r])=>{
+          ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
+          ctx.beginPath();ctx.arc(cx+r*0.8,cy+5,r*0.7,0,Math.PI*2);ctx.fill();
+          ctx.beginPath();ctx.arc(cx-r*0.6,cy+8,r*0.6,0,Math.PI*2);ctx.fill();
+        });
+        const floor=H*0.78;
+        // Grass gradient
+        ctx.fillStyle='#3a7d1e'; ctx.fillRect(0,H*0.6,W,H-H*0.6);
+        ctx.fillStyle='#2d6318'; ctx.fillRect(0,floor,W,H-floor);
+        ctx.strokeStyle='#1e4a10'; ctx.lineWidth=3;
+        ctx.beginPath();ctx.moveTo(0,floor);ctx.lineTo(W,floor);ctx.stroke();
+        // Park bench
+        ctx.fillStyle='#8b6914'; ctx.fillRect(W*0.45,floor-35,W*0.12,8); ctx.fillRect(W*0.45,floor-20,W*0.12,6);
+        ctx.fillRect(W*0.47,floor-20,6,20); ctx.fillRect(W*0.55,floor-20,6,20);
+        const pos=[W*0.2,W*0.5,W*0.8];
+        this._drawJogger(ctx,pos[0],floor);
+        this._drawDogWalker(ctx,pos[1],floor);
+        this._drawVendor(ctx,pos[2],floor);
       },
 
       /* ── SUSPECT 1: Butcher ── */
@@ -6095,17 +6231,318 @@
         ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
       },
 
-      accuse(index) {
-        const innocentSubs = [
-          'The Butcher is innocent. His knife is covered in blood from his job — he slaughters animals for a living. Nothing unusual here.',
-          'The Old Man is innocent. The blood on his staff is old and dried. He tripped and the stick hit the ground. He had nothing to do with it.',
-        ];
-        if (index === this.ANSWER) {
-          showScreen('witm-guilty');
-        } else {
-          document.getElementById('witm-innocent-sub').textContent = innocentSubs[index];
-          showScreen('witm-innocent');
-        }
+      /* ── L2 CHARACTERS ── */
+      _drawChef(ctx,x,s) {
+        // Legs
+        ctx.fillStyle='#2c2c2c';ctx.fillRect(x-12,s-70,11,70);ctx.fillRect(x+1,s-70,11,70);
+        ctx.fillStyle='#1a1a1a';ctx.fillRect(x-14,s-10,13,10);ctx.fillRect(x+1,s-10,14,10);
+        // White apron with tomato splatter
+        ctx.fillStyle='#f0f0f0';ctx.fillRect(x-18,s-130,36,74);
+        ctx.fillStyle='#c0392b';
+        [[4,-20,7,5],[-6,-45,9,6],[2,-65,6,7],[-3,-90,8,5],[8,-110,5,6]].forEach(([dx,dy,w,h])=>{
+          ctx.beginPath();ctx.ellipse(x+dx,s+dy,w,h,0,0,Math.PI*2);ctx.fill();
+        });
+        // Torso
+        ctx.fillStyle='#e8e8e8';ctx.fillRect(x-20,s-158,40,32);
+        // Chef hat
+        ctx.fillStyle='#fff';ctx.fillRect(x-18,s-200,36,14);
+        ctx.beginPath();ctx.ellipse(x,s-210,14,18,0,0,Math.PI*2);ctx.fill();
+        // Head
+        ctx.fillStyle='#d4956a';ctx.beginPath();ctx.ellipse(x,s-174,18,20,0,0,Math.PI*2);ctx.fill();
+        // Moustache
+        ctx.fillStyle='#5a3010';ctx.beginPath();ctx.ellipse(x-6,s-164,7,3,0.3,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.ellipse(x+6,s-164,7,3,-0.3,0,Math.PI*2);ctx.fill();
+        // Eyes
+        ctx.fillStyle='#fff';ctx.fillRect(x-11,s-182,8,6);ctx.fillRect(x+3,s-182,8,6);
+        ctx.fillStyle='#2a1a0a';ctx.fillRect(x-8,s-181,4,4);ctx.fillRect(x+5,s-181,4,4);
+        // Arms — holding ladle
+        ctx.fillStyle='#e8e8e8';ctx.fillRect(x-32,s-148,13,45);ctx.fillRect(x+19,s-148,13,50);
+        ctx.fillStyle='#d4956a';ctx.fillRect(x-32,s-106,13,18);ctx.fillRect(x+19,s-100,13,18);
+        // Ladle in right hand
+        ctx.strokeStyle='#888';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x+25,s-88);ctx.lineTo(x+25,s-55);ctx.stroke();
+        ctx.fillStyle='#aaa';ctx.beginPath();ctx.ellipse(x+25,s-50,8,5,0,0,Math.PI*2);ctx.fill();
+        this._bubble(ctx,x,s-218,'Tomato sauce! I was\ncooking all evening!');
+      },
+
+      _drawButler(ctx,x,s) {
+        // Legs
+        ctx.fillStyle='#111';ctx.fillRect(x-12,s-75,11,75);ctx.fillRect(x+1,s-75,11,75);
+        ctx.fillStyle='#0a0a0a';ctx.fillRect(x-14,s-10,13,10);ctx.fillRect(x+1,s-10,14,10);
+        // Formal jacket
+        ctx.fillStyle='#1a1a1a';ctx.fillRect(x-22,s-155,44,82);
+        // White shirt front
+        ctx.fillStyle='#f0f0f0';ctx.fillRect(x-8,s-153,16,60);
+        // Bow tie
+        ctx.fillStyle='#111';ctx.beginPath();ctx.moveTo(x-8,s-152);ctx.lineTo(x,s-147);ctx.lineTo(x+8,s-152);ctx.lineTo(x,s-157);ctx.closePath();ctx.fill();
+        // White gloves — left has blood smear
+        ctx.fillStyle='#f5f5f5';ctx.fillRect(x-34,s-105,15,18);
+        ctx.fillStyle='rgba(139,0,0,0.6)';ctx.beginPath();ctx.ellipse(x-28,s-97,5,3,0.5,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#f5f5f5';ctx.fillRect(x+19,s-110,15,18);
+        // Arms
+        ctx.fillStyle='#1a1a1a';ctx.fillRect(x-34,s-148,14,46);ctx.fillRect(x+20,s-148,14,42);
+        // Candlestick in right hand
+        ctx.fillStyle='#c8a200';ctx.fillRect(x+26,s-148,6,40);
+        ctx.fillStyle='#c8a200';ctx.beginPath();ctx.ellipse(x+29,s-148,10,4,0,0,Math.PI*2);ctx.fill();
+        // Blood at candlestick base — dark dried
+        ctx.fillStyle='#6b0000';ctx.beginPath();ctx.ellipse(x+29,s-110,8,3,0,0,Math.PI*2);ctx.fill();
+        // Candle flame
+        ctx.fillStyle='#ff9900';ctx.beginPath();ctx.ellipse(x+29,s-152,3,6,0,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#ffff00';ctx.beginPath();ctx.ellipse(x+29,s-154,1.5,3,0,0,Math.PI*2);ctx.fill();
+        // Head
+        ctx.fillStyle='#c8956a';ctx.beginPath();ctx.ellipse(x,s-174,18,20,0,0,Math.PI*2);ctx.fill();
+        // Slicked hair
+        ctx.fillStyle='#1a0a00';ctx.fillRect(x-18,s-192,36,12);
+        ctx.beginPath();ctx.ellipse(x,s-192,18,6,0,0,Math.PI,true);ctx.fill();
+        ctx.beginPath();ctx.moveTo(x-18,s-186);ctx.quadraticCurveTo(x-5,s-195,x+5,s-188);ctx.stroke();
+        // Eyes — calm, composed
+        ctx.fillStyle='#fff';ctx.fillRect(x-11,s-183,8,6);ctx.fillRect(x+3,s-183,8,6);
+        ctx.fillStyle='#1a1a1a';ctx.fillRect(x-8,s-182,4,4);ctx.fillRect(x+5,s-182,4,4);
+        // Thin smile
+        ctx.strokeStyle='#7a5040';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(x-6,s-166);ctx.lineTo(x+6,s-166);ctx.stroke();
+        this._bubble(ctx,x,s-218,'Is there anything I\ncan get for you, sir?');
+      },
+
+      _drawNervousGuest(ctx,x,s) {
+        // Legs
+        ctx.fillStyle='#3a4a6a';ctx.fillRect(x-11,s-75,10,75);ctx.fillRect(x+1,s-75,10,75);
+        ctx.fillStyle='#1a1a1a';ctx.fillRect(x-13,s-10,12,10);ctx.fillRect(x+1,s-10,14,10);
+        // Suit jacket — rumpled
+        ctx.fillStyle='#4a5570';ctx.fillRect(x-20,s-155,40,82);
+        // Shirt, loose tie
+        ctx.fillStyle='#e8e0d0';ctx.fillRect(x-8,s-153,16,60);
+        ctx.fillStyle='#c0392b';ctx.fillRect(x-3,s-150,6,45);ctx.save();ctx.translate(x,s-110);ctx.rotate(0.15);ctx.fillRect(-3,-8,6,12);ctx.restore();
+        // Arms — fidgeting
+        ctx.fillStyle='#4a5570';ctx.fillRect(x-30,s-148,13,50);ctx.fillRect(x+17,s-148,13,50);
+        ctx.fillStyle='#d4956a';ctx.fillRect(x-30,s-100,13,18);ctx.fillRect(x+17,s-100,13,18);
+        // Hands wringing together at centre
+        ctx.fillStyle='#d4956a';ctx.beginPath();ctx.ellipse(x,s-88,12,8,0,0,Math.PI*2);ctx.fill();
+        // Head — sweating
+        ctx.fillStyle='#d4956a';ctx.beginPath();ctx.ellipse(x,s-175,19,21,0,0,Math.PI*2);ctx.fill();
+        // Sweat drops
+        ctx.fillStyle='rgba(100,180,255,0.7)';
+        [[12,-10],[14,0],[-13,-5]].forEach(([dx,dy])=>{ctx.beginPath();ctx.ellipse(x+dx,s+dy+(-175),2,3,0,0,Math.PI*2);ctx.fill();});
+        // Hair — messy
+        ctx.fillStyle='#5a3010';ctx.fillRect(x-18,s-194,36,14);
+        ctx.beginPath();ctx.ellipse(x,s-194,18,7,0,0,Math.PI,true);ctx.fill();
+        ctx.fillRect(x+8,s-193,8,5);
+        // Eyes — wide with panic
+        ctx.fillStyle='#fff';ctx.fillRect(x-12,s-184,10,8);ctx.fillRect(x+2,s-184,10,8);
+        ctx.fillStyle='#2a1a0a';ctx.fillRect(x-8,s-182,5,5);ctx.fillRect(x+5,s-182,5,5);
+        // Eyebrows raised
+        ctx.strokeStyle='#5a3010';ctx.lineWidth=2;
+        ctx.beginPath();ctx.moveTo(x-12,s-188);ctx.lineTo(x-4,s-192);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x+4,s-192);ctx.lineTo(x+12,s-188);ctx.stroke();
+        this._bubble(ctx,x,s-218,"I didn't do anything!\nI'm just nervous!");
+      },
+
+      /* ── L3 CHARACTERS ── */
+      _drawGardener(ctx,x,s) {
+        // Muddy boots
+        ctx.fillStyle='#4a3010';ctx.fillRect(x-14,s-18,13,18);ctx.fillRect(x+1,s-18,15,18);
+        ctx.fillStyle='rgba(60,30,0,0.5)';ctx.beginPath();ctx.ellipse(x-7,s,10,4,0,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.ellipse(x+8,s,10,4,0,0,Math.PI*2);ctx.fill();
+        // Muddy boots detail
+        ctx.fillStyle='#2a1800';ctx.fillRect(x-14,s-4,13,4);ctx.fillRect(x+1,s-4,15,4);
+        // Overalls — dirty green
+        ctx.fillStyle='#4a5a30';ctx.fillRect(x-20,s-145,40,130);
+        // Mud patches on overalls
+        ctx.fillStyle='rgba(60,30,0,0.6)';
+        [[-5,-30,10,7],[8,-60,8,6],[-8,-90,12,5],[4,-115,9,7]].forEach(([dx,dy,w,h])=>{
+          ctx.beginPath();ctx.ellipse(x+dx,s+dy,w,h,0,0,Math.PI*2);ctx.fill();
+        });
+        // Straps
+        ctx.fillStyle='#3a4a20';ctx.fillRect(x-10,s-145,6,40);ctx.fillRect(x+4,s-145,6,40);
+        // Arms
+        ctx.fillStyle='#4a5a30';ctx.fillRect(x-32,s-140,13,55);ctx.fillRect(x+19,s-140,13,55);
+        ctx.fillStyle='#c8956a';ctx.fillRect(x-32,s-88,13,18);ctx.fillRect(x+19,s-88,13,18);
+        // Shovel — freshly used
+        ctx.strokeStyle='#6b4423';ctx.lineWidth=5;ctx.lineCap='round';
+        ctx.beginPath();ctx.moveTo(x+26,s-82);ctx.lineTo(x+30,s-190);ctx.stroke();
+        ctx.fillStyle='#888';
+        ctx.beginPath();ctx.moveTo(x+18,s-190);ctx.lineTo(x+38,s-190);ctx.lineTo(x+40,s-168);ctx.lineTo(x+16,s-168);ctx.closePath();ctx.fill();
+        // Fresh dirt on shovel
+        ctx.fillStyle='rgba(60,30,0,0.7)';ctx.beginPath();ctx.ellipse(x+29,s-175,8,5,0,0,Math.PI*2);ctx.fill();
+        // Head — cap on
+        ctx.fillStyle='#c8956a';ctx.beginPath();ctx.ellipse(x,s-168,19,20,0,0,Math.PI*2);ctx.fill();
+        // Cap
+        ctx.fillStyle='#3a2a10';ctx.fillRect(x-20,s-186,40,14);
+        ctx.beginPath();ctx.ellipse(x,s-186,20,7,0,0,Math.PI,true);ctx.fill();
+        ctx.fillRect(x-24,s-178,48,6);
+        // Eyes — shifty
+        ctx.fillStyle='#fff';ctx.fillRect(x-11,s-178,8,6);ctx.fillRect(x+3,s-178,8,6);
+        ctx.fillStyle='#1a1a1a';ctx.fillRect(x-5,s-177,4,4);ctx.fillRect(x+9,s-177,4,4);
+        this._bubble(ctx,x,s-215,"Just doing some\nlate night gardening…");
+      },
+
+      _drawNurse(ctx,x,s) {
+        ctx.fillStyle='#e8e8e8';ctx.fillRect(x-13,s-75,11,75);ctx.fillRect(x+2,s-75,11,75);
+        ctx.fillStyle='#fff';ctx.fillRect(x-14,s-10,13,10);ctx.fillRect(x+1,s-10,15,10);
+        // Scrubs — teal
+        ctx.fillStyle='#2a8080';ctx.fillRect(x-20,s-155,40,83);
+        // Blood on scrubs — front
+        ctx.fillStyle='rgba(139,0,0,0.5)';
+        [[-4,-40,6,5],[6,-65,8,6],[-8,-90,5,7]].forEach(([dx,dy,w,h])=>{
+          ctx.beginPath();ctx.ellipse(x+dx,s+dy,w,h,0,0,Math.PI*2);ctx.fill();
+        });
+        // Stethoscope
+        ctx.strokeStyle='#1a5a5a';ctx.lineWidth=2.5;
+        ctx.beginPath();ctx.arc(x,s-120,12,Math.PI*1.2,Math.PI*1.8);ctx.stroke();
+        ctx.fillStyle='#888';ctx.beginPath();ctx.arc(x,s-108,5,0,Math.PI*2);ctx.fill();
+        // Arms
+        ctx.fillStyle='#2a8080';ctx.fillRect(x-32,s-148,13,55);ctx.fillRect(x+19,s-148,13,55);
+        ctx.fillStyle='#d4956a';ctx.fillRect(x-32,s-96,13,18);ctx.fillRect(x+19,s-96,13,18);
+        // Clipboard
+        ctx.fillStyle='#d4a820';ctx.fillRect(x-28,s-135,20,28);
+        ctx.fillStyle='#fff';ctx.fillRect(x-26,s-133,16,20);
+        ctx.fillStyle='#888';ctx.fillRect(x-24,s-131,12,2);ctx.fillRect(x-24,s-127,12,2);ctx.fillRect(x-24,s-123,8,2);
+        // Head
+        ctx.fillStyle='#f0c8a0';ctx.beginPath();ctx.ellipse(x,s-174,18,21,0,0,Math.PI*2);ctx.fill();
+        // Nurse cap
+        ctx.fillStyle='#fff';ctx.fillRect(x-16,s-192,32,10);ctx.fillRect(x-10,s-196,20,6);
+        ctx.fillStyle='#c0392b';ctx.fillRect(x-4,s-193,8,4);
+        // Hair
+        ctx.fillStyle='#5a3010';ctx.fillRect(x-18,s-192,7,25);ctx.fillRect(x+11,s-192,7,25);
+        // Eyes
+        ctx.fillStyle='#fff';ctx.fillRect(x-11,s-183,8,6);ctx.fillRect(x+3,s-183,8,6);
+        ctx.fillStyle='#1a1a1a';ctx.fillRect(x-8,s-182,4,4);ctx.fillRect(x+5,s-182,4,4);
+        ctx.strokeStyle='#c08060';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x,s-167,5,0,Math.PI);ctx.stroke();
+        this._bubble(ctx,x,s-218,"Blood from a patient.\nI was on shift all night.");
+      },
+
+      _drawPriest(ctx,x,s) {
+        // Long black robe
+        ctx.fillStyle='#111';
+        ctx.beginPath();ctx.moveTo(x-24,s-140);ctx.lineTo(x+24,s-140);ctx.lineTo(x+30,s);ctx.lineTo(x-30,s);ctx.closePath();ctx.fill();
+        // White collar
+        ctx.fillStyle='#f0f0f0';ctx.fillRect(x-8,s-148,16,18);
+        ctx.beginPath();ctx.moveTo(x-8,s-148);ctx.lineTo(x,s-136);ctx.lineTo(x+8,s-148);ctx.closePath();ctx.fill();
+        // Arms
+        ctx.fillStyle='#111';ctx.fillRect(x-34,s-138,14,55);ctx.fillRect(x+20,s-138,14,55);
+        ctx.fillStyle='#c8956a';ctx.fillRect(x-34,s-86,14,18);ctx.fillRect(x+20,s-86,14,18);
+        // Holy bible in both hands
+        ctx.fillStyle='#8b0000';ctx.fillRect(x-18,s-78,36,22);
+        ctx.fillStyle='#ffd700';ctx.fillRect(x-14,s-76,28,3);ctx.fillRect(x-2,s-78,4,22);
+        // Cross on book
+        ctx.strokeStyle='#ffd700';ctx.lineWidth=2;
+        ctx.beginPath();ctx.moveTo(x,s-75);ctx.lineTo(x,s-60);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(x-6,s-70);ctx.lineTo(x+6,s-70);ctx.stroke();
+        // Head
+        ctx.fillStyle='#c8956a';ctx.beginPath();ctx.ellipse(x,s-173,18,20,0,0,Math.PI*2);ctx.fill();
+        // Tonsure (monk-like bald top)
+        ctx.fillStyle='#1a0a00';ctx.fillRect(x-18,s-191,36,12);ctx.beginPath();ctx.ellipse(x,s-191,18,6,0,0,Math.PI,true);ctx.fill();
+        ctx.fillStyle='#c8956a';ctx.beginPath();ctx.arc(x,s-180,10,Math.PI,0);ctx.fill();
+        // Eyes — serene
+        ctx.fillStyle='#fff';ctx.fillRect(x-10,s-183,8,5);ctx.fillRect(x+2,s-183,8,5);
+        ctx.fillStyle='#3a2a1a';ctx.fillRect(x-7,s-182,4,3);ctx.fillRect(x+4,s-182,4,3);
+        ctx.strokeStyle='#7a5a3a';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x,s-167,5,0,Math.PI);ctx.stroke();
+        this._bubble(ctx,x,s-218,"I was leading mass.\nThirty people saw me.");
+      },
+
+      /* ── L4 CHARACTERS ── */
+      _drawJogger(ctx,x,s) {
+        // Trainers
+        ctx.fillStyle='#fff';ctx.fillRect(x-14,s-14,13,14);ctx.fillRect(x+1,s-14,14,14);
+        ctx.fillStyle='#e74c3c';ctx.fillRect(x-14,s-8,13,4);ctx.fillRect(x+1,s-8,14,4);
+        // Running shorts
+        ctx.fillStyle='#1a6abf';ctx.fillRect(x-16,s-62,32,50);
+        // Running top — neon yellow
+        ctx.fillStyle='#c8e600';ctx.fillRect(x-18,s-138,36,80);
+        // Race number bib
+        ctx.fillStyle='#fff';ctx.fillRect(x-10,s-120,20,22);
+        ctx.fillStyle='#111';ctx.font='bold 9px Arial';ctx.textAlign='center';ctx.fillText('42',x,s-104);
+        // Arms — pumping mid-run
+        ctx.fillStyle='#c8e600';ctx.fillRect(x-30,s-135,13,40);ctx.save();ctx.translate(x+20,s-135);ctx.rotate(-0.3);ctx.fillRect(0,0,13,40);ctx.restore();
+        ctx.fillStyle='#d4956a';ctx.fillRect(x-30,s-97,13,18);ctx.fillRect(x+20,s-100,13,18);
+        // Earphones
+        ctx.strokeStyle='#333';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,s-165,14,Math.PI*1.1,Math.PI*1.9);ctx.stroke();
+        ctx.fillStyle='#333';ctx.beginPath();ctx.arc(x-14,s-162,4,0,Math.PI*2);ctx.fill();ctx.beginPath();ctx.arc(x+14,s-162,4,0,Math.PI*2);ctx.fill();
+        // Head
+        ctx.fillStyle='#d4956a';ctx.beginPath();ctx.ellipse(x,s-172,18,20,0,0,Math.PI*2);ctx.fill();
+        // Sweatband
+        ctx.fillStyle='#e74c3c';ctx.fillRect(x-18,s-190,36,8);
+        // Hair bits poking out
+        ctx.fillStyle='#3a2010';ctx.fillRect(x-12,s-195,8,8);ctx.fillRect(x+4,s-195,8,8);
+        // Eyes — determined
+        ctx.fillStyle='#fff';ctx.fillRect(x-11,s-182,8,6);ctx.fillRect(x+3,s-182,8,6);
+        ctx.fillStyle='#1a1a1a';ctx.fillRect(x-8,s-181,4,4);ctx.fillRect(x+5,s-181,4,4);
+        // Smartwatch
+        ctx.fillStyle='#222';ctx.fillRect(x-30,s-105,13,8);ctx.fillStyle='#00ff88';ctx.fillRect(x-28,s-103,9,4);
+        this._bubble(ctx,x,s-218,'Just out for my\nmorning run!');
+      },
+
+      _drawDogWalker(ctx,x,s) {
+        ctx.fillStyle='#5a4030';ctx.fillRect(x-13,s-14,12,14);ctx.fillRect(x+1,s-14,13,14);
+        // Jeans
+        ctx.fillStyle='#2a4a7a';ctx.fillRect(x-14,s-75,12,63);ctx.fillRect(x+2,s-75,12,63);
+        // Jacket
+        ctx.fillStyle='#8b4513';ctx.fillRect(x-20,s-148,40,76);
+        ctx.fillStyle='#c86020';ctx.fillRect(x-6,s-148,12,40);
+        // Arms
+        ctx.fillStyle='#8b4513';ctx.fillRect(x-32,s-145,13,52);ctx.fillRect(x+19,s-145,13,52);
+        ctx.fillStyle='#d4956a';ctx.fillRect(x-32,s-95,13,18);ctx.fillRect(x+19,s-95,13,18);
+        // Dog lead in right hand
+        ctx.strokeStyle='#5a3010';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x+25,s-86);ctx.quadraticCurveTo(x+50,s-60,x+55,s-8);ctx.stroke();
+        // Dog
+        ctx.fillStyle='#c8a064';ctx.beginPath();ctx.ellipse(x+58,s-18,18,10,0,0,Math.PI*2);ctx.fill();
+        ctx.beginPath();ctx.ellipse(x+72,s-22,8,8,0,0,Math.PI*2);ctx.fill();
+        // Dog paws — muddy
+        ctx.fillStyle='#c8a064';ctx.fillRect(x+44,s-10,7,10);ctx.fillRect(x+54,s-10,7,10);ctx.fillRect(x+64,s-10,7,10);
+        ctx.fillStyle='rgba(60,30,0,0.7)';ctx.fillRect(x+44,s-4,7,4);ctx.fillRect(x+54,s-4,7,4);ctx.fillRect(x+64,s-4,7,4);
+        // Dog ear/tail
+        ctx.fillStyle='#a07848';ctx.beginPath();ctx.ellipse(x+68,s-28,5,8,0.3,0,Math.PI*2);ctx.fill();
+        ctx.strokeStyle='#a07848';ctx.lineWidth=4;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(x+40,s-22);ctx.quadraticCurveTo(x+35,s-38,x+30,s-35);ctx.stroke();
+        // Head
+        ctx.fillStyle='#f0c8a0';ctx.beginPath();ctx.ellipse(x,s-170,18,20,0,0,Math.PI*2);ctx.fill();
+        ctx.fillStyle='#c86020';ctx.fillRect(x-20,s-188,40,12);ctx.beginPath();ctx.ellipse(x,s-188,20,6,0,0,Math.PI,true);ctx.fill();
+        ctx.fillStyle='#8b5a30';ctx.fillRect(x-8,s-196,5,10);ctx.fillRect(x+3,s-196,5,10);
+        ctx.fillStyle='#fff';ctx.fillRect(x-11,s-182,8,6);ctx.fillRect(x+3,s-182,8,6);
+        ctx.fillStyle='#1a1a1a';ctx.fillRect(x-8,s-181,4,4);ctx.fillRect(x+5,s-181,4,4);
+        ctx.strokeStyle='#c08060';ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(x,s-165,5,0,Math.PI);ctx.stroke();
+        this._bubble(ctx,x,s-218,'My dog found something.\nI called it in myself!');
+      },
+
+      _drawVendor(ctx,x,s) {
+        ctx.fillStyle='#fff';ctx.fillRect(x-14,s-14,13,14);ctx.fillRect(x+1,s-14,14,14);
+        ctx.fillStyle='#c0392b';ctx.fillRect(x-14,s-10,13,4);ctx.fillRect(x+1,s-10,14,4);
+        // Trousers
+        ctx.fillStyle='#2c2c2c';ctx.fillRect(x-13,s-72,11,60);ctx.fillRect(x+2,s-72,11,60);
+        // White apron — ice cream stains
+        ctx.fillStyle='#f5f5f5';ctx.fillRect(x-20,s-138,40,70);
+        ctx.fillStyle='rgba(255,200,200,0.6)';
+        [[-5,-30,8,5],[7,-50,6,7],[-8,-70,10,5]].forEach(([dx,dy,w,h])=>{
+          ctx.beginPath();ctx.ellipse(x+dx,s+dy,w,h,0,0,Math.PI*2);ctx.fill();
+        });
+        // Shirt
+        ctx.fillStyle='#e8e8e8';ctx.fillRect(x-20,s-158,40,23);
+        // Arms
+        ctx.fillStyle='#e8e8e8';ctx.fillRect(x-32,s-148,13,50);ctx.fillRect(x+19,s-148,13,50);
+        ctx.fillStyle='#d4956a';ctx.fillRect(x-32,s-100,13,18);ctx.fillRect(x+19,s-100,13,18);
+        // Ice cream cone in left hand
+        ctx.fillStyle='#c8a064';ctx.beginPath();ctx.moveTo(x-26,s-84);ctx.lineTo(x-14,s-84);ctx.lineTo(x-20,s-66);ctx.closePath();ctx.fill();
+        ctx.fillStyle='#ff9999';ctx.beginPath();ctx.arc(x-20,s-87,7,0,Math.PI*2);ctx.fill();
+        // "Chocolate" sauce drizzle — looks too dark
+        ctx.strokeStyle='#3a0000';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(x-22,s-82);ctx.quadraticCurveTo(x-18,s-78,x-15,s-82);ctx.stroke();
+        // Squeeze bottle in right hand — dark sauce
+        ctx.fillStyle='#888';ctx.fillRect(x+21,s-100,10,30);
+        ctx.fillStyle='#3a0000';ctx.fillRect(x+23,s-100,6,28);
+        ctx.fillStyle='#555';ctx.fillRect(x+22,s-104,8,6);
+        // Scratch marks on neck — KEY CLUE
+        ctx.strokeStyle='#8b0000';ctx.lineWidth=1.5;ctx.lineCap='round';
+        [[x+8,s-155,x+14,s-148],[x+6,s-151,x+13,s-145],[x+9,s-147,x+15,s-141]].forEach(([x1,y1,x2,y2])=>{
+          ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+        });
+        // Head
+        ctx.fillStyle='#d4956a';ctx.beginPath();ctx.ellipse(x,s-172,18,20,0,0,Math.PI*2);ctx.fill();
+        // Cap
+        ctx.fillStyle='#fff';ctx.fillRect(x-18,s-190,36,12);ctx.beginPath();ctx.ellipse(x,s-190,18,6,0,0,Math.PI,true);ctx.fill();
+        ctx.fillStyle='#c0392b';ctx.fillRect(x-4,s-191,8,5);
+        ctx.fillRect(x-22,s-182,44,6);
+        // Eyes — trying too hard to look normal
+        ctx.fillStyle='#fff';ctx.fillRect(x-11,s-183,8,6);ctx.fillRect(x+3,s-183,8,6);
+        ctx.fillStyle='#1a1a1a';ctx.fillRect(x-8,s-182,4,4);ctx.fillRect(x+5,s-182,4,4);
+        // Forced smile
+        ctx.strokeStyle='#7a5040';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,s-165,7,0,Math.PI);ctx.stroke();
+        this._bubble(ctx,x,s-218,"Ice cream? Anyone?\nGreat day for it haha!");
       },
     };
 
