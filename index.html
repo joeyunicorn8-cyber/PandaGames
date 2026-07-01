@@ -1229,6 +1229,57 @@
     }
     .btn-logout:hover { color: #fff; border-color: #555; }
 
+    .btn-sponsors {
+      padding: 6px 18px; background: #ffb6c1; color: #7a2040; border: 2px solid #f48fb1;
+      border-radius: 20px; font-size: 12px; font-weight: 800; cursor: pointer; letter-spacing: 1px;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .btn-sponsors:hover { background: #f48fb1; transform: scale(1.05); }
+
+    /* SPONSORS SCREEN */
+    #screen-sponsors {
+      background: repeating-linear-gradient(
+        135deg,
+        #ffd6e0 0px, #ffd6e0 30px,
+        #ffb6c1 30px, #ffb6c1 60px
+      );
+      display: flex; flex-direction: column; align-items: center; min-height: 100vh; padding: 0;
+    }
+    .sponsors-topbar {
+      width: 100%; padding: 16px 24px; display: flex; align-items: center; gap: 16px;
+      background: rgba(255,255,255,0.45); backdrop-filter: blur(6px);
+      border-bottom: 2px solid #f48fb1; box-sizing: border-box;
+    }
+    .sponsors-topbar-back {
+      background: transparent; border: 2px solid #c2185b; color: #c2185b;
+      border-radius: 20px; padding: 6px 16px; font-size: 13px; font-weight: 800;
+      cursor: pointer; transition: background 0.15s;
+    }
+    .sponsors-topbar-back:hover { background: #c2185b; color: #fff; }
+    .sponsors-topbar-title {
+      font-size: 22px; font-weight: 900; color: #880e4f; letter-spacing: 3px;
+    }
+    .sponsors-body {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; gap: 32px; padding: 48px 24px;
+    }
+    .sponsors-heading {
+      font-size: 14px; font-weight: 800; letter-spacing: 4px; color: #880e4f;
+      text-transform: uppercase; opacity: 0.7;
+    }
+    .sponsor-card {
+      background: #fff; border: 3px solid #f48fb1; border-radius: 20px;
+      padding: 32px 48px; text-align: center; cursor: pointer;
+      box-shadow: 0 8px 32px rgba(244,143,177,0.35);
+      transition: transform 0.15s, box-shadow 0.15s; text-decoration: none;
+      display: block;
+    }
+    .sponsor-card:hover { transform: scale(1.05); box-shadow: 0 12px 48px rgba(244,143,177,0.5); }
+    .sponsor-card-name {
+      font-size: 28px; font-weight: 900; color: #880e4f; letter-spacing: 2px;
+    }
+    .sponsor-card-sub { font-size: 13px; color: #c2185b; margin-top: 6px; font-weight: 600; }
+
     .game-hub {
       flex: 1; width: 100%; display: flex; align-items: center; justify-content: center;
       flex-wrap: wrap; gap: 40px; padding: 80px 40px 40px; min-height: 100vh;
@@ -1834,12 +1885,28 @@
     <div class="back-link"><a onclick="showScreen('landing')">← Back</a></div>
   </div>
 
+  <!-- SPONSORS -->
+  <div id="screen-sponsors" class="screen">
+    <div class="sponsors-topbar">
+      <button class="sponsors-topbar-back" onclick="showScreen('game')">← Back</button>
+      <div class="sponsors-topbar-title">SPONSORS</div>
+    </div>
+    <div class="sponsors-body">
+      <div class="sponsors-heading">Our Amazing Sponsors</div>
+      <a class="sponsor-card" href="https://dinoclan.netlify.app/" target="_blank" rel="noopener">
+        <div class="sponsor-card-name">DinoClan</div>
+        <div class="sponsor-card-sub">Click to visit →</div>
+      </a>
+    </div>
+  </div>
+
   <!-- GAME HUB -->
   <div id="screen-game" class="screen">
     <div class="game-topbar">
       <div class="game-topbar-brand"><span>🐼</span> PandaGames</div>
       <div class="game-topbar-right">
         <div class="topbar-username">Logged in as <strong id="display-username"></strong></div>
+        <button class="btn-sponsors" onclick="showScreen('sponsors')">SPONSORS</button>
         <button class="btn-logout" onclick="logout()">Log Out</button>
       </div>
     </div>
