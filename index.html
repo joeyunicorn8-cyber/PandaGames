@@ -291,17 +291,29 @@
       padding:14px 24px; background:rgba(0,0,0,0.55);
     }
     .witm-title { font-size:18px; font-weight:900; color:#ccc; letter-spacing:2px; font-family:'Arial Black',sans-serif; }
-    .witm-hint { font-size:11px; color:rgba(255,255,255,0.3); letter-spacing:.5px; }
-    #witm-canvas { display:block; flex:1; width:100%; cursor:pointer; position:relative; z-index:5; }
-    .witm-result {
-      position:absolute; inset:0; z-index:20; display:none;
-      flex-direction:column; align-items:center; justify-content:center; gap:18px;
-      background:rgba(0,0,0,0.82);
+    .witm-level-badge {
+      font-size:11px; font-weight:800; color:rgba(255,255,255,0.45);
+      letter-spacing:3px; text-transform:uppercase; flex:1; text-align:center;
     }
-    .witm-result.show { display:flex; }
-    .witm-result-emoji { font-size:72px; }
-    .witm-result-title { font-size:28px; font-weight:900; color:#fff; font-family:'Arial Black',sans-serif; letter-spacing:2px; text-align:center; }
-    .witm-result-sub { font-size:14px; color:rgba(255,255,255,0.6); text-align:center; max-width:360px; line-height:1.6; }
+    #witm-stage { position:relative; flex:1; display:flex; flex-direction:column; min-height:0; z-index:5; }
+    #witm-canvas { display:block; flex:1; width:100%; min-height:0; }
+    #witm-label-row {
+      display:flex; justify-content:space-around; align-items:center;
+      padding:10px 20px 14px; background:rgba(0,0,0,0.5); flex-shrink:0; z-index:6; position:relative;
+    }
+    .witm-label-btn {
+      padding:10px 22px; border-radius:10px; border:2px solid rgba(255,255,255,0.25);
+      background:rgba(255,255,255,0.07); color:#ddd; font-size:13px; font-weight:800;
+      letter-spacing:1.5px; cursor:pointer; transition:background .15s, border-color .15s, transform .1s;
+      font-family:'Arial Black',Impact,sans-serif;
+    }
+    .witm-label-btn:hover { background:rgba(255,255,255,0.18); border-color:#fff; transform:scale(1.04); }
+    /* verdict screens */
+    .witm-verdict-screen { flex-direction:column; align-items:center; justify-content:center; position:relative; overflow:hidden; background:#2a2a2a; }
+    .witm-verdict-content { position:relative; z-index:5; display:flex; flex-direction:column; align-items:center; gap:20px; padding:40px 24px; }
+    .witm-verdict-emoji { font-size:80px; }
+    .witm-verdict-title { font-size:36px; font-weight:900; color:#fff; font-family:'Arial Black',sans-serif; letter-spacing:3px; text-align:center; }
+    .witm-verdict-sub { font-size:15px; color:rgba(255,255,255,0.6); text-align:center; max-width:400px; line-height:1.7; }
     .witm-result-btn {
       padding:12px 36px; border-radius:12px; border:2px solid #fff;
       background:transparent; color:#fff; font-size:14px; font-weight:800;
@@ -2113,19 +2125,43 @@
     <button class="btn-dpg-result-back" onclick="showScreen('dpg')">← Play Again</button>
   </div>
 
-  <!-- WHO IS THE MURDERER -->
+  <!-- WHO IS THE MURDERER — GAME -->
   <div id="screen-witm" class="screen">
     <div class="witm-bars"></div>
     <div class="witm-topbar">
       <div class="witm-title">🔪 WHO IS THE MURDERER?</div>
-      <div class="witm-hint">Click on the person you think is guilty</div>
+      <div class="witm-level-badge">EASY &nbsp;·&nbsp; L1</div>
       <button class="btn-quit" onclick="showScreen('game')">QUIT</button>
     </div>
-    <canvas id="witm-canvas"></canvas>
-    <div class="witm-result" id="witm-result">
-      <div class="witm-result-emoji" id="witm-result-emoji"></div>
-      <div class="witm-result-title" id="witm-result-title"></div>
-      <div class="witm-result-sub" id="witm-result-sub"></div>
+    <div id="witm-stage">
+      <canvas id="witm-canvas"></canvas>
+      <div id="witm-label-row">
+        <button class="witm-label-btn" onclick="WITM.accuse(0)">THE BUTCHER</button>
+        <button class="witm-label-btn" onclick="WITM.accuse(1)">THE OLD MAN</button>
+        <button class="witm-label-btn" onclick="WITM.accuse(2)">THE RICH WOMAN</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHO IS THE MURDERER — INNOCENT -->
+  <div id="screen-witm-innocent" class="screen witm-verdict-screen">
+    <div class="witm-bars"></div>
+    <div class="witm-verdict-content">
+      <div class="witm-verdict-emoji">🕊️</div>
+      <div class="witm-verdict-title">INNOCENT</div>
+      <div class="witm-verdict-sub" id="witm-innocent-sub"></div>
+      <button class="witm-result-btn" onclick="WITM.open()">TRY AGAIN</button>
+      <button class="witm-result-btn" onclick="showScreen('game')">QUIT</button>
+    </div>
+  </div>
+
+  <!-- WHO IS THE MURDERER — MURDERER IDENTIFIED -->
+  <div id="screen-witm-guilty" class="screen witm-verdict-screen">
+    <div class="witm-bars" style="opacity:0.4"></div>
+    <div class="witm-verdict-content">
+      <div class="witm-verdict-emoji">🎉</div>
+      <div class="witm-verdict-title" style="color:#ff4444">MURDERER IDENTIFIED</div>
+      <div class="witm-verdict-sub">She did it. The blood on her shoes is fresh. She was standing at the scene and pretending not to care — the classic move of a cold-blooded killer.</div>
       <button class="witm-result-btn" onclick="WITM.open()">PLAY AGAIN</button>
       <button class="witm-result-btn" onclick="showScreen('game')">QUIT</button>
     </div>
@@ -5837,13 +5873,11 @@
 
       open() {
         showScreen('witm');
-        document.getElementById('witm-result').classList.remove('show');
         const cv = document.getElementById('witm-canvas');
-        const wrap = document.getElementById('screen-witm');
-        cv.width  = wrap.clientWidth  || window.innerWidth;
-        cv.height = (wrap.clientHeight || window.innerHeight) - 60;
+        const stage = document.getElementById('witm-stage');
+        cv.width  = stage.clientWidth  || window.innerWidth;
+        cv.height = (stage.clientHeight || window.innerHeight) - 110;
         this._draw(cv);
-        cv.onclick = e => this._click(e, cv);
       },
 
       _zones: [], // [{x,y,w,h,index}]
@@ -5875,19 +5909,7 @@
         ];
         positions.forEach((sx, i) => {
           suspects[i](sx);
-          // Hit zone
-          const zw = W*0.22, zh = H*0.55;
-          this._zones.push({x: sx-zw/2, y: floor-zh, w:zw, h:zh, index:i});
-          // Name label
-          ctx.fillStyle='rgba(255,255,255,0.22)';
-          ctx.fillRect(sx-55, floor+10, 110, 22);
-          ctx.fillStyle='#ccc'; ctx.font='bold 11px Arial'; ctx.textAlign='center';
-          const labels=['THE BUTCHER','THE OLD MAN','THE WOMAN'];
-          ctx.fillText(labels[i], sx, floor+25);
         });
-
-        // Click-to-select hint dots
-        ctx.textAlign='center';
       },
 
       /* ── SUSPECT 1: Butcher ── */
@@ -6071,26 +6093,17 @@
         ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
       },
 
-      _click(e, cv) {
-        const r = cv.getBoundingClientRect();
-        const mx = (e.clientX-r.left)*(cv.width/r.width);
-        const my = (e.clientY-r.top)*(cv.height/r.height);
-        const hit = this._zones.find(z => mx>=z.x && mx<=z.x+z.w && my>=z.y && my<=z.y+z.h);
-        if (!hit) return;
-        const correct = hit.index === this.ANSWER;
-        const names = ['THE BUTCHER','THE OLD MAN','THE RICH WOMAN'];
-        const emoji = correct ? '🎉' : '💀';
-        const title = correct ? 'CORRECT! YOU GOT IT!' : 'WRONG ANSWER...';
-        const subs = [
-          'The butcher is innocent. His knife is bloody from his job — he slaughters animals for a living.',
-          'The old man is suspicious, but the blood on his stick is dried and old. He is innocent.',
-          'She did it. The blood on her shoes is fresh. She was at the scene and is pretending not to care.'
+      accuse(index) {
+        const innocentSubs = [
+          'The Butcher is innocent. His knife is covered in blood from his job — he slaughters animals for a living. Nothing unusual here.',
+          'The Old Man is innocent. The blood on his staff is old and dried. He tripped and the stick hit the ground. He had nothing to do with it.',
         ];
-        const wrongSub = `That's not right. You accused ${names[hit.index]}. ${subs[hit.index]}`;
-        document.getElementById('witm-result-emoji').textContent = emoji;
-        document.getElementById('witm-result-title').textContent = title;
-        document.getElementById('witm-result-sub').textContent = correct ? subs[this.ANSWER] : wrongSub;
-        document.getElementById('witm-result').classList.add('show');
+        if (index === this.ANSWER) {
+          showScreen('witm-guilty');
+        } else {
+          document.getElementById('witm-innocent-sub').textContent = innocentSubs[index];
+          showScreen('witm-innocent');
+        }
       },
     };
 
