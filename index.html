@@ -5279,7 +5279,7 @@
           const players = snap.val() || {};
           this.renderPlayers('hl-players', players);
           const others = Object.values(players).filter(p => !p.isHost);
-          document.getElementById('btn-start-quiz').style.display = others.length ? 'block' : 'none';
+          document.getElementById('btn-start-quiz').style.display = 'block';
           document.getElementById('hl-waiting').style.display = others.length ? 'none' : 'flex';
         });
         this._listeners.push(() => ref.off('value', h));
