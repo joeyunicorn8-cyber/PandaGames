@@ -252,6 +252,63 @@
       pointer-events:none; transition:background .1s;
     }
 
+    /* ── WHO IS THE MURDERER BUTTON ── */
+    .witm-btn {
+      position:relative; width:240px; height:240px; cursor:pointer;
+      background:#1a1a1a; border:3px solid #444; border-radius:20px; overflow:hidden;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+      transition:transform .2s, border-color .2s, box-shadow .2s;
+      box-shadow:0 0 30px rgba(255,255,255,0.05);
+    }
+    .witm-btn:hover { transform:scale(1.06); border-color:#ccc; box-shadow:0 0 40px rgba(200,200,200,0.15); }
+    .witm-btn-bars {
+      position:absolute; inset:0; pointer-events:none;
+      background:repeating-linear-gradient(90deg,transparent,transparent 28px,rgba(255,255,255,0.05) 28px,rgba(255,255,255,0.05) 34px);
+    }
+    .witm-btn-label {
+      position:relative; z-index:2; font-size:18px; font-weight:900;
+      color:#ddd; letter-spacing:1px; font-family:'Arial Black',Impact,sans-serif;
+      text-align:center; line-height:1.2; padding:0 14px;
+      text-shadow:0 2px 8px rgba(0,0,0,0.8);
+    }
+    .witm-btn-sub {
+      position:relative; z-index:2; font-size:10px;
+      color:rgba(255,255,255,0.32); letter-spacing:3px; text-transform:uppercase;
+    }
+    .witm-btn-emoji { position:relative; z-index:2; font-size:34px; }
+
+    /* ── WHO IS THE MURDERER SCREEN ── */
+    #screen-witm {
+      background:#2a2a2a; flex-direction:column; position:relative; overflow:hidden;
+    }
+    .witm-bars {
+      position:absolute; inset:0; pointer-events:none; z-index:2;
+      background:repeating-linear-gradient(90deg,transparent,transparent 60px,rgba(0,0,0,0.72) 60px,rgba(0,0,0,0.72) 72px);
+    }
+    .witm-topbar {
+      position:relative; z-index:10; flex-shrink:0;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:14px 24px; background:rgba(0,0,0,0.55);
+    }
+    .witm-title { font-size:18px; font-weight:900; color:#ccc; letter-spacing:2px; font-family:'Arial Black',sans-serif; }
+    .witm-hint { font-size:11px; color:rgba(255,255,255,0.3); letter-spacing:.5px; }
+    #witm-canvas { display:block; flex:1; width:100%; cursor:pointer; position:relative; z-index:5; }
+    .witm-result {
+      position:absolute; inset:0; z-index:20; display:none;
+      flex-direction:column; align-items:center; justify-content:center; gap:18px;
+      background:rgba(0,0,0,0.82);
+    }
+    .witm-result.show { display:flex; }
+    .witm-result-emoji { font-size:72px; }
+    .witm-result-title { font-size:28px; font-weight:900; color:#fff; font-family:'Arial Black',sans-serif; letter-spacing:2px; text-align:center; }
+    .witm-result-sub { font-size:14px; color:rgba(255,255,255,0.6); text-align:center; max-width:360px; line-height:1.6; }
+    .witm-result-btn {
+      padding:12px 36px; border-radius:12px; border:2px solid #fff;
+      background:transparent; color:#fff; font-size:14px; font-weight:800;
+      cursor:pointer; letter-spacing:2px; transition:background .15s;
+    }
+    .witm-result-btn:hover { background:rgba(255,255,255,0.15); }
+
     /* ── DUMB PEOPLES GAME BUTTON ── */
     .dpg-btn {
       position: relative; width: 240px; height: 240px;
@@ -1781,6 +1838,14 @@
         <div class="balloon-btn-sub">Pop &amp; Score</div>
       </button>
 
+      <!-- WHO IS THE MURDERER BUTTON -->
+      <button class="witm-btn" onclick="WITM.open()">
+        <div class="witm-btn-bars"></div>
+        <div class="witm-btn-emoji">🔪</div>
+        <div class="witm-btn-label">WHO IS THE MURDERER?</div>
+        <div class="witm-btn-sub">Point the finger</div>
+      </button>
+
       <!-- DUMB PEOPLES GAME BUTTON -->
       <button class="dpg-btn" onclick="showScreen('dpg')">
         <div class="dpg-btn-shine"></div>
@@ -2046,6 +2111,24 @@
     <div class="dpg-result-ordinal" id="dpg-smart-ordinal"></div>
     <div class="dpg-result-msg">TO PRETEND THAT YOU ARE SMART</div>
     <button class="btn-dpg-result-back" onclick="showScreen('dpg')">← Play Again</button>
+  </div>
+
+  <!-- WHO IS THE MURDERER -->
+  <div id="screen-witm" class="screen">
+    <div class="witm-bars"></div>
+    <div class="witm-topbar">
+      <div class="witm-title">🔪 WHO IS THE MURDERER?</div>
+      <div class="witm-hint">Click on the person you think is guilty</div>
+      <button class="btn-quit" onclick="showScreen('game')">QUIT</button>
+    </div>
+    <canvas id="witm-canvas"></canvas>
+    <div class="witm-result" id="witm-result">
+      <div class="witm-result-emoji" id="witm-result-emoji"></div>
+      <div class="witm-result-title" id="witm-result-title"></div>
+      <div class="witm-result-sub" id="witm-result-sub"></div>
+      <button class="witm-result-btn" onclick="WITM.open()">PLAY AGAIN</button>
+      <button class="witm-result-btn" onclick="showScreen('game')">QUIT</button>
+    </div>
   </div>
 
   <!-- BLOCK SIMULATOR -->
@@ -5737,6 +5820,277 @@
         this._resultShown=false; this.balloons=[]; this._popParticles=[];
         this._stopMusic();
         if(this.fbRef){ this.fbRef.off(); this.fbRef=null; }
+      },
+    };
+
+    /* ══════════════════════════════════
+       WHO IS THE MURDERER
+    ══════════════════════════════════ */
+    const WITM = {
+      // The correct answer is always suspect index 1 (the old man with the staff)
+      // - Butcher: blood on knife (explained)
+      // - Old man: blood on "walking stick" — no explanation for blood
+      // - Rich woman: blood on shoes (looking away, unconcerned — guilty behaviour, but wrong)
+      // Actually let's make it the RICH WOMAN — she's the most suspicious (looking away, doesn't care)
+      // We'll reveal her as the murderer.
+      ANSWER: 2, // 0=butcher, 1=old man, 2=rich woman
+
+      open() {
+        showScreen('witm');
+        document.getElementById('witm-result').classList.remove('show');
+        const cv = document.getElementById('witm-canvas');
+        const wrap = document.getElementById('screen-witm');
+        cv.width  = wrap.clientWidth  || window.innerWidth;
+        cv.height = (wrap.clientHeight || window.innerHeight) - 60;
+        this._draw(cv);
+        cv.onclick = e => this._click(e, cv);
+      },
+
+      _zones: [], // [{x,y,w,h,index}]
+
+      _draw(cv) {
+        const ctx = cv.getContext('2d');
+        const W = cv.width, H = cv.height;
+        this._zones = [];
+
+        // Background — dull stone grey
+        ctx.fillStyle = '#3a3a3a'; ctx.fillRect(0,0,W,H);
+        // Stone texture lines
+        ctx.strokeStyle = 'rgba(0,0,0,0.18)'; ctx.lineWidth = 1;
+        for (let y=0; y<H; y+=28) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+        for (let x=0; x<W; x+=56) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+
+        // Floor line
+        const floor = H * 0.78;
+        ctx.fillStyle = '#2a2a2a'; ctx.fillRect(0, floor, W, H - floor);
+        ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(0,floor); ctx.lineTo(W,floor); ctx.stroke();
+
+        // Draw 3 suspects spaced evenly
+        const positions = [W*0.2, W*0.5, W*0.8];
+        const suspects = [
+          s => this._drawButcher(ctx, s, floor),
+          s => this._drawOldMan(ctx, s, floor),
+          s => this._drawWoman(ctx, s, floor),
+        ];
+        positions.forEach((sx, i) => {
+          suspects[i](sx);
+          // Hit zone
+          const zw = W*0.22, zh = H*0.55;
+          this._zones.push({x: sx-zw/2, y: floor-zh, w:zw, h:zh, index:i});
+          // Name label
+          ctx.fillStyle='rgba(255,255,255,0.22)';
+          ctx.fillRect(sx-55, floor+10, 110, 22);
+          ctx.fillStyle='#ccc'; ctx.font='bold 11px Arial'; ctx.textAlign='center';
+          const labels=['THE BUTCHER','THE OLD MAN','THE WOMAN'];
+          ctx.fillText(labels[i], sx, floor+25);
+        });
+
+        // Click-to-select hint dots
+        ctx.textAlign='center';
+      },
+
+      /* ── SUSPECT 1: Butcher ── */
+      _drawButcher(ctx, x, floor) {
+        const s = floor; // base y
+        // Body — stocky, apron
+        // Legs
+        ctx.fillStyle='#4a3728'; ctx.fillRect(x-14,s-70,12,70); ctx.fillRect(x+2,s-70,12,70);
+        // Apron (white with blood)
+        ctx.fillStyle='#e8e8e8'; ctx.fillRect(x-20,s-130,40,75);
+        // Blood stains on apron
+        ctx.fillStyle='#8b0000';
+        [[0,-10,8,6],[10,-30,6,8],[-8,-50,10,5],[5,-70,7,9]].forEach(([dx,dy,w,h])=>{
+          ctx.beginPath(); ctx.ellipse(x+dx,s+dy,w,h,0,0,Math.PI*2); ctx.fill();
+        });
+        // Torso under apron
+        ctx.fillStyle='#c0392b'; ctx.fillRect(x-22,s-155,44,30);
+        // Head
+        ctx.fillStyle='#d4956a'; ctx.beginPath(); ctx.ellipse(x,s-175,22,25,0,0,Math.PI*2); ctx.fill();
+        // Hair — dark stubble
+        ctx.fillStyle='#2c1810'; ctx.fillRect(x-22,s-198,44,14);
+        ctx.beginPath(); ctx.ellipse(x,s-198,22,8,0,0,Math.PI,true); ctx.fill();
+        // Eyes — wide, intense
+        ctx.fillStyle='#fff'; ctx.fillRect(x-13,s-183,10,7); ctx.fillRect(x+3,s-183,10,7);
+        ctx.fillStyle='#1a1a1a'; ctx.fillRect(x-10,s-182,5,5); ctx.fillRect(x+5,s-182,5,5);
+        // Frown
+        ctx.strokeStyle='#2c1810'; ctx.lineWidth=2;
+        ctx.beginPath(); ctx.arc(x,s-166,8,0.2,Math.PI-0.2); ctx.stroke();
+        // Right arm holding knife DOWN at side
+        ctx.fillStyle='#c0392b'; ctx.fillRect(x+22,s-148,14,55);
+        ctx.fillStyle='#d4956a'; ctx.fillRect(x+22,s-96,14,22);
+        // Bloody knife
+        ctx.save(); ctx.translate(x+36,s-85); ctx.rotate(0.18);
+        // Handle
+        ctx.fillStyle='#5c3d2e'; ctx.fillRect(-4,0,8,22);
+        // Guard
+        ctx.fillStyle='#888'; ctx.fillRect(-7,-3,14,5);
+        // Blade
+        ctx.fillStyle='#c8c8c8';
+        ctx.beginPath(); ctx.moveTo(-3,-3); ctx.lineTo(3,-3); ctx.lineTo(1,-38); ctx.lineTo(-3,-3); ctx.fill();
+        // Blood on blade
+        ctx.fillStyle='#8b0000';
+        ctx.beginPath(); ctx.moveTo(-2,-10); ctx.lineTo(2,-10); ctx.lineTo(1,-30); ctx.lineTo(-2,-10); ctx.fill();
+        ctx.restore();
+        // Left arm out to side
+        ctx.fillStyle='#c0392b'; ctx.fillRect(x-36,s-148,14,50);
+        ctx.fillStyle='#d4956a'; ctx.fillRect(x-36,s-100,14,18);
+        // Speech bubble
+        this._bubble(ctx, x, s-215, "I'm just a butcher!\nThis is my work knife.");
+      },
+
+      /* ── SUSPECT 2: Old Man ── */
+      _drawOldMan(ctx, x, floor) {
+        const s = floor;
+        // Legs — thin, dark trousers
+        ctx.fillStyle='#2c2c3a'; ctx.fillRect(x-10,s-75,9,75); ctx.fillRect(x+1,s-75,9,75);
+        // Shoes
+        ctx.fillStyle='#1a1a1a'; ctx.fillRect(x-14,s-10,12,10); ctx.fillRect(x+2,s-10,14,10);
+        // Coat — dark grey
+        ctx.fillStyle='#3d3d3d'; ctx.fillRect(x-22,s-150,44,80);
+        // Shirt collar
+        ctx.fillStyle='#e0e0d0'; ctx.fillRect(x-8,s-148,16,20);
+        // Head — old, wrinkled (larger head, white hair)
+        ctx.fillStyle='#c8956a'; ctx.beginPath(); ctx.ellipse(x,s-172,20,22,0,0,Math.PI*2); ctx.fill();
+        // White hair wisps
+        ctx.strokeStyle='#f0f0f0'; ctx.lineWidth=2.5;
+        [[-14,-8],[-10,-14],[-6,-17],[6,-17],[10,-14],[14,-8]].forEach(([dx,dy])=>{
+          ctx.beginPath(); ctx.moveTo(x+dx,s-190+dy); ctx.quadraticCurveTo(x+dx*0.5,s-198+dy,x+dx*0.2,s-193+dy); ctx.stroke();
+        });
+        // Wrinkles
+        ctx.strokeStyle='rgba(0,0,0,0.2)'; ctx.lineWidth=1;
+        ctx.beginPath(); ctx.moveTo(x-10,s-168); ctx.lineTo(x-5,s-170); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(x+5,s-168); ctx.lineTo(x+10,s-170); ctx.stroke();
+        // Eyes — squinting, kind-looking
+        ctx.fillStyle='#fff'; ctx.fillRect(x-11,s-180,8,5); ctx.fillRect(x+3,s-180,8,5);
+        ctx.fillStyle='#5a3a1a'; ctx.fillRect(x-9,s-179,4,3); ctx.fillRect(x+5,s-179,4,3);
+        // Smile — gentle
+        ctx.strokeStyle='#7a5a3a'; ctx.lineWidth=1.5;
+        ctx.beginPath(); ctx.arc(x,s-163,6,0,Math.PI); ctx.stroke();
+        // White beard
+        ctx.fillStyle='#e8e8e8';
+        ctx.beginPath(); ctx.moveTo(x-16,s-158); ctx.quadraticCurveTo(x,-s*0.001+s-135,x+16,s-158); ctx.quadraticCurveTo(x+10,s-145,x,s-138); ctx.quadraticCurveTo(x-10,s-145,x-16,s-158); ctx.fill();
+        // Left arm — holding staff
+        ctx.fillStyle='#3d3d3d'; ctx.fillRect(x-36,s-145,13,50);
+        ctx.fillStyle='#c8956a'; ctx.fillRect(x-36,s-97,13,18);
+        // Staff — tall wooden stick
+        ctx.fillStyle='#8b6914';
+        ctx.fillRect(x-34,s-220,8,220);
+        // Gnarled top
+        ctx.beginPath(); ctx.ellipse(x-30,s-222,10,8,0.3,0,Math.PI*2); ctx.fill();
+        // Blood on bottom of staff — dark, dried
+        ctx.fillStyle='#6b0000';
+        ctx.fillRect(x-34,s-18,8,18);
+        ctx.beginPath(); ctx.ellipse(x-30,s,10,4,0,0,Math.PI*2); ctx.fill();
+        // Right arm — resting on staff
+        ctx.fillStyle='#3d3d3d'; ctx.fillRect(x+12,s-130,13,40);
+        ctx.fillStyle='#c8956a'; ctx.fillRect(x+12,s-92,13,18);
+        // Speech bubble
+        this._bubble(ctx, x, s-220, "The blood? It's from\nmy walking stick falling!");
+      },
+
+      /* ── SUSPECT 3: Rich Woman ── */
+      _drawWoman(ctx, x, floor) {
+        const s = floor;
+        // Legs
+        ctx.fillStyle='#f5c0d0'; ctx.fillRect(x-9,s-80,8,75); ctx.fillRect(x+1,s-80,8,75);
+        // Shiny shoes — light reflects
+        ctx.fillStyle='#1a1a1a'; ctx.fillRect(x-13,s-14,12,14); ctx.fillRect(x+1,s-14,14,14);
+        // Shoe shine
+        ctx.fillStyle='rgba(255,255,255,0.35)';
+        ctx.fillRect(x-11,s-13,5,4); ctx.fillRect(x+3,s-13,5,4);
+        // Tiny blood splatter on shoes
+        ctx.fillStyle='#8b0000';
+        ctx.beginPath(); ctx.ellipse(x-6,s-5,3,2,0.4,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(x+10,s-8,2,2,0,0,Math.PI*2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(x+7,s-3,1.5,1.5,0,0,Math.PI*2); ctx.fill();
+        // Elegant dress — deep purple
+        ctx.fillStyle='#5b2d82';
+        ctx.beginPath(); ctx.moveTo(x-26,s-80); ctx.lineTo(x+26,s-80); ctx.lineTo(x+32,s); ctx.lineTo(x-32,s); ctx.closePath(); ctx.fill();
+        // Dress shimmer
+        ctx.fillStyle='rgba(255,255,255,0.07)';
+        ctx.beginPath(); ctx.moveTo(x-20,s-80); ctx.lineTo(x-10,s-80); ctx.lineTo(x-4,s); ctx.lineTo(x-14,s); ctx.closePath(); ctx.fill();
+        // Torso / bodice
+        ctx.fillStyle='#7a3daa'; ctx.fillRect(x-20,s-155,40,78);
+        // Pearl necklace
+        ctx.fillStyle='#f5f5f0';
+        for (let i=-3; i<=3; i++) {
+          ctx.beginPath(); ctx.arc(x+i*6,s-157,3.5,0,Math.PI*2); ctx.fill();
+        }
+        // Head — turned slightly away (offset eyes/nose)
+        ctx.fillStyle='#f0c8a0'; ctx.beginPath(); ctx.ellipse(x+4,s-178,19,22,0.08,0,Math.PI*2); ctx.fill();
+        // Hair — elegant updo, dark
+        ctx.fillStyle='#1a0a00';
+        ctx.beginPath(); ctx.ellipse(x+4,s-196,20,12,0,0,Math.PI*2); ctx.fill();
+        ctx.fillRect(x-8,s-200,24,12);
+        // Bun
+        ctx.beginPath(); ctx.ellipse(x+10,s-202,9,9,0,0,Math.PI*2); ctx.fill();
+        // Eyes — looking to the side (shifted right)
+        ctx.fillStyle='#fff'; ctx.fillRect(x+2,s-186,8,6); ctx.fillRect(x+12,s-186,8,6);
+        ctx.fillStyle='#2a1a0a'; ctx.fillRect(x+8,s-185,4,4); ctx.fillRect(x+18,s-185,4,4); // eyes far right = looking away
+        // Slight smug expression
+        ctx.strokeStyle='#c08060'; ctx.lineWidth=1.5;
+        ctx.beginPath(); ctx.arc(x+10,s-168,5,0,Math.PI); ctx.stroke();
+        // Left arm — hand on hip
+        ctx.fillStyle='#7a3daa'; ctx.fillRect(x-32,s-148,14,45);
+        ctx.fillStyle='#f0c8a0'; ctx.fillRect(x-34,s-108,16,16);
+        // Right arm — loose at side, slightly angled away (disinterested)
+        ctx.fillStyle='#7a3daa'; ctx.fillRect(x+18,s-148,14,55);
+        ctx.fillStyle='#f0c8a0'; ctx.fillRect(x+16,s-97,16,18);
+        // Small handbag
+        ctx.fillStyle='#c9a227'; ctx.fillRect(x+32,s-115,22,28);
+        ctx.fillStyle='rgba(255,255,255,0.2)'; ctx.fillRect(x+34,s-113,18,4);
+        ctx.strokeStyle='#a07820'; ctx.lineWidth=1.5;
+        ctx.strokeRect(x+32,s-115,22,28);
+        // Gold clasp
+        ctx.fillStyle='#ffd700'; ctx.beginPath(); ctx.arc(x+43,s-102,3,0,Math.PI*2); ctx.fill();
+        // Speech bubble — none, she's ignoring everything
+        this._bubble(ctx, x, s-225, "Hmm? What murder?\nI don't know anything.");
+      },
+
+      _bubble(ctx, x, y, text) {
+        const lines = text.split('\n');
+        const pw = 170, lh = 16;
+        const ph = lines.length * lh + 16;
+        const bx = x - pw/2, by = y - ph;
+        ctx.fillStyle='rgba(240,240,240,0.92)';
+        this._roundRect(ctx, bx, by, pw, ph, 8); ctx.fill();
+        ctx.strokeStyle='rgba(0,0,0,0.2)'; ctx.lineWidth=1; this._roundRect(ctx, bx, by, pw, ph, 8); ctx.stroke();
+        // Tail
+        ctx.fillStyle='rgba(240,240,240,0.92)';
+        ctx.beginPath(); ctx.moveTo(x-7,by+ph); ctx.lineTo(x+7,by+ph); ctx.lineTo(x,by+ph+12); ctx.closePath(); ctx.fill();
+        ctx.fillStyle='#222'; ctx.font='bold 11px Arial'; ctx.textAlign='center';
+        lines.forEach((l,i) => ctx.fillText(l, x, by + 14 + i*lh));
+      },
+
+      _roundRect(ctx, x, y, w, h, r) {
+        ctx.beginPath();
+        ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+        ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+        ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+        ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
+      },
+
+      _click(e, cv) {
+        const r = cv.getBoundingClientRect();
+        const mx = (e.clientX-r.left)*(cv.width/r.width);
+        const my = (e.clientY-r.top)*(cv.height/r.height);
+        const hit = this._zones.find(z => mx>=z.x && mx<=z.x+z.w && my>=z.y && my<=z.y+z.h);
+        if (!hit) return;
+        const correct = hit.index === this.ANSWER;
+        const names = ['THE BUTCHER','THE OLD MAN','THE RICH WOMAN'];
+        const emoji = correct ? '🎉' : '💀';
+        const title = correct ? 'CORRECT! YOU GOT IT!' : 'WRONG ANSWER...';
+        const subs = [
+          'The butcher is innocent. His knife is bloody from his job — he slaughters animals for a living.',
+          'The old man is suspicious, but the blood on his stick is dried and old. He is innocent.',
+          'She did it. The blood on her shoes is fresh. She was at the scene and is pretending not to care.'
+        ];
+        const wrongSub = `That's not right. You accused ${names[hit.index]}. ${subs[hit.index]}`;
+        document.getElementById('witm-result-emoji').textContent = emoji;
+        document.getElementById('witm-result-title').textContent = title;
+        document.getElementById('witm-result-sub').textContent = correct ? subs[this.ANSWER] : wrongSub;
+        document.getElementById('witm-result').classList.add('show');
       },
     };
 
