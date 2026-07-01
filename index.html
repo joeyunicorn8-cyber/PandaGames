@@ -5873,6 +5873,8 @@
 
       open() {
         showScreen('witm');
+        const me = document.getElementById('display-username')?.textContent.trim();
+        if (me) postSystemMsg(me + ' JOINED WHO IS THE MURDERER? 🔪');
         const cv = document.getElementById('witm-canvas');
         const stage = document.getElementById('witm-stage');
         cv.width  = stage.clientWidth  || window.innerWidth;
