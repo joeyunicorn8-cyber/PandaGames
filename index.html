@@ -6059,7 +6059,7 @@
       open() {
         this.level = 1; this.score = 0;
         const me = document.getElementById('display-username')?.textContent.trim();
-        if (me) postSystemMsg(me + ' JOINED WHO IS THE MURDERER? 🔪');
+        if (me) postSystemMsg(me + ' JOINED WHO IS THE MURDERER?');
         this._loadLevel();
       },
 
@@ -6726,7 +6726,7 @@
         this._hideAll();
         showScreen('bomb');
         const me = document.getElementById('display-username')?.textContent.trim();
-        if (me) postSystemMsg(me + ' IS DEFUSING A BOMB 💣');
+        if (me) postSystemMsg(me + ' IS DEFUSING A BOMB');
         this._startRound();
       },
 
