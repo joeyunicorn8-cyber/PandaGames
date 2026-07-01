@@ -322,6 +322,97 @@
     }
     .witm-result-btn:hover { background:rgba(255,255,255,0.15); }
 
+    /* ── DEFUSE THE BOMB BUTTON ── */
+    .bomb-hub-btn {
+      position:relative; width:240px; height:240px; cursor:pointer;
+      background:#1a1a1a; border:3px solid #444; border-radius:20px; overflow:hidden;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+      transition:transform .2s, border-color .2s, box-shadow .2s;
+      box-shadow:0 0 30px rgba(231,76,60,0.06);
+    }
+    .bomb-hub-btn:hover { transform:scale(1.06); border-color:#e74c3c; box-shadow:0 0 40px rgba(231,76,60,0.3); }
+    .bomb-hub-wires {
+      position:absolute; inset:0; pointer-events:none;
+      background:repeating-linear-gradient(0deg,transparent,transparent 30px,rgba(231,76,60,0.07) 30px,rgba(231,76,60,0.07) 32px);
+    }
+    .bomb-hub-wires::after {
+      content:''; position:absolute; inset:0;
+      background:repeating-linear-gradient(0deg,transparent,transparent 44px,rgba(52,152,219,0.07) 44px,rgba(52,152,219,0.07) 46px);
+    }
+    .bomb-hub-emoji { position:relative; z-index:2; font-size:38px; }
+    .bomb-hub-label { position:relative; z-index:2; font-size:17px; font-weight:900; color:#fff; font-family:'Arial Black',sans-serif; letter-spacing:1px; text-align:center; line-height:1.2; padding:0 10px; }
+    .bomb-hub-sub { position:relative; z-index:2; font-size:10px; color:rgba(255,255,255,0.3); letter-spacing:3px; }
+
+    /* ── DEFUSE THE BOMB SCREEN ── */
+    #screen-bomb { background:#0d0d12; flex-direction:column; align-items:center; position:relative; overflow:hidden; }
+    @keyframes bomb-blink { 0%,100%{opacity:1} 50%{opacity:0.15} }
+    @keyframes bomb-shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-10px) rotate(-1deg)} 40%{transform:translateX(10px) rotate(1deg)} 60%{transform:translateX(-6px)} 80%{transform:translateX(6px)} }
+    @keyframes wire-snip { 0%{opacity:1;transform:scaleX(1)} 40%{filter:brightness(2)} 100%{opacity:0.12;filter:brightness(0.4)} }
+    @keyframes wire-spark { 0%{filter:brightness(1)} 30%{filter:brightness(4) saturate(0)} 100%{filter:brightness(0.2) saturate(0)} }
+    @keyframes bomb-pulse { 0%,100%{box-shadow:0 0 20px rgba(0,255,68,0.3)} 50%{box-shadow:0 0 40px rgba(0,255,68,0.7)} }
+    .bomb-shake { animation:bomb-shake 0.45s ease !important; }
+    #bomb-wrap { width:100%; max-width:640px; display:flex; flex-direction:column; align-items:center; gap:14px; padding:16px 16px 0; flex:1; min-height:0; position:relative; z-index:2; }
+    #bomb-quit { position:absolute; top:14px; right:20px; z-index:5; }
+    #bomb-case {
+      width:min(380px,90vw); flex-shrink:0;
+      background:linear-gradient(150deg,#26263a 0%,#111118 100%);
+      border:2px solid #333; border-radius:18px; padding:20px 24px 16px;
+      box-shadow:0 4px 40px rgba(0,0,0,0.9),inset 0 1px 0 rgba(255,255,255,0.05);
+      position:relative;
+    }
+    .bomb-screw {
+      position:absolute; width:9px; height:9px; border-radius:50%;
+      background:radial-gradient(circle at 35% 35%,#666,#222); border:1px solid #444;
+    }
+    .bomb-screw:nth-child(1){top:8px;left:8px} .bomb-screw:nth-child(2){top:8px;right:8px}
+    .bomb-screw:nth-child(3){bottom:8px;left:8px} .bomb-screw:nth-child(4){bottom:8px;right:8px}
+    #bomb-case-inner { display:flex; flex-direction:column; align-items:center; gap:6px; }
+    #bomb-timer {
+      font-size:clamp(54px,10vw,80px); font-weight:900; font-family:'Courier New',monospace;
+      color:#00ff44; letter-spacing:6px; line-height:1;
+      text-shadow:0 0 16px currentColor, 0 0 36px currentColor;
+    }
+    #bomb-round-lbl { font-size:11px; color:rgba(255,255,255,0.38); letter-spacing:3px; text-transform:uppercase; }
+    #bomb-light {
+      width:13px; height:13px; border-radius:50%; background:#00ff44; margin-top:2px;
+      box-shadow:0 0 10px #00ff44; transition:background .25s, box-shadow .25s;
+    }
+    #bomb-clue {
+      font-size:clamp(13px,2.2vw,18px); font-weight:900; color:#fff; text-align:center;
+      font-family:'Arial Black',sans-serif; letter-spacing:1.5px; line-height:1.55;
+      background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1);
+      border-radius:10px; padding:12px 20px; width:min(500px,92vw); flex-shrink:0;
+    }
+    #bomb-wires { width:min(520px,96vw); display:flex; flex-direction:column; gap:7px; flex-shrink:0; }
+    .bwire {
+      display:flex; align-items:center; gap:0; cursor:pointer; height:38px;
+      border-radius:6px; position:relative; transition:transform .12s; user-select:none;
+    }
+    .bwire:hover { transform:scaleY(1.18); }
+    .bwire:hover .bwire-line { filter:brightness(1.35); }
+    .bwire-dot { width:13px; height:13px; border-radius:50%; background:radial-gradient(circle at 35% 35%,#888,#2a2a2a); border:2px solid #555; flex-shrink:0; z-index:2; }
+    .bwire-line { flex:1; height:9px; border-radius:5px; transition:filter .12s; }
+    .bwire-lbl {
+      position:absolute; right:20px; font-size:9px; font-weight:800;
+      letter-spacing:2px; font-family:'Arial Black',sans-serif; pointer-events:none;
+      background:rgba(0,0,0,0.6); padding:1px 6px; border-radius:4px;
+    }
+    .bwire.cut-safe { animation:wire-snip .7s forwards; pointer-events:none; }
+    .bwire.cut-bad  { animation:wire-spark .35s forwards; pointer-events:none; }
+    #bomb-hint { font-size:11px; color:rgba(255,255,255,0.18); text-align:center; letter-spacing:.4px; }
+    /* Overlays */
+    .bomb-ov {
+      position:absolute; inset:0; z-index:30; display:none;
+      flex-direction:column; align-items:center; justify-content:center; gap:16px;
+      background:rgba(0,0,0,0.93); text-align:center; padding:30px;
+    }
+    .bomb-ov-emoji { font-size:78px; }
+    .bomb-ov-title { font-size:clamp(22px,5vw,36px); font-weight:900; color:#fff; font-family:'Arial Black',sans-serif; letter-spacing:3px; }
+    .bomb-ov-sub { font-size:14px; color:rgba(255,255,255,0.5); max-width:380px; line-height:1.7; }
+    .bomb-ov-next { font-size:13px; color:rgba(255,255,255,0.7); font-weight:700; letter-spacing:1px; }
+    .bomb-btn { padding:12px 32px; border-radius:12px; border:2px solid rgba(255,255,255,0.6); background:transparent; color:#fff; font-size:13px; font-weight:800; cursor:pointer; letter-spacing:2px; transition:background .15s; }
+    .bomb-btn:hover { background:rgba(255,255,255,0.13); }
+
     /* ── DUMB PEOPLES GAME BUTTON ── */
     .dpg-btn {
       position: relative; width: 240px; height: 240px;
@@ -1859,6 +1950,14 @@
         <div class="witm-btn-sub">Point the finger</div>
       </button>
 
+      <!-- DEFUSE THE BOMB BUTTON -->
+      <button class="bomb-hub-btn" onclick="BOMB.open()">
+        <div class="bomb-hub-wires"></div>
+        <div class="bomb-hub-emoji">💣</div>
+        <div class="bomb-hub-label">DEFUSE THE BOMB</div>
+        <div class="bomb-hub-sub">Tick tock...</div>
+      </button>
+
       <!-- DUMB PEOPLES GAME BUTTON -->
       <button class="dpg-btn" onclick="showScreen('dpg')">
         <div class="dpg-btn-shine"></div>
@@ -2162,6 +2261,57 @@
       <div class="witm-verdict-sub" id="witm-score-sub"></div>
       <button class="witm-result-btn" onclick="WITM.open()">PLAY AGAIN</button>
       <button class="witm-result-btn" onclick="showScreen('game')">QUIT</button>
+    </div>
+  </div>
+
+  <!-- DEFUSE THE BOMB -->
+  <div id="screen-bomb" class="screen">
+    <button class="btn-quit" id="bomb-quit" onclick="BOMB.quit()">QUIT</button>
+    <div id="bomb-wrap">
+      <div id="bomb-case">
+        <div class="bomb-screw"></div><div class="bomb-screw"></div>
+        <div class="bomb-screw"></div><div class="bomb-screw"></div>
+        <div id="bomb-case-inner">
+          <div id="bomb-timer">00:45</div>
+          <div id="bomb-round-lbl">ROUND 1 / 3 · EASY</div>
+          <div id="bomb-light"></div>
+        </div>
+      </div>
+      <div id="bomb-clue">WAITING...</div>
+      <div id="bomb-wires"></div>
+      <div id="bomb-hint">⚠️ One wrong cut and it's all over.</div>
+    </div>
+    <!-- EXPLODE -->
+    <div class="bomb-ov" id="bomb-ov-explode">
+      <div class="bomb-ov-emoji">💥</div>
+      <div class="bomb-ov-title">BOOM!</div>
+      <div class="bomb-ov-sub">You cut the wrong wire. The bomb detonated.</div>
+      <button class="bomb-btn" onclick="BOMB.open()">TRY AGAIN</button>
+      <button class="bomb-btn" onclick="BOMB.quit()">QUIT</button>
+    </div>
+    <!-- TIMEOUT -->
+    <div class="bomb-ov" id="bomb-ov-timeout">
+      <div class="bomb-ov-emoji">⏱️</div>
+      <div class="bomb-ov-title">TIME'S UP!</div>
+      <div class="bomb-ov-sub">The countdown hit zero. The bomb went off.</div>
+      <button class="bomb-btn" onclick="BOMB.open()">TRY AGAIN</button>
+      <button class="bomb-btn" onclick="BOMB.quit()">QUIT</button>
+    </div>
+    <!-- ROUND DEFUSED -->
+    <div class="bomb-ov" id="bomb-ov-defused">
+      <div class="bomb-ov-emoji">✂️</div>
+      <div class="bomb-ov-title" style="color:#4ade80">DEFUSED!</div>
+      <div class="bomb-ov-sub" id="bomb-ov-defused-spare"></div>
+      <div class="bomb-ov-next" id="bomb-ov-defused-next"></div>
+      <button class="bomb-btn" onclick="BOMB.nextRound()">CONTINUE →</button>
+    </div>
+    <!-- WIN -->
+    <div class="bomb-ov" id="bomb-ov-win">
+      <div class="bomb-ov-emoji">🏆</div>
+      <div class="bomb-ov-title" style="color:#ffd700">ALL CLEAR!</div>
+      <div class="bomb-ov-sub">Three bombs. Three perfect cuts. You're a legend.</div>
+      <button class="bomb-btn" onclick="BOMB.open()">PLAY AGAIN</button>
+      <button class="bomb-btn" onclick="BOMB.quit()">QUIT</button>
     </div>
   </div>
 
@@ -6543,6 +6693,200 @@
         // Forced smile
         ctx.strokeStyle='#7a5040';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,s-165,7,0,Math.PI);ctx.stroke();
         this._bubble(ctx,x,s-218,"Ice cream? Anyone?\nGreat day for it haha!");
+      },
+    };
+
+    /* ══════════════════════════════════
+       DEFUSE THE BOMB
+    ══════════════════════════════════ */
+    const BOMB = {
+      round:0, timeLeft:0, _interval:null, _audioCtx:null, _used:false,
+
+      ROUNDS:[
+        {wires:5, time:45, diff:'EASY',   clue:'direct'},
+        {wires:6, time:30, diff:'MEDIUM', clue:'avoid'},
+        {wires:7, time:20, diff:'HARD',   clue:'position'},
+      ],
+
+      COLORS:[
+        {name:'RED',    hex:'#e74c3c', lit:'#ff7675'},
+        {name:'BLUE',   hex:'#3498db', lit:'#74b9ff'},
+        {name:'GREEN',  hex:'#27ae60', lit:'#55efc4'},
+        {name:'YELLOW', hex:'#f1c40f', lit:'#ffeaa7'},
+        {name:'ORANGE', hex:'#e67e22', lit:'#fdcb6e'},
+        {name:'PURPLE', hex:'#9b59b6', lit:'#d7a9ff'},
+        {name:'WHITE',  hex:'#dfe6e9', lit:'#fff'},
+        {name:'PINK',   hex:'#e91e8c', lit:'#fd79a8'},
+      ],
+
+      safeIdx:-1, wires:[],
+
+      open() {
+        this.round = 0; this._stopTimer();
+        this._hideAll();
+        showScreen('bomb');
+        const me = document.getElementById('display-username')?.textContent.trim();
+        if (me) postSystemMsg(me + ' IS DEFUSING A BOMB 💣');
+        this._startRound();
+      },
+
+      _startRound() {
+        this._used = false;
+        const rd = this.ROUNDS[this.round];
+        this.timeLeft = rd.time;
+
+        // pick wires
+        const pool = [...this.COLORS].sort(()=>Math.random()-.5).slice(0, rd.wires);
+        this.safeIdx = Math.floor(Math.random() * rd.wires);
+        this.wires = pool;
+
+        // update header
+        document.getElementById('bomb-round-lbl').textContent = `ROUND ${this.round+1} / 3  ·  ${rd.diff}`;
+        this._setTimerColor();
+
+        // generate clue
+        const safe = pool[this.safeIdx];
+        let clueHTML = '';
+        if (rd.clue === 'direct') {
+          clueHTML = `CUT THE <span style="color:${safe.hex};text-shadow:0 0 8px ${safe.hex}">${safe.name}</span> WIRE`;
+        } else if (rd.clue === 'avoid') {
+          const bads = pool.filter((_,i)=>i!==this.safeIdx).slice(0,2);
+          clueHTML = `DO NOT CUT <span style="color:${bads[0].hex}">${bads[0].name}</span> OR <span style="color:${bads[1].hex}">${bads[1].name}</span>.<br>THE SAFE WIRE IS A DIFFERENT COLOUR.`;
+        } else {
+          const ordinals = ['1ST','2ND','3RD','4TH','5TH','6TH','7TH'];
+          const bad = pool.filter((_,i)=>i!==this.safeIdx)[Math.floor(Math.random()*(rd.wires-1))];
+          clueHTML = `CUT THE <span style="color:${safe.lit}">${ordinals[this.safeIdx]} WIRE FROM THE TOP</span>.<br>AVOID THE <span style="color:${bad.hex}">${bad.name}</span> ONE AT ALL COSTS.`;
+        }
+        document.getElementById('bomb-clue').innerHTML = clueHTML;
+
+        // render wires
+        const wrap = document.getElementById('bomb-wires');
+        wrap.innerHTML = '';
+        pool.forEach((w,i) => {
+          const row = document.createElement('div');
+          row.className = 'bwire'; row.id = `bw${i}`;
+          row.onclick = () => this._cut(i);
+          row.innerHTML = `
+            <div class="bwire-dot"></div>
+            <div class="bwire-line" style="background:linear-gradient(to bottom,${w.lit} 0%,${w.hex} 40%,${w.hex} 60%,rgba(0,0,0,0.35) 100%);box-shadow:0 0 10px ${w.hex}66"></div>
+            <div class="bwire-dot"></div>
+            <div class="bwire-lbl" style="color:${w.lit};text-shadow:0 0 6px ${w.hex}">${w.name}</div>`;
+          wrap.appendChild(row);
+        });
+
+        this._startTimer();
+      },
+
+      _cut(i) {
+        if (this._used) return;
+        this._used = true;
+        const row = document.getElementById(`bw${i}`);
+        if (i === this.safeIdx) {
+          this._stopTimer();
+          row.classList.add('cut-safe');
+          this._sfx('snip');
+          setTimeout(() => this._roundWon(), 750);
+        } else {
+          row.classList.add('cut-bad');
+          document.getElementById('screen-bomb').classList.add('bomb-shake');
+          this._sfx('spark');
+          setTimeout(() => {
+            this._stopTimer();
+            document.getElementById('screen-bomb').classList.remove('bomb-shake');
+            this._sfx('boom');
+            this._show('bomb-ov-explode');
+          }, 420);
+        }
+      },
+
+      _roundWon() {
+        this._sfx('win');
+        if (this.round >= 2) { this._show('bomb-ov-win'); return; }
+        const next = this.ROUNDS[this.round+1];
+        document.getElementById('bomb-ov-defused-spare').textContent =
+          `${this.timeLeft} second${this.timeLeft!==1?'s':''} to spare!`;
+        document.getElementById('bomb-ov-defused-next').textContent =
+          `UP NEXT: ROUND ${this.round+2} / 3  ·  ${next.diff}  (${next.time}s)`;
+        this._show('bomb-ov-defused');
+      },
+
+      nextRound() {
+        this.round++;
+        this._hideAll();
+        this._startRound();
+      },
+
+      quit() { this._stopTimer(); showScreen('game'); },
+
+      _startTimer() {
+        this._stopTimer();
+        this._updateDisplay();
+        this._interval = setInterval(() => {
+          this.timeLeft--;
+          this._updateDisplay();
+          if (!this._used) this._sfx('tick');
+          if (this.timeLeft <= 0) {
+            this._stopTimer();
+            if (!this._used) { this._used=true; this._sfx('boom'); this._show('bomb-ov-timeout'); }
+          }
+        }, 1000);
+      },
+
+      _stopTimer() { clearInterval(this._interval); this._interval=null; },
+
+      _updateDisplay() {
+        const t = this.timeLeft;
+        document.getElementById('bomb-timer').textContent = `00:${String(Math.max(0,t)).padStart(2,'0')}`;
+        this._setTimerColor();
+      },
+
+      _setTimerColor() {
+        const t = this.timeLeft, el = document.getElementById('bomb-timer');
+        const light = document.getElementById('bomb-light');
+        if (!el) return;
+        if (t <= 5)  { el.style.color='#ff2222'; el.style.animation='bomb-blink .25s infinite'; light.style.background='#ff2222'; light.style.boxShadow='0 0 12px #ff2222'; }
+        else if (t<=15){ el.style.color='#ff8800'; el.style.animation='bomb-blink .6s infinite'; light.style.background='#ff8800'; light.style.boxShadow='0 0 10px #ff8800'; }
+        else         { el.style.color='#00ff44'; el.style.animation='none'; light.style.background='#00ff44'; light.style.boxShadow='0 0 10px #00ff44'; }
+      },
+
+      _show(id) { document.getElementById(id).style.display='flex'; },
+      _hideAll() { ['bomb-ov-explode','bomb-ov-timeout','bomb-ov-defused','bomb-ov-win'].forEach(id=>{ document.getElementById(id).style.display='none'; }); },
+
+      _ctx() {
+        if (!this._audioCtx) this._audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+        return this._audioCtx;
+      },
+
+      _sfx(type) {
+        try {
+          const ctx = this._ctx(), now = ctx.currentTime;
+          if (type==='tick') {
+            const freq = this.timeLeft<=5 ? 1400 : this.timeLeft<=15 ? 1000 : 700;
+            const o=ctx.createOscillator(), g=ctx.createGain();
+            o.connect(g); g.connect(ctx.destination);
+            o.frequency.value=freq; o.type='square';
+            g.gain.setValueAtTime(0.12,now); g.gain.exponentialRampToValueAtTime(0.0001,now+0.07);
+            o.start(now); o.stop(now+0.07);
+          } else if (type==='snip') {
+            const buf=ctx.createBuffer(1,ctx.sampleRate*.08,ctx.sampleRate), d=buf.getChannelData(0);
+            for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*(1-i/d.length);
+            const s=ctx.createBufferSource(),g=ctx.createGain();
+            s.buffer=buf; s.connect(g); g.connect(ctx.destination); g.gain.value=0.35; s.start();
+            [400,600].forEach((f,i)=>{ const o=ctx.createOscillator(),g2=ctx.createGain(); o.connect(g2); g2.connect(ctx.destination); o.frequency.value=f; g2.gain.setValueAtTime(0.18,now+i*.05); g2.gain.exponentialRampToValueAtTime(0.0001,now+i*.05+.2); o.start(now+i*.05); o.stop(now+i*.05+.2); });
+          } else if (type==='spark') {
+            const buf=ctx.createBuffer(1,ctx.sampleRate*.12,ctx.sampleRate),d=buf.getChannelData(0);
+            for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.exp(-i/(d.length*.2));
+            const s=ctx.createBufferSource(),g=ctx.createGain();
+            s.buffer=buf; s.connect(g); g.connect(ctx.destination); g.gain.value=0.6; s.start();
+          } else if (type==='boom') {
+            const buf=ctx.createBuffer(1,ctx.sampleRate*.9,ctx.sampleRate),d=buf.getChannelData(0);
+            for(let i=0;i<d.length;i++) d[i]=(Math.random()*2-1)*Math.pow(1-i/d.length,1.5);
+            const s=ctx.createBufferSource(),g=ctx.createGain();
+            s.buffer=buf; s.connect(g); g.connect(ctx.destination); g.gain.value=0.85; s.start();
+          } else if (type==='win') {
+            [523,659,784,1047,1319].forEach((f,i)=>{ const o=ctx.createOscillator(),g=ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value=f; const t=now+i*.1; g.gain.setValueAtTime(0.22,t); g.gain.exponentialRampToValueAtTime(0.0001,t+.28); o.start(t); o.stop(t+.28); });
+          }
+        } catch(e){}
       },
     };
 
