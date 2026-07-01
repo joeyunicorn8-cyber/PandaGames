@@ -1628,7 +1628,35 @@
     .result-place {
       font-size: 22px; font-weight: 900; color: #2c2c6c; margin-bottom: 8px;
     }
-    .result-score { font-size: 16px; color: #666; margin-bottom: 24px; }
+    .result-score { font-size: 16px; color: #666; margin-bottom: 16px; }
+    .result-stats-row { display:flex; gap:12px; justify-content:center; margin-bottom:14px; }
+    .result-stat { background:#f0f0ff; border-radius:12px; padding:10px 14px; flex:1; min-width:0; }
+    .result-stat-label { font-size:9px; font-weight:800; color:#9090c0; letter-spacing:2px; text-transform:uppercase; margin-bottom:4px; }
+    .result-stat-val { font-size:18px; font-weight:900; color:#2c2c6c; }
+    .result-winner { font-size:14px; font-weight:800; color:#2c2c6c; background:#e8eaff; border-radius:10px; padding:10px 16px; margin-bottom:16px; line-height:1.5; min-height:0; }
+    .result-winner:empty { display:none; }
+    /* Custom quiz builder */
+    #screen-quiz-custom { flex-direction:column; align-items:center; background:linear-gradient(135deg,#e8eaf6 0%,#dce3fa 100%); }
+    #quiz-custom-body { width:min(600px,95vw); display:flex; flex-direction:column; gap:14px; padding:20px 16px 40px; overflow-y:auto; flex:1; }
+    .custom-field-row { display:flex; flex-direction:column; gap:6px; }
+    .custom-label { font-size:11px; font-weight:800; color:#5c5c9c; letter-spacing:2px; text-transform:uppercase; }
+    .custom-input { padding:10px 14px; border:2px solid #c5c8e8; border-radius:10px; font-size:15px; color:#2c2c6c; background:#fff; outline:none; }
+    .custom-input:focus { border-color:#3c3c9c; }
+    .custom-q-block { background:#fff; border-radius:14px; padding:16px; box-shadow:0 2px 12px rgba(60,60,156,0.08); display:flex; flex-direction:column; gap:8px; }
+    .custom-q-header { display:flex; justify-content:space-between; align-items:center; }
+    .custom-q-num { font-size:12px; font-weight:800; color:#3c3c9c; letter-spacing:1px; }
+    .custom-del-btn { background:none; border:none; color:#c0392b; font-size:18px; cursor:pointer; padding:0 4px; }
+    .custom-opts-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+    .custom-opt-wrap { display:flex; align-items:center; gap:6px; }
+    .custom-opt-wrap label { font-size:11px; font-weight:700; color:#666; width:14px; flex-shrink:0; }
+    .custom-opt-wrap input[type=text] { flex:1; padding:7px 10px; border:2px solid #dde; border-radius:8px; font-size:13px; color:#333; }
+    .custom-opt-wrap input[type=radio] { accent-color:#3c3c9c; width:16px; height:16px; cursor:pointer; }
+    .custom-correct-label { font-size:10px; color:#5c5c9c; letter-spacing:1px; }
+    .custom-add-btn { padding:12px; background:#e8eaff; color:#3c3c9c; border:2px dashed #9090c0; border-radius:12px; font-size:14px; font-weight:800; cursor:pointer; letter-spacing:1px; }
+    .custom-add-btn:hover { background:#d5d8ff; }
+    .custom-start-btn { padding:16px; background:#3c3c9c; color:#fff; border:none; border-radius:14px; font-size:16px; font-weight:900; cursor:pointer; letter-spacing:1px; }
+    .custom-start-btn:hover { background:#2c2c7c; }
+    .custom-error { font-size:13px; color:#c0392b; font-weight:700; text-align:center; min-height:0; }
     .btn-back-to-quizzes {
       padding: 14px 36px; background: #3c3c9c; color: #fff; border: none;
       border-radius: 50px; font-size: 15px; font-weight: 800; cursor: pointer;
@@ -2590,7 +2618,31 @@
       <div class="result-trophy" id="result-trophy">🏆</div>
       <div class="result-place" id="result-place"></div>
       <div class="result-score" id="result-score"></div>
+      <div class="result-stats-row">
+        <div class="result-stat"><div class="result-stat-label">ACCURACY</div><div class="result-stat-val" id="result-accuracy">—</div></div>
+        <div class="result-stat"><div class="result-stat-label">TIME</div><div class="result-stat-val" id="result-time">—</div></div>
+        <div class="result-stat"><div class="result-stat-label">COMBINED</div><div class="result-stat-val" id="result-combined">—</div></div>
+      </div>
+      <div class="result-winner" id="result-winner"></div>
       <button class="btn-back-to-quizzes" onclick="MP.cleanup(); MP.roomCode=''; quizListMode='solo'; showScreen('quiz-list')">Back to Quizzes</button>
+    </div>
+  </div>
+
+  <!-- CUSTOM QUIZ BUILDER -->
+  <div id="screen-quiz-custom" class="screen">
+    <div class="quiz-play-topbar">
+      <div class="quiz-play-info">✏️ Build Your Quiz</div>
+      <button class="btn-quit-green" style="border-color:rgba(255,255,255,0.4);color:#fff;background:rgba(255,255,255,0.15);" onclick="showScreen('quiz-list')">QUIT</button>
+    </div>
+    <div id="quiz-custom-body">
+      <div class="custom-field-row">
+        <label class="custom-label">Quiz Title</label>
+        <input id="custom-title" class="custom-input" placeholder="e.g. My Science Quiz" maxlength="40"/>
+      </div>
+      <div id="custom-q-list"></div>
+      <button class="custom-add-btn" onclick="CQ.addQ()">+ Add Question</button>
+      <button class="custom-start-btn" onclick="CQ.start()">▶ Start Quiz!</button>
+      <div id="custom-error" class="custom-error"></div>
     </div>
   </div>
 
@@ -4828,13 +4880,135 @@
         {q:'What do you call shoes with a significantly raised heel?',o:['Flats','Loafers','Heels','Moccasins'],a:2},
         {q:'What is the difference between a skirt and a dress?',o:['A skirt is longer','A dress has an attached top portion','A skirt is always formal','There is no difference'],a:1},
         {q:'What is a poncho?',o:['A type of boot','A sleeveless jacket','A single piece of fabric with a head hole worn as a cloak','A wrap-around skirt'],a:2}
-      ]}
+      ]},
+      {id:'footwear',title:'Footwear Quiz',emoji:'👟',qs:[
+        {q:'What type of shoe has no back and is held on by a strap?',o:['Mule','Sandal','Loafer','Clog'],a:1},
+        {q:'What is a Wellington boot made of?',o:['Leather','Canvas','Rubber','Suede'],a:2},
+        {q:'What are espadrilles traditionally made from?',o:['Rubber and nylon','Jute rope and canvas','Leather and cork','Wool and felt'],a:1},
+        {q:'Which shoe type has a thick crepe or rubber sole and was popular in the 1970s?',o:['Oxford','Platform shoe','Derby','Brogue'],a:1},
+        {q:'What is the bottom part of a shoe that contacts the ground called?',o:['Insole','Upper','Sole','Tongue'],a:2},
+        {q:'Stilettos are named after what?',o:['A city in Italy','A thin dagger','A famous designer','A type of fabric'],a:1},
+        {q:'What country are Birkenstock sandals from?',o:['Sweden','USA','Germany','Netherlands'],a:2},
+        {q:'What are flip-flops called in Australia?',o:['Slippers','Sandals','Thongs','Slides'],a:2},
+        {q:'Which shoe type has a cap toe and laces through eyelets on the upper (not a separate piece)?',o:['Derby','Oxford','Monk strap','Chelsea boot'],a:1},
+        {q:'What is a cobbler?',o:['A shoe designer','A shoe repairperson','A shoe salesperson','A shoe factory worker'],a:1}
+      ]},
+      {id:'puzzle',title:'Puzzle Quiz',emoji:'🧩',qs:[
+        {q:'A Rubik\'s cube in its solved state has how many colours showing?',o:['4','5','6','8'],a:2},
+        {q:'What is a "jigsaw" puzzle named after?',o:['Its inventor John Jigsaw','The jigsaw tool used to cut them','A town in Germany','A type of pattern'],a:1},
+        {q:'In a standard crossword, clues are given for which directions?',o:['Up and Down','Left and Right','Across and Down','North and South'],a:2},
+        {q:'What is the minimum number of moves to solve any Rubik\'s cube called?',o:['God\'s Algorithm','Perfect Solution','Minimal Path','Cube Zero'],a:0},
+        {q:'How many pieces does a standard chess set have in total?',o:['24','32','36','40'],a:1},
+        {q:'A Sudoku grid is divided into how many 3×3 boxes?',o:['6','7','8','9'],a:3},
+        {q:'What type of puzzle requires you to find words hidden in a grid of letters?',o:['Crossword','Word Search','Anagram','Cryptogram'],a:1},
+        {q:'In a maze, what does "dead end" mean?',o:['The start of the maze','A path with no exit','The centre','A wrong turn that loops back'],a:1},
+        {q:'The Tower of Hanoi puzzle was invented in which century?',o:['16th','17th','18th','19th'],a:3},
+        {q:'What is an anagram?',o:['A hidden picture','A word formed by rearranging letters of another word','A number puzzle','A type of code'],a:1}
+      ]},
+      {id:'money',title:'Money Quiz',emoji:'💰',qs:[
+        {q:'What is the currency of Japan?',o:['Won','Yuan','Yen','Ringgit'],a:2},
+        {q:'What does "GDP" stand for?',o:['Gross Domestic Product','General Dollar Price','Government Domestic Plan','Gross Daily Profit'],a:0},
+        {q:'What is inflation?',o:['A decrease in prices over time','An increase in the money supply only','A general rise in prices over time','The value of a country\'s exports'],a:2},
+        {q:'Who is on the US $100 bill?',o:['George Washington','Abraham Lincoln','Benjamin Franklin','Alexander Hamilton'],a:2},
+        {q:'What is a "bull market"?',o:['A market for livestock','A rising stock market','A falling stock market','A market with high inflation'],a:1},
+        {q:'Bitcoin is an example of what?',o:['A stock','A cryptocurrency','A government bond','A commodity'],a:1},
+        {q:'What does "APR" stand for in banking?',o:['Annual Percentage Rate','Average Payment Ratio','Approved Payment Record','Asset Price Return'],a:0},
+        {q:'The Euro is used by how many EU member states (as of 2024)?',o:['15','17','20','27'],a:2},
+        {q:'What is the name for the interest earned on previously earned interest?',o:['Simple interest','Base rate','Compound interest','Dividend'],a:2},
+        {q:'What is the NYSE?',o:['National Youth Savings Exchange','New York Stock Exchange','National Yen Settlement Exchange','New York Savings Entity'],a:1}
+      ]},
+      {id:'jobs',title:'Jobs Quiz',emoji:'💼',qs:[
+        {q:'What does a podiatrist treat?',o:['Eyes','Feet','Teeth','Ears'],a:1},
+        {q:'What is a sommelier?',o:['A professional chef','A wine expert in a restaurant','A pastry maker','A front-of-house manager'],a:1},
+        {q:'An actuary works primarily with what?',o:['Architecture','Statistical risk and finance','Agricultural science','Computer code'],a:1},
+        {q:'What does an orthodontist specialise in?',o:['Heart conditions','Straightening teeth and jaws','Eye diseases','Bone fractures'],a:1},
+        {q:'A cartographer makes what?',o:['Carts','Maps','Cartoons','Cardboard boxes'],a:1},
+        {q:'What job does a "farrier" do?',o:['Delivers mail','Shoes horses','Repairs fences','Grows fruit'],a:1},
+        {q:'In aviation, what does a "first officer" do?',o:['Security screening','Co-pilots the aircraft','Handles luggage','Manages cabin crew'],a:1},
+        {q:'A numismatist collects what?',o:['Stamps','Coins and currency','Rare books','Fossils'],a:1},
+        {q:'What is a "stevedore"?',o:['A type of chef','A dockworker who loads and unloads ships','A railway engineer','A cattle herder'],a:1},
+        {q:'What does an entomologist study?',o:['Birds','Insects','The environment','Ancient languages'],a:1}
+      ]},
+      {id:'landscape',title:'Landscape & Terrain',emoji:'🏔️',qs:[
+        {q:'What is a fjord?',o:['A mountain pass','A narrow sea inlet between cliffs','A flat grassy plain','A type of sand dune'],a:1},
+        {q:'What is the largest desert in the world by area?',o:['Sahara','Gobi','Atacama','Antarctic'],a:3},
+        {q:'What is a mesa?',o:['A river delta','An isolated flat-topped hill with steep sides','A valley between mountains','A coastal wetland'],a:1},
+        {q:'What type of terrain is a "tundra"?',o:['Dense tropical rainforest','A hot sandy desert','A treeless frozen plain','A deep ocean trench'],a:2},
+        {q:'What is an atoll?',o:['A type of volcano','A ring-shaped coral reef island','A large glacier','A submerged mountain'],a:1},
+        {q:'What does "arid" mean when describing climate?',o:['Very cold','Very wet','Very dry','Very windy'],a:2},
+        {q:'What is the term for land completely surrounded by water?',o:['Peninsula','Isthmus','Island','Archipelago'],a:2},
+        {q:'What is a tributary?',o:['A river that flows into a larger river','A lake formed by a glacier','The mouth of a river','A waterfall'],a:0},
+        {q:'Which biome has the highest biodiversity?',o:['Tundra','Desert','Tropical rainforest','Grassland'],a:2},
+        {q:'What is the term for the gradual wearing away of rock by wind and water?',o:['Deposition','Erosion','Weathering','Tectonics'],a:1}
+      ]},
+      {id:'hydraulics',title:'Hydraulics Quiz',emoji:'🔧',qs:[
+        {q:'Hydraulics uses which fluid to transmit power?',o:['Air','Water or oil','Electricity','Steam'],a:1},
+        {q:'What is Pascal\'s Law?',o:['Pressure in a fluid acts only downward','Pressure applied to a confined fluid is transmitted equally in all directions','Fluid pressure decreases with depth','Fluids always flow from high to low pressure'],a:1},
+        {q:'What device converts fluid pressure into mechanical force?',o:['Compressor','Hydraulic cylinder','Pump','Valve'],a:1},
+        {q:'What is the unit of pressure in the SI system?',o:['Newton','Bar','Pascal','Joule'],a:2},
+        {q:'A hydraulic press uses Pascal\'s law to do what?',o:['Cool fluids','Multiply force','Generate electricity','Reduce pressure'],a:1},
+        {q:'What causes cavitation in a hydraulic pump?',o:['Too much oil','Air bubbles or vapour forming due to low pressure','Overheating','Blocked filters'],a:1},
+        {q:'What is the purpose of a hydraulic accumulator?',o:['Filter the fluid','Store energy by holding pressurised fluid','Cool the system','Regulate temperature'],a:1},
+        {q:'In a hydraulic system, what does a "relief valve" do?',o:['Increase pressure','Release excess pressure to prevent damage','Add more fluid','Filter contaminants'],a:1},
+        {q:'What is viscosity?',o:['A fluid\'s colour','A fluid\'s resistance to flow','A fluid\'s temperature','A fluid\'s density'],a:1},
+        {q:'Hydraulic brakes in cars use which type of fluid?',o:['Engine oil','Water','Brake fluid (glycol-based)','Transmission fluid'],a:2}
+      ]},
+      {id:'ancient',title:'Ancient Civilization',emoji:'🏛️',qs:[
+        {q:'Which ancient civilization built the Great Pyramid of Giza?',o:['Romans','Mesopotamians','Egyptians','Greeks'],a:2},
+        {q:'What writing system did ancient Mesopotamians use?',o:['Hieroglyphics','Cuneiform','Linear B','Sanskrit'],a:1},
+        {q:'Julius Caesar was a leader of which ancient empire?',o:['Greek','Persian','Roman','Egyptian'],a:2},
+        {q:'The Colosseum is located in which modern city?',o:['Athens','Istanbul','Cairo','Rome'],a:3},
+        {q:'What was the name of the ancient Greek marketplace and gathering place?',o:['Forum','Agora','Colosseum','Acropolis'],a:1},
+        {q:'Which ancient wonder was located at Alexandria?',o:['Hanging Gardens','Great Pyramid','Lighthouse of Alexandria','Colossus of Rhodes'],a:2},
+        {q:'The Inca Empire was located on which continent?',o:['Africa','Asia','North America','South America'],a:3},
+        {q:'Cleopatra was the ruler of which ancient civilization?',o:['Roman','Greek','Egyptian','Persian'],a:2},
+        {q:'What material did ancient Romans use extensively to build durable structures?',o:['Mud brick','Timber','Concrete (opus caementicium)','Limestone only'],a:2},
+        {q:'Which ancient civilization invented the wheel?',o:['Egyptians','Chinese','Mesopotamians','Greeks'],a:2}
+      ]},
+      {id:'season',title:'Season & Weather Quiz',emoji:'🌦️',qs:[
+        {q:'What causes the seasons on Earth?',o:['Distance from the Sun','Earth\'s axial tilt','The Moon\'s orbit','Solar flares'],a:1},
+        {q:'What is the Coriolis effect?',o:['The warming of oceans','The deflection of winds due to Earth\'s rotation','The cycle of evaporation','The tidal pull of the Moon'],a:1},
+        {q:'In the Southern Hemisphere, summer occurs during which months?',o:['June–August','March–May','December–February','September–November'],a:2},
+        {q:'What is the difference between weather and climate?',o:['They are the same','Weather is short-term; climate is long-term patterns','Climate is daily; weather is yearly','Weather only refers to temperature'],a:1},
+        {q:'What type of cloud produces thunderstorms?',o:['Stratus','Cirrus','Cumulus','Cumulonimbus'],a:3},
+        {q:'What is the term for the transition from winter to spring in the Northern Hemisphere?',o:['Autumnal equinox','Summer solstice','Vernal equinox','Winter solstice'],a:2},
+        {q:'What is a "nor\'easter"?',o:['A wind from the northeast in the Pacific','A type of tornado','A powerful storm along the northeast US coast','A dry summer wind'],a:2},
+        {q:'What does a barometer measure?',o:['Humidity','Wind speed','Atmospheric pressure','Temperature'],a:2},
+        {q:'Which season has the shortest day (least daylight) in the Northern Hemisphere?',o:['Spring','Summer','Autumn','Winter'],a:3},
+        {q:'What is the name for a prolonged period of abnormally high temperatures?',o:['Drought','Heatwave','Humid spell','Tropical surge'],a:1}
+      ]},
+      {id:'buffalo',title:'Buffalo Quiz',emoji:'🦬',qs:[
+        {q:'What is another common name for the American bison?',o:['American Buffalo','American Bull','Great Plains Ox','Prairie Bison'],a:0},
+        {q:'Are American bison and African buffalo the same species?',o:['Yes','No, they are different species','Yes, just different names','They are subspecies of the same animal'],a:1},
+        {q:'What is a group of buffalo called?',o:['A pack','A pride','A herd','A flock'],a:2},
+        {q:'The water buffalo is native to which continent?',o:['Africa','South America','Asia','Europe'],a:2},
+        {q:'How much can a male American bison weigh?',o:['Up to 200 kg','Up to 500 kg','Up to 900 kg','Up to 2000 kg'],a:2},
+        {q:'What do buffalo primarily eat?',o:['Meat and fish','Grass and vegetation','Insects and larvae','Roots and bark only'],a:1},
+        {q:'Buffalo were nearly driven to extinction in North America due to what?',o:['Disease','Climate change','Overhunting and habitat loss','Predation by wolves'],a:2},
+        {q:'What is the speed of an American bison at full sprint?',o:['20 km/h','40 km/h','65 km/h','90 km/h'],a:2},
+        {q:'Cape buffalo are found on which continent?',o:['Asia','South America','Australia','Africa'],a:3},
+        {q:'What is a baby bison called?',o:['Calf','Cub','Foal','Pup'],a:0}
+      ]},
+      {id:'flower',title:'Flower Quiz',emoji:'🌸',qs:[
+        {q:'What is the male reproductive part of a flower called?',o:['Pistil','Petal','Stamen','Sepal'],a:2},
+        {q:'What is the process by which pollen is transferred from one flower to another?',o:['Germination','Pollination','Fertilisation','Photosynthesis'],a:1},
+        {q:'Which flower is the national flower of England?',o:['Daffodil','Thistle','Tudor Rose','Shamrock'],a:2},
+        {q:'Saffron is derived from which flower?',o:['Rose','Lotus','Crocus','Lavender'],a:2},
+        {q:'What is the largest flower in the world?',o:['Sunflower','Rafflesia arnoldii','Giant Dahlia','Titan Arum'],a:1},
+        {q:'Which flower is associated with remembrance, especially for war veterans?',o:['Lily','Daisy','Poppy','Iris'],a:2},
+        {q:'What colour are forget-me-not flowers?',o:['Yellow','Pink','White','Blue'],a:3},
+        {q:'Roses belong to which plant family?',o:['Asteraceae','Rosaceae','Lamiaceae','Fabaceae'],a:1},
+        {q:'What is a flower\'s sepal?',o:['A petal','A leaf-like structure protecting the bud','The central stalk','The pollen sac'],a:1},
+        {q:'Which gas do flowers absorb from the air during photosynthesis?',o:['Oxygen','Nitrogen','Carbon dioxide','Hydrogen'],a:2}
+      ]},
+      {id:'custom',title:'Custom Quiz',emoji:'✏️',qs:[]}
     ];
 
     let currentQuiz = null;
     let currentQIndex = 0;
     let userAnswers = [];
     let answered = false;
+    let quizStartTime = 0;
 
     function ordinal(n) {
       const s = ['th','st','nd','rd'];
@@ -4852,7 +5026,7 @@
         card.innerHTML = `<div class="quiz-card-emoji">${q.emoji}</div>
           <div class="quiz-card-title">${q.title}</div>
           <div class="quiz-card-sub">10 questions</div>`;
-        card.onclick = () => startQuiz(q.id);
+        card.onclick = () => { if (q.id==='custom') { showScreen('quiz-custom'); CQ.init(); } else startQuiz(q.id); };
         grid.appendChild(card);
       });
     }
@@ -4866,6 +5040,7 @@
       currentQIndex = 0;
       userAnswers = [];
       answered = false;
+      quizStartTime = Date.now();
       document.getElementById('quiz-play-title').textContent = currentQuiz.emoji + ' ' + currentQuiz.title;
       showScreen('quiz-play');
       renderQuestion();
@@ -4941,6 +5116,73 @@
     showScreen = function(name) {
       _origShowScreen(name);
       if (name === 'quiz-list') buildQuizGrid();
+    };
+
+    /* ══════════════════════════════════
+       CUSTOM QUIZ BUILDER
+    ══════════════════════════════════ */
+    const CQ = {
+      questions: [],
+      init() {
+        this.questions = [];
+        document.getElementById('custom-title').value = '';
+        document.getElementById('custom-error').textContent = '';
+        this._render();
+      },
+      _render() {
+        const list = document.getElementById('custom-q-list');
+        list.innerHTML = '';
+        this.questions.forEach((q, qi) => {
+          const block = document.createElement('div');
+          block.className = 'custom-q-block';
+          block.innerHTML = `
+            <div class="custom-q-header">
+              <span class="custom-q-num">QUESTION ${qi+1}</span>
+              <button class="custom-del-btn" onclick="CQ.removeQ(${qi})">✕</button>
+            </div>
+            <input class="custom-input" placeholder="Question text…" value="${q.q.replace(/"/g,'&quot;')}"
+              oninput="CQ.questions[${qi}].q=this.value">
+            <div class="custom-correct-label">SELECT THE CORRECT ANSWER ↓</div>
+            <div class="custom-opts-grid">
+              ${['A','B','C','D'].map((lbl,oi)=>`
+                <div class="custom-opt-wrap">
+                  <input type="radio" name="correct-${qi}" value="${oi}" ${q.a===oi?'checked':''} onchange="CQ.questions[${qi}].a=${oi}">
+                  <label>${lbl}</label>
+                  <input type="text" class="custom-input" placeholder="Option ${lbl}…" value="${(q.o[oi]||'').replace(/"/g,'&quot;')}"
+                    oninput="CQ.questions[${qi}].o[${oi}]=this.value">
+                </div>`).join('')}
+            </div>`;
+          list.appendChild(block);
+        });
+      },
+      addQ() {
+        this.questions.push({q:'',o:['','','',''],a:0});
+        this._render();
+        // scroll to bottom
+        document.getElementById('quiz-custom-body').scrollTop = 99999;
+      },
+      removeQ(i) {
+        this.questions.splice(i,1);
+        this._render();
+      },
+      start() {
+        const title = document.getElementById('custom-title').value.trim();
+        const err = document.getElementById('custom-error');
+        if (!title) { err.textContent = 'Please enter a quiz title.'; return; }
+        if (this.questions.length < 2) { err.textContent = 'Add at least 2 questions.'; return; }
+        for (let i=0; i<this.questions.length; i++) {
+          const q = this.questions[i];
+          if (!q.q.trim()) { err.textContent = `Question ${i+1} has no text.`; return; }
+          if (q.o.some(o=>!o.trim())) { err.textContent = `Question ${i+1} has empty options.`; return; }
+        }
+        err.textContent = '';
+        // Inject as a temporary quiz and start it
+        const customQ = QUIZZES.find(x=>x.id==='custom');
+        customQ.title = title;
+        customQ.qs = this.questions.map(q=>({q:q.q,o:[...q.o],a:q.a}));
+        MP.roomCode = '';
+        startQuiz('custom');
+      }
     };
 
     /* ══════════════════════════════════
@@ -5100,11 +5342,12 @@
         this._listeners.push(() => sRef.off('value', sH));
       },
 
-      async submitScore(score) {
+      async submitScore(score, timeTaken, accuracyPct, combined) {
         const db = getDb();
         if (!db || !this.roomCode) return 1;
         await db.ref('rooms/'+this.roomCode+'/players/'+this.id()).update({
-          score, done: true, completedAt: Date.now()
+          score, done: true, completedAt: Date.now(),
+          timeTaken: timeTaken||0, accuracyPct: accuracyPct||0, combined: combined||0
         });
         const snap = await db.ref('rooms/'+this.roomCode+'/players').once('value');
         const done = Object.values(snap.val() || {}).filter(p => p.done);
@@ -5135,6 +5378,7 @@
           <div class="quiz-card-title">${q.title}</div>
           <div class="quiz-card-sub">${quizListMode === 'host' ? 'Host this quiz' : '10 questions'}</div>`;
         card.onclick = () => {
+          if (q.id === 'custom') { showScreen('quiz-custom'); CQ.init(); return; }
           if (quizListMode === 'host') { MP.createRoom(q.id); }
           else { MP.roomCode = ''; startQuiz(q.id); }
         };
@@ -5142,21 +5386,46 @@
       });
     };
 
-    // Override submitQuiz to handle multiplayer scoring
+    // Override submitQuiz to handle multiplayer scoring + accuracy/speed combined
     const _submitQuiz = submitQuiz;
     submitQuiz = async function() {
+      const total = currentQuiz.qs.length;
       const score = userAnswers.filter((a,i) => a === currentQuiz.qs[i].a).length;
+      const timeTaken = Math.round((Date.now() - quizStartTime) / 1000);
+      const accuracyPct = Math.round(score / total * 100);
+      // Combined: accuracy worth 70%, speed bonus worth 30% (max speed bonus at ≤30s)
+      const speedBonus = Math.max(0, Math.round((1 - Math.min(timeTaken, 180) / 180) * 30));
+      const combined = Math.round(accuracyPct * 0.7 + speedBonus);
+
       document.getElementById('quiz-progress-fill').style.width = '100%';
-      const trophy = score >= 9 ? '🏆' : score >= 7 ? '🥈' : score >= 5 ? '🥉' : '📋';
+      const trophy = accuracyPct >= 90 ? '🏆' : accuracyPct >= 70 ? '🥈' : accuracyPct >= 50 ? '🥉' : '📋';
       document.getElementById('result-trophy').textContent = trophy;
       document.getElementById('result-score').textContent =
-        'You scored ' + score + ' out of ' + currentQuiz.qs.length + ' correct.';
+        'You scored ' + score + ' out of ' + total + ' correct.';
+      document.getElementById('result-accuracy').textContent = accuracyPct + '%';
+      const mins = Math.floor(timeTaken/60), secs = timeTaken%60;
+      document.getElementById('result-time').textContent =
+        mins > 0 ? mins+'m '+secs+'s' : secs+'s';
+      document.getElementById('result-combined').textContent = combined + '/100';
 
-      let place;
+      let place, winnerText = '';
       if (MP.roomCode) {
-        place = await MP.submitScore(score);
+        place = await MP.submitScore(score, timeTaken, accuracyPct, combined);
         document.getElementById('result-place').textContent =
           'You are the ' + ordinal(place) + ' person to finish this room!';
+        // Listen for all results to determine winner
+        const db = getDb();
+        if (db) {
+          db.ref('rooms/'+MP.roomCode+'/players').once('value', snap => {
+            const players = Object.values(snap.val()||{}).filter(p=>p.done);
+            if (players.length > 1) {
+              const sorted = [...players].sort((a,b)=>(b.combined||0)-(a.combined||0));
+              const top = sorted[0];
+              winnerText = '🏅 WINNER: ' + (top.name||'?') + ' — ' + (top.combined||0) + '/100 combined score';
+              document.getElementById('result-winner').textContent = winnerText;
+            }
+          });
+        }
       } else {
         const key = 'qc_' + currentQuiz.id;
         const prev = parseInt(localStorage.getItem(key) || '0');
@@ -5164,6 +5433,7 @@
         localStorage.setItem(key, place);
         document.getElementById('result-place').textContent =
           'You are the ' + ordinal(place) + ' person to complete this quiz!';
+        document.getElementById('result-winner').textContent = '';
       }
       showScreen('quiz-result');
     };
