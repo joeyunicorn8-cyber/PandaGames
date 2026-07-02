@@ -322,6 +322,105 @@
     }
     .witm-result-btn:hover { background:rgba(255,255,255,0.15); }
 
+    /* ── THE FEELINGS GAME BUTTON ── */
+    .feelings-hub-btn {
+      position:relative; width:240px; height:240px; cursor:pointer;
+      background:#1a1a1a; border:3px solid #444; border-radius:20px; overflow:hidden;
+      display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px;
+      transition:transform .2s, border-color .2s, box-shadow .2s;
+    }
+    .feelings-hub-btn:hover { transform:scale(1.06); border-color:#fff; box-shadow:0 0 40px rgba(255,255,255,0.2); }
+    .feelings-hub-emojis {
+      position:absolute; inset:0; display:grid; grid-template-columns:repeat(5,1fr);
+      pointer-events:none; overflow:hidden; padding:6px;
+    }
+    .feelings-hub-emojis span {
+      font-size:22px; display:flex; align-items:center; justify-content:center;
+      opacity:0.07; filter:grayscale(1);
+    }
+    .feelings-hub-label {
+      position:relative; z-index:2; font-family:'Georgia',serif; font-style:italic;
+      font-size:18px; font-weight:700; color:#fff; letter-spacing:1px; text-align:center; line-height:1.3; padding:0 12px;
+    }
+    .feelings-hub-sub { position:relative; z-index:2; font-size:10px; color:rgba(255,255,255,0.3); letter-spacing:3px; }
+
+    /* ── THE FEELINGS GAME SCREENS ── */
+    #screen-feelings {
+      flex-direction:column; align-items:center;
+      background: linear-gradient(135deg,#ff6b6b,#feca57,#48dbfb,#ff9ff3,#54a0ff,#5f27cd);
+      background-size:300% 300%; animation:feelings-bg 8s ease infinite;
+      min-height:100vh; padding:0;
+    }
+    @keyframes feelings-bg {
+      0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%}
+    }
+    .feelings-topbar {
+      width:100%; padding:16px 24px; display:flex; align-items:center; gap:16px;
+      background:rgba(0,0,0,0.25); backdrop-filter:blur(8px);
+      border-bottom:2px solid rgba(255,255,255,0.2); box-sizing:border-box; flex-shrink:0;
+    }
+    .feelings-topbar-back {
+      background:rgba(255,255,255,0.15); border:2px solid rgba(255,255,255,0.4); color:#fff;
+      border-radius:20px; padding:6px 16px; font-size:13px; font-weight:800; cursor:pointer;
+      transition:background 0.15s;
+    }
+    .feelings-topbar-back:hover { background:rgba(255,255,255,0.3); }
+    .feelings-topbar-title {
+      font-size:22px; font-weight:900; color:#fff; letter-spacing:3px;
+      text-shadow:0 2px 8px rgba(0,0,0,0.3);
+    }
+    .feelings-grid {
+      display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+      gap:14px; padding:32px 24px; width:100%; max-width:900px; box-sizing:border-box;
+    }
+    .feeling-btn {
+      background:rgba(255,255,255,0.2); border:2px solid rgba(255,255,255,0.4);
+      border-radius:16px; padding:20px 12px; cursor:pointer; text-align:center;
+      backdrop-filter:blur(6px); transition:transform .15s, background .15s, box-shadow .15s;
+      display:flex; flex-direction:column; align-items:center; gap:8px;
+    }
+    .feeling-btn:hover { transform:scale(1.08); background:rgba(255,255,255,0.35); box-shadow:0 6px 24px rgba(0,0,0,0.2); }
+    .feeling-btn-emoji { font-size:36px; }
+    .feeling-btn-name { font-size:13px; font-weight:900; color:#fff; letter-spacing:1px; text-shadow:0 1px 4px rgba(0,0,0,0.3); }
+
+    #screen-feeling-detail {
+      flex-direction:column; align-items:center; justify-content:center;
+      min-height:100vh; padding:0;
+    }
+    .fd-bg {
+      position:absolute; inset:0; animation:feelings-bg 8s ease infinite;
+      background:linear-gradient(135deg,#ff6b6b,#feca57,#48dbfb,#ff9ff3,#54a0ff,#5f27cd);
+      background-size:300% 300%;
+    }
+    .fd-content {
+      position:relative; z-index:2; display:flex; flex-direction:column;
+      align-items:center; gap:20px; padding:40px 24px; text-align:center; width:100%; max-width:500px; box-sizing:border-box;
+    }
+    .fd-back {
+      position:absolute; top:20px; left:20px; z-index:10;
+      background:rgba(255,255,255,0.2); border:2px solid rgba(255,255,255,0.4); color:#fff;
+      border-radius:20px; padding:6px 16px; font-size:13px; font-weight:800; cursor:pointer;
+    }
+    .fd-back:hover { background:rgba(255,255,255,0.35); }
+    .fd-emoji { font-size:96px; filter:drop-shadow(0 4px 16px rgba(0,0,0,0.3)); }
+    .fd-ordinal {
+      font-size:28px; font-weight:900; color:#fff; line-height:1.3;
+      text-shadow:0 2px 12px rgba(0,0,0,0.4); letter-spacing:1px;
+    }
+    .fd-ordinal span { font-size:40px; display:block; }
+    .fd-users-label {
+      font-size:12px; font-weight:800; letter-spacing:3px; color:rgba(255,255,255,0.7);
+      text-transform:uppercase;
+    }
+    .fd-users-list {
+      display:flex; flex-wrap:wrap; gap:8px; justify-content:center; max-width:400px;
+    }
+    .fd-user-chip {
+      background:rgba(255,255,255,0.25); border:1px solid rgba(255,255,255,0.4);
+      border-radius:20px; padding:4px 14px; font-size:13px; font-weight:700; color:#fff;
+      backdrop-filter:blur(4px);
+    }
+
     /* ── DEFUSE THE BOMB BUTTON ── */
     .bomb-hub-btn {
       position:relative; width:240px; height:240px; cursor:pointer;
@@ -2058,6 +2157,18 @@
         <div class="dpg-btn-sub">Are you dumb?</div>
       </button>
 
+      <!-- THE FEELINGS GAME BUTTON -->
+      <button class="feelings-hub-btn" onclick="FG.open()">
+        <div class="feelings-hub-emojis">
+          <span>😊</span><span>😢</span><span>😡</span><span>😍</span><span>😰</span>
+          <span>😴</span><span>😐</span><span>🥹</span><span>😤</span><span>🤗</span>
+          <span>😨</span><span>😌</span><span>🥺</span><span>😔</span><span>😁</span>
+          <span>🤩</span><span>😶</span><span>😞</span><span>🤯</span><span>😇</span>
+        </div>
+        <div class="feelings-hub-label">The Feelings Game</div>
+        <div class="feelings-hub-sub">How do you feel?</div>
+      </button>
+
       <!-- ARTIST BUTTON -->
       <button class="artist-btn" onclick="startArtist()">
         <div class="artist-btn-bg"></div>
@@ -2083,6 +2194,27 @@
         <div class="artist-btn-label">ARTIST</div>
         <div class="artist-btn-sub">Draw &amp; Paint</div>
       </button>
+    </div>
+  </div>
+
+  <!-- THE FEELINGS GAME - PICK A FEELING -->
+  <div id="screen-feelings" class="screen">
+    <div class="feelings-topbar">
+      <button class="feelings-topbar-back" onclick="showScreen('game')">← Back</button>
+      <div class="feelings-topbar-title">THE FEELINGS GAME</div>
+    </div>
+    <div class="feelings-grid" id="feelings-grid"></div>
+  </div>
+
+  <!-- THE FEELINGS GAME - FEELING DETAIL -->
+  <div id="screen-feeling-detail" class="screen" style="position:relative;">
+    <div class="fd-bg"></div>
+    <button class="fd-back" onclick="showScreen('feelings')">← Back</button>
+    <div class="fd-content">
+      <div class="fd-emoji" id="fd-emoji"></div>
+      <div class="fd-ordinal"><span id="fd-ordinal-num"></span>YOU ARE THE <strong id="fd-ordinal-word"></strong> TO FEEL <strong id="fd-feeling-name"></strong></div>
+      <div class="fd-users-label">Others feeling this right now</div>
+      <div class="fd-users-list" id="fd-users-list"></div>
     </div>
   </div>
 
@@ -7029,6 +7161,86 @@
         ctx.strokeStyle='#7a5040';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,s-165,7,0,Math.PI);ctx.stroke();
         this._bubble(ctx,x,s-218,"Ice cream? Anyone?\nGreat day for it haha!");
       },
+    };
+
+    /* ══════════════════════════════════
+       THE FEELINGS GAME
+    ══════════════════════════════════ */
+    const FG = {
+      FEELINGS: [
+        {id:'happy',    name:'HAPPY',       emoji:'😊'},
+        {id:'sad',      name:'SAD',         emoji:'😢'},
+        {id:'angry',    name:'ANGRY',       emoji:'😡'},
+        {id:'excited',  name:'EXCITED',     emoji:'🤩'},
+        {id:'anxious',  name:'ANXIOUS',     emoji:'😰'},
+        {id:'tired',    name:'TIRED',       emoji:'😴'},
+        {id:'bored',    name:'BORED',       emoji:'😐'},
+        {id:'loved',    name:'LOVED',       emoji:'🥹'},
+        {id:'confused', name:'CONFUSED',    emoji:'😵'},
+        {id:'proud',    name:'PROUD',       emoji:'😤'},
+        {id:'nervous',  name:'NERVOUS',     emoji:'😨'},
+        {id:'calm',     name:'CALM',        emoji:'😌'},
+        {id:'grateful', name:'GRATEFUL',    emoji:'🤗'},
+        {id:'lonely',   name:'LONELY',      emoji:'😔'},
+        {id:'frustrated',name:'FRUSTRATED', emoji:'😖'},
+        {id:'hopeful',  name:'HOPEFUL',     emoji:'🌟'},
+        {id:'silly',    name:'SILLY',       emoji:'🤪'},
+        {id:'scared',   name:'SCARED',      emoji:'😱'},
+        {id:'content',  name:'CONTENT',     emoji:'😇'},
+        {id:'overwhelmed',name:'OVERWHELMED',emoji:'🤯'},
+      ],
+      _unsub: null,
+
+      open() {
+        const grid = document.getElementById('feelings-grid');
+        grid.innerHTML = '';
+        this.FEELINGS.forEach(f => {
+          const btn = document.createElement('button');
+          btn.className = 'feeling-btn';
+          btn.innerHTML = `<div class="feeling-btn-emoji">${f.emoji}</div><div class="feeling-btn-name">${f.name}</div>`;
+          btn.onclick = () => this.pick(f);
+          grid.appendChild(btn);
+        });
+        showScreen('feelings');
+      },
+
+      async pick(f) {
+        const db = getDb();
+        const username = typeof me !== 'undefined' ? me : (localStorage.getItem('pg_user') || 'Anonymous');
+        if (!db) return;
+
+        const ref = db.ref('feelings/' + f.id);
+        // Add this user with timestamp
+        await ref.child('users/' + username.replace(/[.#$[\]]/g,'_')).set({ name: username, at: Date.now() });
+
+        // Get count for ordinal
+        const snap = await ref.child('users').once('value');
+        const users = snap.val() || {};
+        const allUsers = Object.values(users).sort((a,b) => a.at - b.at);
+        const myPos = allUsers.findIndex(u => u.name === username) + 1;
+
+        document.getElementById('fd-emoji').textContent = f.emoji;
+        document.getElementById('fd-feeling-name').textContent = f.name;
+        document.getElementById('fd-ordinal-num').textContent = '';
+        document.getElementById('fd-ordinal-word').textContent = this._ordinal(myPos);
+        showScreen('feeling-detail');
+
+        // Live listener for user list
+        if (this._unsub) { this._unsub(); this._unsub = null; }
+        const h = ref.child('users').on('value', snap2 => {
+          const u2 = Object.values(snap2.val() || {}).sort((a,b) => a.at - b.at);
+          const myIdx = u2.findIndex(u => u.name === username) + 1;
+          document.getElementById('fd-ordinal-word').textContent = this._ordinal(myIdx || myPos);
+          const list = document.getElementById('fd-users-list');
+          list.innerHTML = u2.map(u => `<div class="fd-user-chip">${u.name}</div>`).join('');
+        });
+        this._unsub = () => ref.child('users').off('value', h);
+      },
+
+      _ordinal(n) {
+        const s = ['th','st','nd','rd'], v = n % 100;
+        return n + (s[(v-20)%10] || s[v] || s[0]);
+      }
     };
 
     /* ══════════════════════════════════
