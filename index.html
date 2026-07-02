@@ -7192,6 +7192,7 @@
       _unsub: null,
 
       open() {
+        postSystemMsg(me + ' JOINED THE FEELINGS GAME');
         const grid = document.getElementById('feelings-grid');
         grid.innerHTML = '';
         this.FEELINGS.forEach(f => {
