@@ -7451,6 +7451,8 @@
       _LIGHTS:['#f1948a','#85c1e9','#82e0aa','#fad7a0','#c39bd3'],
 
       open() {
+        const me = document.getElementById('display-username').textContent.trim();
+        postSystemMsg(me + ' JOINED BLOCK SIMULATOR');
         showScreen('bsim');
         document.getElementById('bsim-color-swatch').style.background = this.customColor;
         document.getElementById('bsim-color-picker').value = this.customColor;
