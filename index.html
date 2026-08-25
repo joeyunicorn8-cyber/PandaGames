@@ -2066,10 +2066,71 @@
     }
 
     /* ── UNO GAME SCREEN ── */
-    #screen-uno {
+    #screen-uno, #screen-uno-host, #screen-uno-join, #screen-uno-play {
       flex-direction: column;
       background: radial-gradient(ellipse at center, #1b4332 0%, #08261a 80%);
     }
+
+    /* ── UNO LOBBY / HOST / JOIN ── */
+    .uno-lobby {
+      flex: 1; width: 100%; display: flex; align-items: center; justify-content: center;
+      padding: 90px 20px 40px; min-height: 100vh; gap: 20px; flex-wrap: wrap;
+    }
+    .uno-lobby-card {
+      background: #10241a; border: 1px solid rgba(255,255,255,0.12); border-radius: 22px;
+      padding: 36px 40px; width: 100%; max-width: 480px; text-align: center;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .uno-lobby-heading { font-size: 16px; font-weight: 800; letter-spacing: 0.5px; color: #fff; margin-bottom: 22px; }
+    .uno-lobby-sub { font-size: 13px; color: #9cc2ab; margin-top: 6px; }
+
+    .uno-lobby-mode-btns { display: flex; flex-direction: column; gap: 12px; }
+    .uno-mode-btn {
+      display: flex; align-items: center; gap: 14px; text-align: left;
+      padding: 16px 18px; background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1);
+      border-radius: 14px; cursor: pointer; transition: border-color 0.15s, background 0.15s, transform 0.15s;
+    }
+    .uno-mode-btn:hover { border-color: #f4b400; background: rgba(255,255,255,0.09); transform: translateY(-1px); }
+    .uno-mode-icon { font-size: 28px; }
+    .uno-mode-label { font-size: 15px; font-weight: 800; color: #fff; }
+    .uno-mode-sub { font-size: 12px; color: #8fbfa2; margin-top: 2px; }
+
+    .uno-count-options { display: flex; gap: 12px; justify-content: center; margin-bottom: 22px; }
+    .uno-count-opt {
+      width: 60px; height: 60px; border-radius: 14px;
+      background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.15);
+      color: #fff; font-size: 22px; font-weight: 900; cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .uno-count-opt.active { border-color: #f4b400; background: rgba(244,180,0,0.18); }
+    .uno-lobby-back {
+      display: block; margin: 14px auto 0; background: none; border: none; color: #8fbfa2;
+      font-size: 13px; cursor: pointer; text-decoration: underline;
+    }
+
+    .uno-room-code {
+      font-size: 64px; font-weight: 900; letter-spacing: 10px; font-family: 'Courier New', monospace;
+      color: #f4b400; margin: 8px 0;
+    }
+    .uno-lobby-players { margin-top: 20px; display: flex; flex-direction: column; gap: 8px; text-align: left; }
+    .uno-lobby-player {
+      display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px;
+      background: rgba(255,255,255,0.06); font-weight: 700; color: #fff; font-size: 14px;
+    }
+    .uno-lobby-player .tag-host { margin-left: auto; font-size: 10px; letter-spacing: 1px; color: #f4b400; }
+
+    .uno-code-inputs { display: flex; gap: 12px; justify-content: center; margin-bottom: 18px; }
+    .uno-code-input {
+      width: 64px; height: 76px; text-align: center; font-size: 36px; font-weight: 900;
+      font-family: 'Courier New', monospace; color: #f4b400; background: rgba(255,255,255,0.06);
+      border: 2px solid rgba(255,255,255,0.2); border-radius: 12px; outline: none; text-transform: uppercase;
+      transition: border-color 0.15s;
+    }
+    .uno-code-input:focus { border-color: #f4b400; }
+    .uno-join-err { color: #ff6b6b; font-size: 13px; font-weight: 700; min-height: 18px; margin-bottom: 8px; }
+
+    .uno-lobby-card button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .uno-end-waiting { font-size: 13px; color: #9cc2ab; margin-top: -8px; }
 
     .uno-topbar {
       position: fixed; top: 0; left: 0; right: 0; height: 56px;
@@ -2342,7 +2403,7 @@
       </button>
 
       <!-- UNO BUTTON -->
-      <button class="uno-btn" onclick="UNO.open()">
+      <button class="uno-btn" onclick="UNO.openLobby()">
         <div class="uno-btn-bg"></div>
         <div class="uno-btn-oval"><span>UNO</span></div>
         <div class="uno-btn-sub">Classic Card Game</div>
@@ -3128,6 +3189,100 @@
   <div id="screen-uno" class="screen">
     <div class="uno-topbar">
       <div class="uno-topbar-title">🎴 UNO</div>
+      <button class="btn-quit" onclick="showScreen('game')">QUIT</button>
+    </div>
+
+    <div class="uno-lobby">
+      <div class="uno-lobby-card" id="uno-lobby-step-mode">
+        <div class="uno-lobby-heading">How do you want to play?</div>
+        <div class="uno-lobby-mode-btns">
+          <button class="uno-mode-btn" onclick="UNO.pickMode('bots')">
+            <div class="uno-mode-icon">🤖</div>
+            <div>
+              <div class="uno-mode-label">Play vs Bots</div>
+              <div class="uno-mode-sub">Instant, offline</div>
+            </div>
+          </button>
+          <button class="uno-mode-btn" onclick="UNO.pickMode('host')">
+            <div class="uno-mode-icon">📡</div>
+            <div>
+              <div class="uno-mode-label">Host with Friends</div>
+              <div class="uno-mode-sub">Create a room, share the code</div>
+            </div>
+          </button>
+          <button class="uno-mode-btn" onclick="UNO.pickMode('join')">
+            <div class="uno-mode-icon">🔑</div>
+            <div>
+              <div class="uno-mode-label">Join a Game</div>
+              <div class="uno-mode-sub">Enter a friend's room code</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div class="uno-lobby-card" id="uno-lobby-step-count" style="display:none;">
+        <div class="uno-lobby-heading" id="uno-count-heading">How many players?</div>
+        <div class="uno-count-options" id="uno-count-options">
+          <button class="uno-count-opt" onclick="UNO.setCount(2)">2</button>
+          <button class="uno-count-opt" onclick="UNO.setCount(3)">3</button>
+          <button class="uno-count-opt" onclick="UNO.setCount(4)">4</button>
+        </div>
+        <button class="btn-play-again" id="uno-lobby-confirm" onclick="UNO.confirmLobby()">Start</button>
+        <button class="uno-lobby-back" onclick="UNO.backToModeChoice()">← Back</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNO HOST LOBBY -->
+  <div id="screen-uno-host" class="screen">
+    <div class="uno-topbar">
+      <div class="uno-topbar-title">🎴 UNO — HOSTING</div>
+      <button class="btn-quit" onclick="UNO.cancelHost()">CANCEL</button>
+    </div>
+    <div class="uno-lobby">
+      <div class="uno-lobby-card">
+        <div class="uno-lobby-heading">Room Code — share with friends</div>
+        <div class="uno-room-code" id="uno-host-code">---</div>
+        <div class="uno-lobby-sub">Waiting for players… (<span id="uno-host-count">1</span>/<span id="uno-host-max">4</span>)</div>
+        <div class="uno-lobby-players" id="uno-host-players"></div>
+        <button class="btn-play-again" id="uno-host-start-btn" onclick="UNO.startHostedGame()" disabled>Start Game</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNO JOIN -->
+  <div id="screen-uno-join" class="screen">
+    <div class="uno-topbar">
+      <div class="uno-topbar-title">🎴 UNO — JOIN</div>
+      <button class="btn-quit" onclick="UNO.cancelJoin()">CANCEL</button>
+    </div>
+    <div class="uno-lobby">
+      <div class="uno-lobby-card" id="uno-join-form">
+        <div class="uno-lobby-heading">Enter the room code</div>
+        <div class="uno-code-inputs">
+          <input class="uno-code-input" id="un1" maxlength="1"
+            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'');if(this.value)document.getElementById('un2').focus()">
+          <input class="uno-code-input" id="un2" maxlength="1"
+            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'');if(this.value)document.getElementById('un3').focus()"
+            onkeydown="if(event.key==='Backspace'&&!this.value)document.getElementById('un1').focus()">
+          <input class="uno-code-input" id="un3" maxlength="1"
+            oninput="this.value=this.value.toUpperCase().replace(/[^A-Z]/g,'')"
+            onkeydown="if(event.key==='Backspace'&&!this.value)document.getElementById('un2').focus()">
+        </div>
+        <div class="uno-join-err" id="uno-join-err"></div>
+        <button class="btn-play-again" onclick="UNO.joinRoom()">JOIN</button>
+      </div>
+      <div class="uno-lobby-card" id="uno-join-waiting" style="display:none;">
+        <div class="uno-lobby-heading">Joined! Waiting for host to start…</div>
+        <div class="uno-lobby-players" id="uno-join-players"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- UNO GAME TABLE -->
+  <div id="screen-uno-play" class="screen">
+    <div class="uno-topbar">
+      <div class="uno-topbar-title">🎴 UNO</div>
       <button class="btn-quit" onclick="UNO.quit()">QUIT</button>
     </div>
 
@@ -3171,9 +3326,10 @@
       <div class="uno-end-title" id="uno-end-title">YOU WIN!</div>
       <div class="uno-end-sub" id="uno-end-sub"></div>
       <div class="lose-buttons">
-        <button class="btn-play-again" onclick="UNO.newRound()">Play Again</button>
+        <button class="btn-play-again" id="uno-play-again-btn" onclick="UNO.newRound()">Play Again</button>
         <button class="btn-quit-solid" onclick="UNO.quit()">Quit</button>
       </div>
+      <div class="uno-end-waiting" id="uno-end-waiting-host" style="display:none;">Waiting for the host to start a new round…</div>
     </div>
   </div>
 
@@ -8338,7 +8494,7 @@
     };
 
     /* ══════════════════════════════════
-       UNO — classic rules, 4 players (you + 3 bots)
+       UNO — classic rules, 2-4 players, vs bots or vs friends online
     ══════════════════════════════════ */
     const UNO = {
       COLORS: ['red', 'yellow', 'green', 'blue'],
@@ -8349,39 +8505,284 @@
       dir: 1,
       currentColor: null,
       gameOver: false,
+      winnerIndex: -1,
       busy: false,
       awaitingPassDecision: false,
       pendingWildCard: null,
       _unoCallTimer: null,
 
-      open() {
+      mode: 'bots',        // 'bots' | 'friends'
+      online: false,
+      isHost: false,
+      myIndex: 0,
+      roomCode: '',
+      maxPlayers: 4,
+      fbRoomRef: null,
+      fbGameRef: null,
+      _pendingMode: null,
+      _pendingCount: 4,
+      _overlayShown: false,
+      _launchedOnline: false,
+
+      /* ══════ LOBBY ══════ */
+      openLobby() {
+        this._pendingMode = null;
+        document.getElementById('uno-lobby-step-count').style.display = 'none';
+        document.getElementById('uno-lobby-step-mode').style.display = 'block';
         showScreen('uno');
-        const me = document.getElementById('display-username').textContent.trim();
-        if (me) postSystemMsg(me + ' JOINED UNO');
-        this.newRound();
       },
 
+      pickMode(mode) {
+        if (mode === 'join') { this._openJoinScreen(); return; }
+        this._pendingMode = mode;
+        this._pendingCount = 4;
+        document.querySelectorAll('#uno-count-options .uno-count-opt').forEach(b => b.classList.remove('active'));
+        document.getElementById('uno-count-heading').textContent = mode === 'bots' ? 'How many players (incl. you)?' : 'Max players for your room?';
+        document.getElementById('uno-lobby-confirm').textContent = mode === 'bots' ? 'Start Game' : 'Create Room';
+        document.getElementById('uno-lobby-step-mode').style.display = 'none';
+        document.getElementById('uno-lobby-step-count').style.display = 'block';
+      },
+
+      setCount(n) {
+        this._pendingCount = n;
+        document.querySelectorAll('#uno-count-options .uno-count-opt').forEach((b, i) => b.classList.toggle('active', i + 2 === n));
+      },
+
+      backToModeChoice() {
+        document.getElementById('uno-lobby-step-count').style.display = 'none';
+        document.getElementById('uno-lobby-step-mode').style.display = 'block';
+      },
+
+      confirmLobby() {
+        if (this._pendingMode === 'bots') this.startBotGame(this._pendingCount);
+        else if (this._pendingMode === 'host') this.hostRoom(this._pendingCount);
+      },
+
+      /* ══════ VS BOTS ══════ */
+      startBotGame(count) {
+        count = Math.max(2, Math.min(4, count || 4));
+        this.mode = 'bots'; this.online = false; this.isHost = false; this.myIndex = 0;
+        this.players = [{ name: 'You', isBot: false, hand: [] }];
+        for (let i = 1; i < count; i++) this.players.push({ name: 'Bot ' + i, isBot: true, hand: [] });
+        showScreen('uno-play');
+        const me = document.getElementById('display-username').textContent.trim();
+        if (me) postSystemMsg(me + ' JOINED UNO vs ' + (count - 1) + ' BOT' + (count - 1 === 1 ? '' : 'S'));
+        this._dealAndStart();
+      },
+
+      /* ══════ HOST WITH FRIENDS ══════ */
+      hostRoom(maxPlayers) {
+        const db = getDb();
+        if (!db) { alert('Multiplayer not available.'); return; }
+        const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+        let code = '';
+        for (let i = 0; i < 3; i++) code += chars[Math.floor(Math.random() * chars.length)];
+        const me = document.getElementById('display-username').textContent.trim() || 'Host';
+
+        this.mode = 'friends'; this.online = true; this.isHost = true; this.myIndex = 0;
+        this.roomCode = code; this.maxPlayers = Math.max(2, Math.min(4, maxPlayers || 4));
+
+        document.getElementById('uno-host-code').textContent = code;
+        document.getElementById('uno-host-max').textContent = this.maxPlayers;
+        document.getElementById('uno-host-start-btn').disabled = true;
+        showScreen('uno-host');
+
+        this.fbRoomRef = db.ref('uno/' + code);
+        this.fbRoomRef.set({ state: 'waiting', host: me, maxPlayers: this.maxPlayers, players: [me] });
+        this.fbRoomRef.on('value', snap => this._onHostLobbyUpdate(snap.val()));
+      },
+
+      _onHostLobbyUpdate(room) {
+        if (!room) return;
+        const players = room.players || [];
+        document.getElementById('uno-host-count').textContent = players.length;
+        document.getElementById('uno-host-players').innerHTML = players.map((n, i) =>
+          '<div class="uno-lobby-player">' + this._escapeHtml(n) + (i === 0 ? '<span class="tag-host">HOST</span>' : '') + '</div>'
+        ).join('');
+        document.getElementById('uno-host-start-btn').disabled = players.length < 2;
+      },
+
+      startHostedGame() {
+        if (!this.fbRoomRef) return;
+        this.fbRoomRef.once('value').then(snap => {
+          const room = snap.val();
+          const names = (room && room.players) || [];
+          if (names.length < 2) return;
+          this.fbRoomRef.off();
+          this.players = names.map(n => ({ name: n, isBot: false, hand: [] }));
+          this.myIndex = 0;
+          this._overlayShown = false;
+          this.fbGameRef = this.fbRoomRef.child('game');
+          this._dealAndStart().then(() => {
+            this.fbRoomRef.update({ state: 'playing' });
+            this._attachGameListener();
+            showScreen('uno-play');
+            const me = document.getElementById('display-username').textContent.trim();
+            if (me) postSystemMsg(me + ' STARTED A GAME OF UNO (Room: ' + this.roomCode + ')');
+          });
+        });
+      },
+
+      cancelHost() {
+        if (this.fbRoomRef) { this.fbRoomRef.off(); this.fbRoomRef.remove(); this.fbRoomRef = null; }
+        this.openLobby();
+      },
+
+      /* ══════ JOIN ══════ */
+      _openJoinScreen() {
+        ['un1', 'un2', 'un3'].forEach(id => document.getElementById(id).value = '');
+        document.getElementById('uno-join-err').textContent = '';
+        document.getElementById('uno-join-form').style.display = 'block';
+        document.getElementById('uno-join-waiting').style.display = 'none';
+        this._launchedOnline = false;
+        showScreen('uno-join');
+        setTimeout(() => document.getElementById('un1').focus(), 200);
+      },
+
+      cancelJoin() {
+        if (this.fbRoomRef) { this.fbRoomRef.off(); this.fbRoomRef = null; }
+        this.openLobby();
+      },
+
+      joinRoom() {
+        const code = ['un1', 'un2', 'un3'].map(id => document.getElementById(id).value.trim().toUpperCase()).join('');
+        if (code.length < 3) { document.getElementById('uno-join-err').textContent = 'Enter all 3 letters.'; return; }
+        const db = getDb();
+        if (!db) { document.getElementById('uno-join-err').textContent = 'Multiplayer unavailable.'; return; }
+        const ref = db.ref('uno/' + code);
+        ref.once('value').then(snap => {
+          const room = snap.val();
+          if (!room || room.state !== 'waiting') {
+            document.getElementById('uno-join-err').textContent = 'Room not found or already started.'; return;
+          }
+          const players = room.players || [];
+          if (players.length >= room.maxPlayers) {
+            document.getElementById('uno-join-err').textContent = 'Room is full.'; return;
+          }
+          const me = document.getElementById('display-username').textContent.trim() || 'Guest';
+          this.mode = 'friends'; this.online = true; this.isHost = false;
+          this.myIndex = players.length;
+          this.roomCode = code; this.maxPlayers = room.maxPlayers; this.fbRoomRef = ref;
+          this._overlayShown = false; this._launchedOnline = false;
+          ref.update({ players: [...players, me] });
+          document.getElementById('uno-join-form').style.display = 'none';
+          document.getElementById('uno-join-waiting').style.display = 'block';
+          ref.on('value', snap2 => this._onJoinerUpdate(snap2.val()));
+        });
+      },
+
+      _onJoinerUpdate(room) {
+        if (!room) return;
+        const players = room.players || [];
+        const box = document.getElementById('uno-join-players');
+        if (box) box.innerHTML = players.map((n, i) =>
+          '<div class="uno-lobby-player">' + this._escapeHtml(n) + (i === 0 ? '<span class="tag-host">HOST</span>' : '') + '</div>'
+        ).join('');
+        if (room.state === 'playing' && !this._launchedOnline) {
+          this._launchedOnline = true;
+          this.players = players.map(n => ({ name: n, isBot: false, hand: [] }));
+          this.fbRoomRef.off();
+          this.fbGameRef = this.fbRoomRef.child('game');
+          this._attachGameListener();
+          showScreen('uno-play');
+          const me = document.getElementById('display-username').textContent.trim();
+          if (me) postSystemMsg(me + ' JOINED UNO (Room: ' + this.roomCode + ')');
+        }
+      },
+
+      _escapeHtml(s) {
+        return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      },
+
+      /* ══════ ONLINE SYNC ══════ */
+      _attachGameListener() {
+        if (!this.fbGameRef) return;
+        this.fbGameRef.on('value', snap => this._applyIncomingState(snap.val()));
+      },
+
+      _detachGameListener() {
+        if (this.fbGameRef) { this.fbGameRef.off(); this.fbGameRef = null; }
+        if (this.fbRoomRef) { this.fbRoomRef.off(); this.fbRoomRef = null; }
+      },
+
+      _serializeState() {
+        return {
+          turn: this.turn,
+          dir: this.dir,
+          currentColor: this.currentColor,
+          gameOver: this.gameOver,
+          winnerIndex: this.gameOver ? this.winnerIndex : null,
+          awaitingPassIndex: this.awaitingPassDecision ? this.turn : null,
+          deck: this.deck,
+          discard: this.discard,
+          hands: this.players.map(p => p.hand),
+          updatedAt: Date.now(),
+        };
+      },
+
+      _pushState() {
+        if (!this.fbGameRef) return Promise.resolve();
+        return this.fbGameRef.set(this._serializeState());
+      },
+
+      _applyIncomingState(state) {
+        if (!state || !this.online) return;
+        this.turn = state.turn;
+        this.dir = state.dir;
+        this.currentColor = state.currentColor;
+        this.deck = state.deck || [];
+        this.discard = state.discard || [];
+        (state.hands || []).forEach((h, i) => { if (this.players[i]) this.players[i].hand = h || []; });
+        this.awaitingPassDecision = state.awaitingPassIndex === this.myIndex;
+        const wasOver = this.gameOver;
+        this.gameOver = !!state.gameOver;
+        this.busy = this.gameOver || this.turn !== this.myIndex;
+        this.render();
+        if (this.gameOver && !wasOver && !this._overlayShown) {
+          this._overlayShown = true;
+          this._showEndOverlay(this.players[state.winnerIndex], state.winnerIndex === this.myIndex);
+        }
+      },
+
+      /* ══════ SHARED SETUP ══════ */
       quit() {
+        this._detachGameListener();
+        this.online = false;
         document.getElementById('uno-end-overlay').classList.remove('visible');
         document.getElementById('uno-color-picker').classList.remove('visible');
-        showScreen('game');
+        this.openLobby();
       },
 
       newRound() {
+        if (this.online && !this.isHost) return; // only the host can restart an online room
         document.getElementById('uno-end-overlay').classList.remove('visible');
         document.getElementById('uno-color-picker').classList.remove('visible');
         document.getElementById('uno-call-banner').classList.remove('visible');
+        this._overlayShown = false;
+        this._dealAndStart();
+      },
+
+      _dealAndStart() {
+        this._dealState();
+        if (this.online) return this._pushState();
+        this._log('New round — 7 cards each. Match the colour, number or symbol.');
+        this.render();
+        if (this.players[this.turn].isBot) {
+          this.busy = true;
+          setTimeout(() => this._botTurn(), 800);
+        }
+        return Promise.resolve();
+      },
+
+      _dealState() {
         this.gameOver = false;
+        this.winnerIndex = -1;
         this.busy = false;
         this.awaitingPassDecision = false;
         this.pendingWildCard = null;
         this.dir = 1;
-        this.players = [
-          { name: 'You', isBot: false, hand: [] },
-          { name: 'Bot 1', isBot: true, hand: [] },
-          { name: 'Bot 2', isBot: true, hand: [] },
-          { name: 'Bot 3', isBot: true, hand: [] },
-        ];
+        this.players.forEach(p => p.hand = []);
+
         this.deck = this._buildDeck();
         this._shuffle(this.deck);
         this.discard = [];
@@ -8397,13 +8798,6 @@
         this.currentColor = first.color;
         this.turn = 0;
         this._applyStartEffect(first);
-
-        this._log('New round — 7 cards each. Match the colour, number or symbol.');
-        this.render();
-        if (this.players[this.turn].isBot) {
-          this.busy = true;
-          setTimeout(() => this._botTurn(), 800);
-        }
       },
 
       _buildDeck() {
@@ -8469,8 +8863,8 @@
       },
 
       playCard(index) {
-        if (this.gameOver || this.busy || this.turn !== 0) return;
-        const hand = this.players[0].hand;
+        if (this.gameOver || this.busy || this.turn !== this.myIndex) return;
+        const hand = this.players[this.myIndex].hand;
         const card = hand[index];
         if (!card) return;
         if (!this._canPlay(card)) { this._log("You can't play that card — it must match the colour, number or symbol."); return; }
@@ -8494,8 +8888,8 @@
       },
 
       drawCard() {
-        if (this.gameOver || this.busy || this.turn !== 0 || this.awaitingPassDecision) return;
-        const hand = this.players[0].hand;
+        if (this.gameOver || this.busy || this.turn !== this.myIndex || this.awaitingPassDecision) return;
+        const hand = this.players[this.myIndex].hand;
         if (hand.some(c => this._canPlay(c))) {
           this._log('You have a playable card — play it instead of drawing.');
           return;
@@ -8533,7 +8927,7 @@
         this._log(player.name + ' played ' + this._cardLabel(card) + (chosenColor ? (' → ' + chosenColor.toUpperCase()) : ''));
         this.render();
         if (player.hand.length === 0) { this._endRound(player); return; }
-        if (player.hand.length === 1) this._showUnoCall(player.name);
+        if (player.hand.length === 1) this._showUnoCall(player.name, this.turn === this.myIndex);
         setTimeout(() => this._applyEffect(card), 450);
       },
 
@@ -8565,6 +8959,7 @@
       },
 
       _nextTurnFlow() {
+        if (this.online) { this._pushState(); return; }
         if (this.gameOver) { this.render(); return; }
         this.busy = this.players[this.turn].isBot;
         this.render();
@@ -8615,9 +9010,9 @@
         return best;
       },
 
-      _showUnoCall(name) {
+      _showUnoCall(name, isMe) {
         const el = document.getElementById('uno-call-banner');
-        el.textContent = (name === 'You' ? 'UNO!' : name.toUpperCase() + ': UNO!');
+        el.textContent = (isMe ? 'UNO!' : name.toUpperCase() + ': UNO!');
         el.classList.remove('visible');
         void el.offsetWidth;
         el.classList.add('visible');
@@ -8627,24 +9022,32 @@
 
       _endRound(winner) {
         this.gameOver = true;
+        this.winnerIndex = this.players.indexOf(winner);
+        if (this.online) { this._pushState(); return; }
         this.render();
+        this._showEndOverlay(winner, this.winnerIndex === this.myIndex);
+      },
+
+      _showEndOverlay(winner, iWon) {
         const overlay = document.getElementById('uno-end-overlay');
         const title = document.getElementById('uno-end-title');
         const sub = document.getElementById('uno-end-sub');
-        if (winner.isBot) {
-          title.textContent = 'YOU LOSE';
-          title.style.background = 'linear-gradient(135deg, #ff4444, #ff0000, #cc0000)';
-          title.style.webkitBackgroundClip = 'text';
-          sub.textContent = winner.name + ' played their last card first.';
-        } else {
+        if (iWon) {
           title.textContent = 'YOU WIN!';
           title.style.background = 'linear-gradient(135deg, #ffd93d, #ff9800, #ff5722)';
           title.style.webkitBackgroundClip = 'text';
           sub.textContent = 'You played your last card first!';
+        } else {
+          title.textContent = 'YOU LOSE';
+          title.style.background = 'linear-gradient(135deg, #ff4444, #ff0000, #cc0000)';
+          title.style.webkitBackgroundClip = 'text';
+          sub.textContent = (winner ? winner.name : 'Someone') + ' played their last card first.';
         }
+        document.getElementById('uno-play-again-btn').style.display = (!this.online || this.isHost) ? 'inline-block' : 'none';
+        document.getElementById('uno-end-waiting-host').style.display = (this.online && !this.isHost) ? 'block' : 'none';
         overlay.classList.add('visible');
         const me = document.getElementById('display-username').textContent.trim();
-        if (me) postSystemMsg(winner.isBot ? (me + ' LOST A GAME OF UNO') : (me + ' WON A GAME OF UNO 🎴'));
+        if (me) postSystemMsg(iWon ? (me + ' WON A GAME OF UNO 🎴') : (me + ' LOST A GAME OF UNO'));
       },
 
       _cardSymbol(card) {
@@ -8686,7 +9089,8 @@
       _renderOpponents() {
         const box = document.getElementById('uno-opponents');
         box.innerHTML = '';
-        for (let i = 1; i < this.players.length; i++) {
+        for (let i = 0; i < this.players.length; i++) {
+          if (i === this.myIndex) continue;
           const p = this.players[i];
           const n = p.hand.length;
           const div = document.createElement('div');
@@ -8722,32 +9126,34 @@
         document.getElementById('uno-deck-count').textContent = this.deck.length;
         document.getElementById('uno-direction').textContent = this.dir === 1 ? '↻' : '↺';
         const drawPile = document.getElementById('uno-draw-pile');
-        drawPile.classList.toggle('disabled', this.turn !== 0 || this.busy || this.gameOver || this.awaitingPassDecision);
+        drawPile.classList.toggle('disabled', this.turn !== this.myIndex || this.busy || this.gameOver || this.awaitingPassDecision);
         document.getElementById('uno-pass-btn').classList.toggle('visible', this.awaitingPassDecision);
       },
 
       _renderHand() {
         const box = document.getElementById('uno-hand');
         box.innerHTML = '';
-        const me = this.players[0];
+        const me = this.players[this.myIndex];
+        if (!me) return;
         me.hand.forEach((card, i) => {
           const el = this._buildCardEl(card);
           el.classList.add('hand-card');
-          const canAct = !this.gameOver && this.turn === 0 && !this.busy;
+          const canAct = !this.gameOver && this.turn === this.myIndex && !this.busy;
           el.classList.toggle('playable', canAct && this._canPlay(card));
           el.onclick = () => this.playCard(i);
           box.appendChild(el);
         });
-        if (!this.gameOver && this.turn === 0 && !this.busy) this._renderStatus();
+        if (!this.gameOver && this.turn === this.myIndex && !this.busy) this._renderStatus();
       },
 
       _renderStatus() {
         if (this.gameOver) return;
         const el = document.getElementById('uno-status');
-        if (this.turn === 0) {
+        if (this.turn === this.myIndex) {
           el.textContent = this.awaitingPassDecision ? 'Play your drawn card or pass' : 'Your turn — play a card or draw';
         } else {
-          el.textContent = this.players[this.turn].name + "'s turn…";
+          const p = this.players[this.turn];
+          el.textContent = (p ? p.name : 'Someone') + "'s turn…";
         }
       },
     };
@@ -8761,7 +9167,9 @@
       if (e.key === 'Escape') {
         if (active.id === 'screen-ttt') quitTTT();
         if (active.id === 'screen-slider') quitSlider();
-        if (active.id === 'screen-uno') UNO.quit();
+        if (active.id === 'screen-uno-play') UNO.quit();
+        if (active.id === 'screen-uno-host') UNO.cancelHost();
+        if (active.id === 'screen-uno-join') UNO.cancelJoin();
         return;
       }
       if (e.key === 'Enter') {
