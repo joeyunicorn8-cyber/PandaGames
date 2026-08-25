@@ -2085,11 +2085,20 @@
       gap: 18px; padding: 80px 20px 24px; min-height: 100vh;
     }
 
-    .uno-opponents { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; }
-    .uno-opp { display: flex; flex-direction: column; align-items: center; gap: 6px; opacity: 0.7; transition: opacity 0.2s; }
+    .uno-opponents { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; padding-top: 4px; }
+    .uno-opp { display: flex; flex-direction: column; align-items: center; gap: 8px; opacity: 0.7; transition: opacity 0.2s; }
     .uno-opp.active { opacity: 1; }
-    .uno-opp.active .uno-card.back { box-shadow: 0 0 0 3px #fff, 0 0 22px rgba(255,255,255,0.6); }
+    .uno-opp.active .uno-mini-card { box-shadow: 0 0 0 2px #fff, 0 0 10px rgba(255,255,255,0.5); }
+    .uno-opp-stack { position: relative; height: 40px; }
+    .uno-mini-card {
+      position: absolute; top: 0;
+      width: 26px; height: 38px; border-radius: 5px;
+      background: linear-gradient(160deg, #14142b, #05050f);
+      border: 1.5px solid rgba(255,255,255,0.3);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
     .uno-opp-name { font-size: 12px; letter-spacing: 1px; color: #cfe8d8; font-weight: 700; }
+    .uno-opp-count { color: #8fbfa2; font-weight: 600; }
     .uno-tag-uno {
       display: inline-block; margin-left: 4px; padding: 1px 6px; border-radius: 8px;
       background: #d0021b; color: #fff; font-size: 9px; font-weight: 900; letter-spacing: 1px;
@@ -2130,11 +2139,8 @@
       border: 2px solid rgba(255,255,255,0.5);
       user-select: none;
     }
-    .uno-card.small { width: 44px; height: 64px; }
     .uno-card-corner { position: absolute; top: 5px; left: 7px; font-size: 12px; font-weight: 800; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
     .uno-card-label { font-size: 26px; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
-    .uno-card.small .uno-card-label { font-size: 18px; }
-    .uno-card.small .uno-card-corner { display: none; }
 
     .uno-card.red { background: linear-gradient(160deg, #ff5c5c, #c40017); }
     .uno-card.yellow { background: linear-gradient(160deg, #ffdd55, #e0a300); }
@@ -2146,11 +2152,6 @@
       border-color: rgba(255,255,255,0.25);
     }
     .uno-card.back .uno-card-label { font-style: italic; font-size: 15px; transform: rotate(-14deg); color: rgba(255,255,255,0.85); }
-    .uno-card.back.small .uno-opp-badge { font-size: 20px; }
-
-    .uno-opp-badge {
-      font-size: 24px; font-weight: 900; color: #fff; text-shadow: 0 1px 4px rgba(0,0,0,0.7);
-    }
 
     .uno-hand {
       display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
@@ -8687,15 +8688,26 @@
         box.innerHTML = '';
         for (let i = 1; i < this.players.length; i++) {
           const p = this.players[i];
+          const n = p.hand.length;
           const div = document.createElement('div');
           div.className = 'uno-opp' + (this.turn === i && !this.gameOver ? ' active' : '');
-          const card = document.createElement('div');
-          card.className = 'uno-card back small';
-          card.innerHTML = '<span class="uno-opp-badge">' + p.hand.length + '</span>';
+
+          const stack = document.createElement('div');
+          stack.className = 'uno-opp-stack';
+          const spacing = n > 1 ? Math.min(11, Math.max(3, 110 / (n - 1))) : 0;
+          stack.style.width = (26 + spacing * Math.max(0, n - 1)) + 'px';
+          for (let c = 0; c < n; c++) {
+            const mini = document.createElement('div');
+            mini.className = 'uno-mini-card';
+            mini.style.left = (c * spacing) + 'px';
+            mini.style.zIndex = c;
+            stack.appendChild(mini);
+          }
+
           const name = document.createElement('div');
           name.className = 'uno-opp-name';
-          name.innerHTML = p.name + (p.hand.length === 1 ? '<span class="uno-tag-uno">UNO</span>' : '');
-          div.appendChild(card);
+          name.innerHTML = p.name + ' <span class="uno-opp-count">(' + n + ')</span>' + (n === 1 ? '<span class="uno-tag-uno">UNO</span>' : '');
+          div.appendChild(stack);
           div.appendChild(name);
           box.appendChild(div);
         }
