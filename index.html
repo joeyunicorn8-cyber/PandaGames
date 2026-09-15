@@ -8552,7 +8552,7 @@
       location: { inside: false, house: null, floor: 0 },
       houses: [], trees: [], fences: [], cars: [], wire: null, wirePoles: [], bench: null,
       perchPoints: [], zones: {}, npcs: [],
-      particles: [], _munchMsg: null,
+      particles: [], _statusMsg: null,
       _built: false, _kd: null, _ku: null,
 
       open() {
@@ -8562,7 +8562,7 @@
         if (!this._built) { this._buildWorld(); this._built = true; }
         this._resetNPCs();
         this.location = { inside: false, house: null, floor: 0 };
-        this.particles = []; this._munchMsg = null;
+        this.particles = []; this._statusMsg = null;
         const spawnHouse = this.houses[0];
         this.bird = { x: spawnHouse.x + spawnHouse.w / 2, y: 470, altitude: 0, vAlt: 0, facing: 1, state: 'walk', perch: null, wingPhase: 0 };
         this.camera.x = this.bird.x; this.camera.y = this.bird.y; this.camera.zoom = 1.6;
@@ -8626,6 +8626,7 @@
         if (it.type === 'stairsUp') { this._goStairs(1); return; }
         if (it.type === 'stairsDown') { this._goStairs(0); return; }
         if (it.type === 'fridge') { this._raidFridge(it.point); return; }
+        if (it.type === 'toilet') { this._useToilet(it.point); return; }
       },
 
       _findNearbyPerch() {
@@ -8653,6 +8654,12 @@
             if (!fp) continue;
             const inRoom = b.x >= r.x && b.x <= r.x + r.w && b.y >= r.y && b.y <= r.y + r.h;
             if (inRoom && Math.hypot(b.x - fp.x, b.y - fp.y) < 30) return { type: 'fridge', point: fp };
+          }
+          for (const r of floor.rooms) {
+            if (r.type !== 'bathroom') continue;
+            const tp = this._toiletPoint(r);
+            const inRoom = b.x >= r.x && b.x <= r.x + r.w && b.y >= r.y && b.y <= r.y + r.h;
+            if (inRoom && Math.hypot(b.x - tp.x, b.y - tp.y) < 26) return { type: 'toilet', point: tp };
           }
           return null;
         }
@@ -8708,7 +8715,27 @@
             rot: Math.random() * Math.PI * 2, vrot: (Math.random() - 0.5) * 6,
           });
         }
-        this._munchMsg = { text: 'Nom nom nom! 😋', t: 0, dur: 1.3, x: b.x, y: b.y };
+        this._statusMsg = { text: 'Nom nom nom! 😋', t: 0, dur: 1.3, x: b.x, y: b.y };
+      },
+
+      _toiletPoint(r) {
+        return { x: r.x + r.w - 22, y: r.y + r.h - 16 };
+      },
+
+      _useToilet(point) {
+        const b = this.bird;
+        for (let i = 0; i < 10; i++) {
+          const ang = -Math.PI / 2 + (Math.random() - 0.5) * 1.8;
+          const speed = 10 + Math.random() * 14;
+          this.particles.push({
+            x: point.x + (Math.random() - 0.5) * 6, y: point.y - 6,
+            vx: Math.cos(ang) * speed * 0.4, vy: -(14 + Math.random() * 12),
+            life: 0, maxLife: 0.6 + Math.random() * 0.4, gravity: false,
+            emoji: Math.random() < 0.5 ? '✨' : '💧',
+            size: 9 + Math.random() * 5, rot: 0, vrot: (Math.random() - 0.5) * 3,
+          });
+        }
+        this._statusMsg = { text: 'Ahhh... relief! 😌', t: 0, dur: 1.3, x: b.x, y: b.y };
       },
 
       _updateParticles(dt) {
@@ -8720,9 +8747,9 @@
           if (p.gravity) p.vy += 70 * dt;
           p.rot += p.vrot * dt;
         }
-        if (this._munchMsg) {
-          this._munchMsg.t += dt;
-          if (this._munchMsg.t >= this._munchMsg.dur) this._munchMsg = null;
+        if (this._statusMsg) {
+          this._statusMsg.t += dt;
+          if (this._statusMsg.t >= this._statusMsg.dur) this._statusMsg = null;
         }
       },
 
@@ -8743,8 +8770,8 @@
           }
           ctx.restore();
         });
-        if (this._munchMsg) {
-          const m = this._munchMsg;
+        if (this._statusMsg) {
+          const m = this._statusMsg;
           const fadeIn = Math.min(1, m.t / 0.15), fadeOut = Math.min(1, (m.dur - m.t) / 0.4);
           ctx.save();
           ctx.globalAlpha = Math.max(0, Math.min(fadeIn, fadeOut));
@@ -8878,15 +8905,17 @@
               entry: fp(0.5, 1), stairsUp: fp(0.85, 0.3), stairsDown: null,
             },
             {
+              // Central hallway spans the full height so every room on either
+              // side borders it directly — no room opens onto another room's wall.
               rooms: [
-                { type: 'bedroom',  ...fr(0, 0, 0.35, 0.5), private: true, doorSide: 'right', accent: '#8ecae6' },
-                { type: 'bedroom',  ...fr(0.35, 0, 0.35, 0.5), private: true, doorSide: 'right', accent: '#f4a300' },
-                { type: 'bedroom',  ...fr(0, 0.5, 0.35, 0.5), private: true, doorSide: 'right', accent: '#e07a5f' },
-                { type: 'bedroom',  ...fr(0.35, 0.5, 0.35, 0.5), private: true, doorSide: 'right', accent: '#81b29a' },
-                { type: 'hallway',  ...fr(0.7, 0, 0.3, 0.6), private: false },
-                { type: 'bathroom', ...fr(0.7, 0.6, 0.3, 0.4), private: true, doorSide: 'left' },
+                { type: 'bedroom',  ...fr(0, 0, 0.42, 0.5), private: true, doorSide: 'right', accent: '#8ecae6' },
+                { type: 'bedroom',  ...fr(0, 0.5, 0.42, 0.5), private: true, doorSide: 'right', accent: '#f4a300' },
+                { type: 'hallway',  ...fr(0.42, 0, 0.16, 1.0), private: false },
+                { type: 'bedroom',  ...fr(0.58, 0, 0.42, 0.38), private: true, doorSide: 'left', accent: '#e07a5f' },
+                { type: 'bedroom',  ...fr(0.58, 0.38, 0.42, 0.38), private: true, doorSide: 'left', accent: '#81b29a' },
+                { type: 'bathroom', ...fr(0.58, 0.76, 0.42, 0.24), private: true, doorSide: 'left' },
               ],
-              entry: null, stairsUp: null, stairsDown: fp(0.85, 0.3),
+              entry: null, stairsUp: null, stairsDown: fp(0.5, 0.5),
             },
           ] };
         }
@@ -9099,6 +9128,7 @@
           else if (it && it.type === 'stairsUp') hint.textContent = 'Press E to go upstairs';
           else if (it && it.type === 'stairsDown') hint.textContent = 'Press E to go downstairs';
           else if (it && it.type === 'fridge') hint.textContent = 'Press E to raid the fridge';
+          else if (it && it.type === 'toilet') hint.textContent = 'Press E to use the toilet';
           else hint.textContent = 'Arrows/WASD to walk around';
           return;
         }
@@ -9410,7 +9440,7 @@
         if (this.location.floor === 0 && h.npc) this._drawNPC(ctx, h.npc);
 
         const it = this._findInteraction();
-        if (it && it.point && (it.type === 'exit' || it.type === 'stairsUp' || it.type === 'stairsDown' || it.type === 'fridge')) {
+        if (it && it.point && (it.type === 'exit' || it.type === 'stairsUp' || it.type === 'stairsDown' || it.type === 'fridge' || it.type === 'toilet')) {
           ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 2;
           ctx.beginPath(); ctx.arc(it.point.x, it.point.y, 14, 0, Math.PI * 2); ctx.stroke();
         }
@@ -9531,9 +9561,9 @@
           ctx.fillStyle = '#7a5a44'; ctx.fillRect(sx - 5, sy + 8, 10, 12);
         }
 
-        const wcx = r.x + r.w - 22, wcy = r.y + r.h - 30;
-        ctx.fillStyle = '#fff'; ctx.fillRect(wcx - 8, wcy, 16, 9);
-        ctx.beginPath(); ctx.ellipse(wcx, wcy + 14, 10, 8, 0, 0, Math.PI * 2); ctx.fill();
+        const toilet = this._toiletPoint(r);
+        ctx.fillStyle = '#fff'; ctx.fillRect(toilet.x - 8, toilet.y - 14, 16, 9);
+        ctx.beginPath(); ctx.ellipse(toilet.x, toilet.y, 10, 8, 0, 0, Math.PI * 2); ctx.fill();
         ctx.strokeStyle = '#c9c2b8'; ctx.lineWidth = 1.2; ctx.stroke();
 
         ctx.fillStyle = 'rgba(120,170,200,0.3)';
