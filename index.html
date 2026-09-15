@@ -8552,6 +8552,7 @@
       location: { inside: false, house: null, floor: 0 },
       houses: [], trees: [], fences: [], cars: [], wire: null, wirePoles: [], bench: null,
       perchPoints: [], zones: {}, npcs: [],
+      particles: [], _munchMsg: null,
       _built: false, _kd: null, _ku: null,
 
       open() {
@@ -8561,6 +8562,7 @@
         if (!this._built) { this._buildWorld(); this._built = true; }
         this._resetNPCs();
         this.location = { inside: false, house: null, floor: 0 };
+        this.particles = []; this._munchMsg = null;
         const spawnHouse = this.houses[0];
         this.bird = { x: spawnHouse.x + spawnHouse.w / 2, y: 470, altitude: 0, vAlt: 0, facing: 1, state: 'walk', perch: null, wingPhase: 0 };
         this.camera.x = this.bird.x; this.camera.y = this.bird.y; this.camera.zoom = 1.6;
@@ -8623,6 +8625,7 @@
         if (it.type === 'exit') { this._exitHouse(); return; }
         if (it.type === 'stairsUp') { this._goStairs(1); return; }
         if (it.type === 'stairsDown') { this._goStairs(0); return; }
+        if (it.type === 'fridge') { this._raidFridge(it.point); return; }
       },
 
       _findNearbyPerch() {
@@ -8644,6 +8647,13 @@
           }
           if (floor.stairsUp && Math.hypot(b.x - floor.stairsUp.x, b.y - floor.stairsUp.y) < 28) return { type: 'stairsUp', point: floor.stairsUp };
           if (floor.stairsDown && Math.hypot(b.x - floor.stairsDown.x, b.y - floor.stairsDown.y) < 28) return { type: 'stairsDown', point: floor.stairsDown };
+          for (const r of floor.rooms) {
+            if (r.type !== 'kitchen') continue;
+            const fp = this._fridgePoint(r);
+            if (!fp) continue;
+            const inRoom = b.x >= r.x && b.x <= r.x + r.w && b.y >= r.y && b.y <= r.y + r.h;
+            if (inRoom && Math.hypot(b.x - fp.x, b.y - fp.y) < 30) return { type: 'fridge', point: fp };
+          }
           return null;
         }
         if (b.state === 'perch') return { type: 'unperch' };
@@ -8672,6 +8682,78 @@
         b.x = h.x + h.w / 2; b.y = h.y + h.h + 16; b.altitude = 0; b.vAlt = 0; b.state = 'walk'; b.perch = null;
         this.camera.x = b.x; this.camera.y = b.y;
         this.location = { inside: false, house: null, floor: 0 };
+      },
+
+      _fridgePoint(r) {
+        const cy = r.y + 8, ch = 24;
+        const fx = r.x + r.w - 32, fy = r.y + r.h - 52;
+        if (fy <= cy + ch + 10) return null;
+        return { x: fx + 12, y: fy + 23, fx, fy };
+      },
+
+      _raidFridge(point) {
+        const b = this.bird;
+        const foodEmoji = ['🍗', '🧀', '🍞', '🍎', '🥕', '🍇'];
+        for (let i = 0; i < 14; i++) {
+          const ang = Math.random() * Math.PI * 2;
+          const speed = 18 + Math.random() * 38;
+          const isFood = Math.random() < 0.4;
+          this.particles.push({
+            x: point.x, y: point.y,
+            vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed - 24,
+            life: 0, maxLife: 0.55 + Math.random() * 0.5,
+            kind: isFood ? 'food' : 'crumb',
+            emoji: foodEmoji[Math.floor(Math.random() * foodEmoji.length)],
+            size: isFood ? 10 + Math.random() * 5 : 2 + Math.random() * 1.5,
+            rot: Math.random() * Math.PI * 2, vrot: (Math.random() - 0.5) * 6,
+          });
+        }
+        this._munchMsg = { text: 'Nom nom nom! 😋', t: 0, dur: 1.3, x: b.x, y: b.y };
+      },
+
+      _updateParticles(dt) {
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+          const p = this.particles[i];
+          p.life += dt;
+          if (p.life >= p.maxLife) { this.particles.splice(i, 1); continue; }
+          p.x += p.vx * dt; p.y += p.vy * dt;
+          p.vy += 70 * dt;
+          p.rot += p.vrot * dt;
+        }
+        if (this._munchMsg) {
+          this._munchMsg.t += dt;
+          if (this._munchMsg.t >= this._munchMsg.dur) this._munchMsg = null;
+        }
+      },
+
+      _drawParticles(ctx) {
+        this.particles.forEach(p => {
+          const a = Math.max(0, 1 - p.life / p.maxLife);
+          ctx.save();
+          ctx.globalAlpha = a;
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rot);
+          if (p.kind === 'food') {
+            ctx.font = p.size + 'px sans-serif';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            ctx.fillText(p.emoji, 0, 0);
+          } else {
+            ctx.fillStyle = '#e8d9b5';
+            ctx.beginPath(); ctx.arc(0, 0, p.size, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.restore();
+        });
+        if (this._munchMsg) {
+          const m = this._munchMsg;
+          const fadeIn = Math.min(1, m.t / 0.15), fadeOut = Math.min(1, (m.dur - m.t) / 0.4);
+          ctx.save();
+          ctx.globalAlpha = Math.max(0, Math.min(fadeIn, fadeOut));
+          ctx.fillStyle = '#fff';
+          ctx.font = '700 12px sans-serif';
+          ctx.textAlign = 'center';
+          ctx.fillText(m.text, m.x, m.y - 22 - m.t * 10);
+          ctx.restore();
+        }
       },
 
       _goStairs(targetFloor) {
@@ -8876,6 +8958,7 @@
         else this._updateOutside(dt);
         this._updateHint();
         this.npcs.forEach(n => this._updateNPC(n, dt));
+        this._updateParticles(dt);
       },
 
       _updateOutside(dt) {
@@ -8965,6 +9048,7 @@
           if (it && it.type === 'exit') hint.textContent = 'Press E to exit';
           else if (it && it.type === 'stairsUp') hint.textContent = 'Press E to go upstairs';
           else if (it && it.type === 'stairsDown') hint.textContent = 'Press E to go downstairs';
+          else if (it && it.type === 'fridge') hint.textContent = 'Press E to raid the fridge';
           else hint.textContent = 'Arrows/WASD to walk around';
           return;
         }
@@ -9275,12 +9359,13 @@
         if (this.location.floor === 0 && h.npc) this._drawNPC(ctx, h.npc);
 
         const it = this._findInteraction();
-        if (it && it.point && (it.type === 'exit' || it.type === 'stairsUp' || it.type === 'stairsDown')) {
+        if (it && it.point && (it.type === 'exit' || it.type === 'stairsUp' || it.type === 'stairsDown' || it.type === 'fridge')) {
           ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 2;
           ctx.beginPath(); ctx.arc(it.point.x, it.point.y, 14, 0, Math.PI * 2); ctx.stroke();
         }
 
         this._drawBird(ctx, this.bird);
+        this._drawParticles(ctx);
 
         ctx.restore();
       },
@@ -9417,8 +9502,9 @@
         const stoveX = r.x + r.w - 68;
         [[0, 0], [17, 0], [0, 14], [17, 14]].forEach(([ox, oy]) => { ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(stoveX + ox, cy + 6 + oy, 4.2, 0, Math.PI * 2); ctx.fill(); });
 
-        const fx = r.x + r.w - 32, fy = r.y + r.h - 52;
-        if (fy > cy + ch + 10) {
+        const fridge = this._fridgePoint(r);
+        if (fridge) {
+          const { fx, fy } = fridge;
           ctx.fillStyle = 'rgba(0,0,0,0.12)'; ctx.fillRect(fx + 2, fy + 1, 24, 46);
           ctx.fillStyle = '#e7e9ea'; ctx.fillRect(fx, fy, 24, 46);
           ctx.strokeStyle = '#c3c8c8'; ctx.strokeRect(fx, fy, 24, 46);
