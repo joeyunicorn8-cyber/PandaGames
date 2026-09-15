@@ -8701,9 +8701,9 @@
           this.particles.push({
             x: point.x, y: point.y,
             vx: Math.cos(ang) * speed, vy: Math.sin(ang) * speed - 24,
-            life: 0, maxLife: 0.55 + Math.random() * 0.5,
+            life: 0, maxLife: 0.55 + Math.random() * 0.5, gravity: true,
             kind: isFood ? 'food' : 'crumb',
-            emoji: foodEmoji[Math.floor(Math.random() * foodEmoji.length)],
+            emoji: isFood ? foodEmoji[Math.floor(Math.random() * foodEmoji.length)] : null,
             size: isFood ? 10 + Math.random() * 5 : 2 + Math.random() * 1.5,
             rot: Math.random() * Math.PI * 2, vrot: (Math.random() - 0.5) * 6,
           });
@@ -8717,7 +8717,7 @@
           p.life += dt;
           if (p.life >= p.maxLife) { this.particles.splice(i, 1); continue; }
           p.x += p.vx * dt; p.y += p.vy * dt;
-          p.vy += 70 * dt;
+          if (p.gravity) p.vy += 70 * dt;
           p.rot += p.vrot * dt;
         }
         if (this._munchMsg) {
@@ -8733,7 +8733,7 @@
           ctx.globalAlpha = a;
           ctx.translate(p.x, p.y);
           ctx.rotate(p.rot);
-          if (p.kind === 'food') {
+          if (p.emoji) {
             ctx.font = p.size + 'px sans-serif';
             ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
             ctx.fillText(p.emoji, 0, 0);
@@ -8949,6 +8949,7 @@
           facing: 1, walkPhase: Math.random() * 10,
           skin: skinTones[Math.floor(Math.random() * skinTones.length)],
           shirt: shirtColors[Math.floor(Math.random() * shirtColors.length)],
+          chasing: false, calmT: 0, _angerEmitT: 0,
         };
       },
 
@@ -9034,6 +9035,53 @@
         this.camera.zoom += (targetZoom - this.camera.zoom) * Math.min(1, dt * 3);
         this.camera.x += (b.x - this.camera.x) * Math.min(1, dt * 4);
         this.camera.y += (b.y - this.camera.y) * Math.min(1, dt * 4);
+
+        this._updateHouseNPCChase(dt);
+      },
+
+      _updateHouseNPCChase(dt) {
+        const npc = this.location.house.npc;
+        if (!npc) return;
+        if (npc.calmT > 0) { npc.calmT -= dt; return; }
+        const b = this.bird;
+        const d = Math.hypot(npc.x - b.x, npc.y - b.y);
+
+        if (!npc.chasing) {
+          if (this.location.floor === 0 && d < 55) { npc.chasing = true; npc._angerEmitT = 0; }
+          return;
+        }
+
+        npc._angerEmitT -= dt;
+        if (npc._angerEmitT <= 0) {
+          npc._angerEmitT = 0.22;
+          const angryEmoji = ['😠', '💢', '❗', '😡'];
+          this.particles.push({
+            x: npc.x + (Math.random() - 0.5) * 10, y: npc.y - 20,
+            vx: (Math.random() - 0.5) * 10, vy: -(14 + Math.random() * 10),
+            life: 0, maxLife: 0.5 + Math.random() * 0.3, gravity: false,
+            emoji: angryEmoji[Math.floor(Math.random() * angryEmoji.length)],
+            size: 12 + Math.random() * 4, rot: 0, vrot: 0,
+          });
+        }
+
+        if (d > 2) {
+          const speed = 95;
+          const mx = (b.x - npc.x) / d, my = (b.y - npc.y) / d;
+          npc.x += mx * speed * dt; npc.y += my * speed * dt;
+          npc.facing = mx >= 0 ? 1 : -1;
+          npc.walkPhase += dt * 10;
+        }
+
+        if (d < 18) this._getChasedOut();
+      },
+
+      _getChasedOut() {
+        const h = this.location.house, npc = h.npc;
+        const b = this.bird;
+        b.x = h.x + h.w / 2; b.y = h.y + h.h + 46; b.altitude = 0; b.vAlt = 0; b.state = 'walk'; b.perch = null;
+        this.camera.x = b.x; this.camera.y = b.y;
+        this.location = { inside: false, house: null, floor: 0 };
+        if (npc) { npc.chasing = false; npc.calmT = 3; npc.pauseT = 1; npc.tx = npc.x; npc.ty = npc.y; }
       },
 
       _updateHint() {
@@ -9045,6 +9093,8 @@
 
         const it = this._findInteraction();
         if (this.location.inside) {
+          const npc = this.location.house.npc;
+          if (npc && npc.chasing) { hint.textContent = "RUN! They've spotted you!"; return; }
           if (it && it.type === 'exit') hint.textContent = 'Press E to exit';
           else if (it && it.type === 'stairsUp') hint.textContent = 'Press E to go upstairs';
           else if (it && it.type === 'stairsDown') hint.textContent = 'Press E to go downstairs';
@@ -9060,6 +9110,7 @@
       },
 
       _updateNPC(n, dt) {
+        if (n.chasing) return; // driven by _updateHouseNPCChase instead
         n.pauseT -= dt;
         const d = Math.hypot(n.tx - n.x, n.ty - n.y);
         if (d < 4 && n.pauseT <= 0) {
