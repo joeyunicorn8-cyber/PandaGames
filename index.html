@@ -2290,6 +2290,52 @@
       cursor: pointer; letter-spacing: 1px; transition: border-color 0.15s, background 0.15s;
     }
     .btn-quit-solid:hover { background: rgba(255,255,255,0.1); border-color: #fff; }
+
+    /* ── BIRD SIMULATOR BUTTON ── */
+    .bird-btn {
+      position: relative;
+      width: 240px; height: 240px;
+      cursor: pointer;
+      background: linear-gradient(160deg, #8ecae6, #219ebc);
+      border: 3px solid #444;
+      border-radius: 20px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 10px;
+      overflow: hidden;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      box-shadow: 0 0 30px rgba(255,255,255,0.05);
+    }
+    .bird-btn:hover { transform: scale(1.06); border-color: #fff; box-shadow: 0 0 40px rgba(255,255,255,0.2); }
+    .bird-btn-icon { font-size: 60px; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.3)); }
+    .bird-btn-label { font-size: 19px; font-weight: 900; letter-spacing: 2px; color: #fff; text-shadow: 0 2px 8px rgba(0,0,0,0.3); text-align: center; line-height: 1.25; }
+    .bird-btn-sub { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.85); }
+
+    /* ── BIRD SIMULATOR SCREEN ── */
+    #screen-bird { background: #bde0fe; position: relative; overflow: hidden; }
+    #bird-canvas-wrap { position: absolute; inset: 0; }
+    #bird-canvas { width: 100%; height: 100%; display: block; }
+
+    .bird-topbar {
+      position: absolute; top: 0; left: 0; right: 0; z-index: 10;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 18px; background: rgba(0,0,0,0.35); gap: 14px;
+      backdrop-filter: blur(6px);
+    }
+    .bird-topbar-title { font-size: 17px; font-weight: 900; color: #fff; letter-spacing: 2px; white-space: nowrap; text-shadow: 0 1px 4px rgba(0,0,0,0.5); }
+
+    .bird-hint {
+      position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%);
+      z-index: 10; padding: 8px 18px; border-radius: 30px;
+      background: rgba(0,0,0,0.55); color: #fff; font-size: 13px; font-weight: 700;
+      letter-spacing: 0.5px; white-space: nowrap; pointer-events: none;
+    }
+    .bird-altitude-wrap {
+      position: absolute; right: 18px; top: 70px; bottom: 70px; width: 10px; z-index: 10;
+      background: rgba(0,0,0,0.3); border-radius: 6px; overflow: hidden;
+      display: flex; align-items: flex-end; opacity: 0; transition: opacity 0.3s;
+    }
+    .bird-altitude-wrap.visible { opacity: 1; }
+    .bird-altitude-fill { width: 100%; background: linear-gradient(180deg, #fff, #8ecae6); border-radius: 6px; }
   </style>
 </head>
 <body>
@@ -2582,6 +2628,13 @@
         </svg>
         <div class="artist-btn-label">ARTIST</div>
         <div class="artist-btn-sub">Draw &amp; Paint</div>
+      </button>
+
+      <!-- BIRD SIMULATOR BUTTON -->
+      <button class="bird-btn" onclick="BIRD.open()">
+        <div class="bird-btn-icon">🐦</div>
+        <div class="bird-btn-label">BIRD<br>SIMULATOR</div>
+        <div class="bird-btn-sub">Fly Free</div>
       </button>
     </div>
   </div>
@@ -2995,6 +3048,19 @@
       </label>
       <div class="bsim-toolbar-hint">Click → place<br>Drag → move<br>Right-click → delete</div>
     </div>
+  </div>
+
+  <!-- BIRD SIMULATOR -->
+  <div id="screen-bird" class="screen">
+    <div class="bird-topbar">
+      <div class="bird-topbar-title">🐦 BIRD SIMULATOR</div>
+      <button class="btn-quit" onclick="BIRD.cleanup();showScreen('game')">QUIT</button>
+    </div>
+    <div id="bird-canvas-wrap">
+      <canvas id="bird-canvas"></canvas>
+    </div>
+    <div class="bird-hint" id="bird-hint">Arrows/WASD to walk · Hold SPACE to fly</div>
+    <div class="bird-altitude-wrap" id="bird-altitude-wrap"><div class="bird-altitude-fill" id="bird-altitude-fill" style="height:0%"></div></div>
   </div>
 
   <!-- BALLOON LOBBY -->
@@ -8471,6 +8537,484 @@
     };
 
     /* ══════════════════════════════════
+       BIRD SIMULATOR — free-roam neighbourhood, walk/fly/perch
+    ══════════════════════════════════ */
+    const BIRD = {
+      canvas: null, ctx: null, W: 0, H: 0, _raf: null, _lastT: 0,
+      WORLD_W: 2600, WORLD_H: 1400,
+      MAX_ALT: 240, WALL_T: 14,
+      HOUSE_COLORS: ['#e07a5f', '#3d5a80', '#81b29a', '#f2cc8f', '#9d8189'],
+
+      camera: { x: 0, y: 0, zoom: 1.6 },
+      keys: { up: false, down: false, left: false, right: false, fly: false },
+      bird: { x: 0, y: 0, altitude: 0, vAlt: 0, facing: 1, state: 'walk', perch: null, wingPhase: 0 },
+      houses: [], trees: [], fences: [], cars: [], wire: null, wirePoles: [], bench: null,
+      perchPoints: [], zones: {}, npcs: [],
+      _built: false, _kd: null, _ku: null,
+
+      open() {
+        const me = document.getElementById('display-username').textContent.trim();
+        if (me) postSystemMsg(me + ' JOINED BIRD SIMULATOR');
+        showScreen('bird');
+        if (!this._built) { this._buildWorld(); this._built = true; }
+        this._resetNPCs();
+        const spawnHouse = this.houses[0];
+        this.bird = { x: spawnHouse.x + spawnHouse.w / 2, y: 470, altitude: 0, vAlt: 0, facing: 1, state: 'walk', perch: null, wingPhase: 0 };
+        this.camera.x = this.bird.x; this.camera.y = this.bird.y; this.camera.zoom = 1.6;
+        requestAnimationFrame(() => this._init());
+      },
+
+      _init() {
+        const wrap = document.getElementById('bird-canvas-wrap');
+        this.W = wrap.clientWidth || window.innerWidth;
+        this.H = wrap.clientHeight || window.innerHeight;
+        const old = document.getElementById('bird-canvas');
+        const cv = document.createElement('canvas');
+        cv.id = 'bird-canvas'; cv.width = this.W; cv.height = this.H;
+        cv.style.cssText = 'width:100%;height:100%;display:block;';
+        old.replaceWith(cv);
+        this.canvas = cv; this.ctx = cv.getContext('2d');
+
+        this.keys = { up: false, down: false, left: false, right: false, fly: false };
+        this._kd = e => this._onKey(e, true);
+        this._ku = e => this._onKey(e, false);
+        document.addEventListener('keydown', this._kd);
+        document.addEventListener('keyup', this._ku);
+
+        this._lastT = performance.now();
+        cancelAnimationFrame(this._raf);
+        const loop = t => {
+          const dt = Math.min(0.05, (t - this._lastT) / 1000);
+          this._lastT = t;
+          this._update(dt);
+          this._draw();
+          this._raf = requestAnimationFrame(loop);
+        };
+        this._raf = requestAnimationFrame(loop);
+      },
+
+      cleanup() {
+        cancelAnimationFrame(this._raf); this._raf = null;
+        if (this._kd) document.removeEventListener('keydown', this._kd);
+        if (this._ku) document.removeEventListener('keyup', this._ku);
+        this._kd = null; this._ku = null;
+      },
+
+      _onKey(e, down) {
+        const k = e.key;
+        if (k === 'ArrowUp' || k === 'w' || k === 'W') { this.keys.up = down; e.preventDefault(); }
+        if (k === 'ArrowDown' || k === 's' || k === 'S') { this.keys.down = down; e.preventDefault(); }
+        if (k === 'ArrowLeft' || k === 'a' || k === 'A') { this.keys.left = down; e.preventDefault(); }
+        if (k === 'ArrowRight' || k === 'd' || k === 'D') { this.keys.right = down; e.preventDefault(); }
+        if (k === ' ') { this.keys.fly = down; e.preventDefault(); }
+        if ((k === 'e' || k === 'E') && down) this._onPerchKey();
+      },
+
+      _onPerchKey() {
+        const b = this.bird;
+        if (b.state === 'perch') {
+          b.state = 'fly'; b.perch = null; b.vAlt = 40;
+          return;
+        }
+        const target = this._findNearbyPerch();
+        if (target) {
+          b.x = target.x; b.y = target.y; b.altitude = target.alt;
+          b.state = 'perch'; b.perch = target; b.vAlt = 0;
+        }
+      },
+
+      _findNearbyPerch() {
+        const b = this.bird;
+        let best = null, bestD = 46;
+        for (const p of this.perchPoints) {
+          const d = Math.hypot(p.x - b.x, p.y - b.y);
+          if (d < bestD) { bestD = d; best = p; }
+        }
+        return best;
+      },
+
+      /* ══════ WORLD BUILD (once) ══════ */
+      _buildWorld() {
+        this.houses = []; this.trees = []; this.fences = []; this.cars = []; this.perchPoints = [];
+
+        const houseY = 150, houseH = 250, houseW = 360, slot = 500;
+        for (let i = 0; i < 5; i++) {
+          const x = 100 + i * slot;
+          const doorW = 56;
+          this.houses.push({
+            x, y: houseY, w: houseW, h: houseH,
+            color: this.HOUSE_COLORS[i % this.HOUSE_COLORS.length],
+            door: { x: x + houseW / 2 - doorW / 2, w: doorW },
+            name: 'House ' + (i + 1),
+          });
+        }
+
+        const treeSpots = [
+          { x: 430, y: 460 }, { x: 1430, y: 460 },
+          { x: 300, y: 950 }, { x: 750, y: 1100 }, { x: 1300, y: 980 },
+          { x: 1850, y: 1150 }, { x: 2250, y: 950 },
+        ];
+        treeSpots.forEach(t => {
+          const canopyR = 65 + Math.random() * 20;
+          const tree = { x: t.x, y: t.y, canopyR, perchAlt: 95 };
+          this.trees.push(tree);
+          for (let a = 0; a < 3; a++) {
+            const ang = (a / 3) * Math.PI * 2 + Math.random() * 0.4;
+            this.perchPoints.push({
+              x: t.x + Math.cos(ang) * canopyR * 0.7,
+              y: t.y + Math.sin(ang) * canopyR * 0.7,
+              alt: tree.perchAlt, type: 'tree',
+            });
+          }
+        });
+
+        const fenceY = 440;
+        this.fences.push({ x1: 660, y1: fenceY, x2: 940, y2: fenceY });
+        for (let x = 680; x <= 920; x += 60) this.perchPoints.push({ x, y: fenceY - 4, alt: 40, type: 'fence' });
+
+        this.wire = { x1: 180, y1: 520, x2: 2420, y2: 520, sag: 26 };
+        this.wirePoles = [{ x: 180, y: 520 }, { x: 2420, y: 520 }];
+        for (let t = 0.08; t < 1; t += 0.14) {
+          const x = this.wire.x1 + (this.wire.x2 - this.wire.x1) * t;
+          const y = this.wire.y1 + Math.sin(t * Math.PI) * this.wire.sag;
+          this.perchPoints.push({ x, y, alt: 135, type: 'wire' });
+        }
+
+        const carColors = ['#c1121f', '#264653', '#e9c46a'];
+        [420, 1220, 1980].forEach((x, i) => {
+          this.cars.push({ x, y: 655, w: 130, h: 56, color: carColors[i] });
+          this.perchPoints.push({ x: x + 65, y: 655 + 10, alt: 22, type: 'car' });
+        });
+
+        this.bench = { x: 1600, y: 1250, w: 90, h: 26 };
+        this.perchPoints.push({ x: this.bench.x + 45, y: this.bench.y + 6, alt: 14, type: 'bench' });
+
+        this.zones = {
+          northSidewalk: { x: 150, y: 500, w: 2300, h: 50 },
+          southSidewalk: { x: 150, y: 680, w: 2300, h: 50 },
+          park: { x: 150, y: 750, w: 2300, h: 600 },
+        };
+      },
+
+      _resetNPCs() {
+        this.npcs = [];
+        const skinTones = ['#f1c27d', '#e0ac69', '#c68642', '#8d5524', '#ffdbac'];
+        const shirtColors = ['#ef476f', '#06d6a0', '#118ab2', '#ffd166', '#8338ec', '#fb5607'];
+        this.houses.forEach(h => {
+          const bounds = { x: h.x + this.WALL_T + 10, y: h.y + this.WALL_T + 10, w: h.w - this.WALL_T * 2 - 20, h: h.h - this.WALL_T * 2 - 20 };
+          const npc = this._makeNPC(bounds, skinTones, shirtColors, true);
+          h.npc = npc;
+          this.npcs.push(npc);
+        });
+        [this.zones.northSidewalk, this.zones.northSidewalk, this.zones.southSidewalk, this.zones.southSidewalk, this.zones.park, this.zones.park]
+          .forEach(z => this.npcs.push(this._makeNPC(z, skinTones, shirtColors, false)));
+      },
+
+      _makeNPC(bounds, skinTones, shirtColors, indoor) {
+        const x = bounds.x + Math.random() * bounds.w, y = bounds.y + Math.random() * bounds.h;
+        return {
+          bounds, x, y, tx: x, ty: y, indoor,
+          speed: 26 + Math.random() * 18,
+          pauseT: Math.random() * 2,
+          facing: 1, walkPhase: Math.random() * 10,
+          skin: skinTones[Math.floor(Math.random() * skinTones.length)],
+          shirt: shirtColors[Math.floor(Math.random() * shirtColors.length)],
+        };
+      },
+
+      /* ══════ UPDATE ══════ */
+      _update(dt) {
+        const b = this.bird;
+
+        if (b.state !== 'perch') {
+          let mx = 0, my = 0;
+          if (this.keys.left) mx -= 1;
+          if (this.keys.right) mx += 1;
+          if (this.keys.up) my -= 1;
+          if (this.keys.down) my += 1;
+          if (mx || my) {
+            const len = Math.hypot(mx, my);
+            mx /= len; my /= len;
+            const speed = b.altitude > 4 ? 190 : 65;
+            const nx = b.x + mx * speed * dt;
+            const ny = b.y + my * speed * dt;
+            if (b.altitude > 4 || !this._collideHouses(nx, ny)) {
+              b.x = Math.max(20, Math.min(this.WORLD_W - 20, nx));
+              b.y = Math.max(20, Math.min(this.WORLD_H - 20, ny));
+            }
+            if (mx !== 0) b.facing = mx > 0 ? 1 : -1;
+            b.wingPhase += dt * (b.altitude > 4 ? 14 : 8);
+          } else {
+            b.wingPhase += dt * (b.altitude > 4 ? 14 : 3);
+          }
+
+          if (this.keys.fly) b.vAlt = Math.min(160, b.vAlt + 340 * dt);
+          else b.vAlt -= 260 * dt;
+          b.altitude = Math.max(0, Math.min(this.MAX_ALT, b.altitude + b.vAlt * dt));
+          if (b.altitude <= 0) { b.altitude = 0; b.vAlt = 0; }
+          b.state = b.altitude > 4 ? 'fly' : 'walk';
+        } else {
+          b.wingPhase += dt * 2;
+        }
+
+        const targetZoom = 1.6 - (b.altitude / this.MAX_ALT) * 0.95;
+        this.camera.zoom += (targetZoom - this.camera.zoom) * Math.min(1, dt * 3);
+        this.camera.x += (b.x - this.camera.x) * Math.min(1, dt * 4);
+        this.camera.y += (b.y - this.camera.y) * Math.min(1, dt * 4);
+
+        this._updateHint();
+        this.npcs.forEach(n => this._updateNPC(n, dt));
+      },
+
+      _updateHint() {
+        const b = this.bird;
+        const hint = document.getElementById('bird-hint');
+        const altWrap = document.getElementById('bird-altitude-wrap');
+        document.getElementById('bird-altitude-fill').style.height = Math.round((b.altitude / this.MAX_ALT) * 100) + '%';
+        altWrap.classList.toggle('visible', b.altitude > 2 || b.state === 'perch');
+
+        if (b.state === 'perch') {
+          hint.textContent = 'Perched — press E to fly off';
+        } else if (b.state === 'fly') {
+          const near = this._findNearbyPerch();
+          hint.textContent = near ? 'Press E to perch' : 'Arrows/WASD to fly · Release SPACE to glide down';
+        } else {
+          hint.textContent = 'Arrows/WASD to walk · Hold SPACE to fly';
+        }
+      },
+
+      _updateNPC(n, dt) {
+        n.pauseT -= dt;
+        const d = Math.hypot(n.tx - n.x, n.ty - n.y);
+        if (d < 4 && n.pauseT <= 0) {
+          n.tx = n.bounds.x + Math.random() * n.bounds.w;
+          n.ty = n.bounds.y + Math.random() * n.bounds.h;
+          n.pauseT = 1 + Math.random() * 3;
+        }
+        if (d >= 4) {
+          const mx = (n.tx - n.x) / d, my = (n.ty - n.y) / d;
+          n.x += mx * n.speed * dt;
+          n.y += my * n.speed * dt;
+          n.facing = mx >= 0 ? 1 : -1;
+          n.walkPhase += dt * 8;
+        }
+      },
+
+      _collideHouses(x, y) {
+        for (const h of this.houses) {
+          if (x < h.x || x > h.x + h.w || y < h.y || y > h.y + h.h) continue;
+          const t = this.WALL_T;
+          const inInner = x > h.x + t && x < h.x + h.w - t && y > h.y + t && y < h.y + h.h - t;
+          if (inInner) continue;
+          const nearSouthWall = y > h.y + h.h - t - 2;
+          const inDoor = x > h.door.x && x < h.door.x + h.door.w;
+          if (nearSouthWall && inDoor) continue;
+          return true;
+        }
+        return false;
+      },
+
+      /* ══════ DRAW ══════ */
+      _draw() {
+        const ctx = this.ctx, W = this.W, H = this.H;
+        ctx.save();
+        ctx.fillStyle = '#bde0fe';
+        ctx.fillRect(0, 0, W, H);
+
+        const zoom = this.camera.zoom;
+        ctx.translate(W / 2, H / 2);
+        ctx.scale(zoom, zoom);
+        ctx.translate(-this.camera.x, -this.camera.y);
+
+        this._drawGround(ctx);
+        this._drawWire(ctx);
+
+        const entities = [];
+        this.houses.forEach(h => entities.push({ y: h.y + h.h, draw: () => this._drawHouse(ctx, h) }));
+        this.fences.forEach(f => entities.push({ y: f.y1, draw: () => this._drawFence(ctx, f) }));
+        this.cars.forEach(c => entities.push({ y: c.y + c.h, draw: () => this._drawCar(ctx, c) }));
+        if (this.bench) entities.push({ y: this.bench.y + this.bench.h, draw: () => this._drawBench(ctx, this.bench) });
+        this.npcs.forEach(n => { if (!n.indoor) entities.push({ y: n.y, draw: () => this._drawNPC(ctx, n) }); });
+        this.trees.forEach(t => entities.push({ y: t.y + t.canopyR * 0.5, draw: () => this._drawTreeTrunk(ctx, t) }));
+        entities.sort((a, c) => a.y - c.y);
+        entities.forEach(e => e.draw());
+
+        const b = this.bird;
+        const underCanopy = [];
+        this.trees.forEach(t => {
+          const near = Math.hypot(b.x - t.x, b.y - t.y) < t.canopyR + 30;
+          if (near && b.altitude < t.perchAlt - 10) underCanopy.push(t);
+          else this._drawTreeCanopy(ctx, t);
+        });
+
+        if (b.state === 'fly') {
+          const near = this._findNearbyPerch();
+          if (near) {
+            ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(near.x, near.y, 10, 0, Math.PI * 2); ctx.stroke();
+          }
+        }
+
+        this._drawBird(ctx, b);
+        underCanopy.forEach(t => this._drawTreeCanopy(ctx, t));
+
+        ctx.restore();
+      },
+
+      _drawGround(ctx) {
+        ctx.fillStyle = '#8bc656';
+        ctx.fillRect(0, 0, this.WORLD_W, this.WORLD_H);
+
+        ctx.fillStyle = '#9ed76c';
+        ctx.fillRect(0, 400, this.WORLD_W, 100);
+
+        ctx.fillStyle = '#c9c9c9';
+        ctx.fillRect(0, 500, this.WORLD_W, 50);
+        ctx.fillRect(0, 680, this.WORLD_W, 50);
+
+        ctx.fillStyle = '#4a4a4a';
+        ctx.fillRect(0, 550, this.WORLD_W, 130);
+        ctx.strokeStyle = 'rgba(255,255,255,0.6)'; ctx.lineWidth = 4;
+        ctx.setLineDash([28, 22]);
+        ctx.beginPath(); ctx.moveTo(0, 615); ctx.lineTo(this.WORLD_W, 615); ctx.stroke();
+        ctx.setLineDash([]);
+
+        ctx.strokeStyle = '#d8c9a3'; ctx.lineWidth = 26;
+        ctx.beginPath(); ctx.moveTo(200, 780); ctx.quadraticCurveTo(1200, 1000, 2400, 850); ctx.stroke();
+      },
+
+      _drawWire(ctx) {
+        if (!this.wire) return;
+        this.wirePoles.forEach(p => { ctx.fillStyle = '#6b4f3a'; ctx.fillRect(p.x - 4, p.y - 60, 8, 130); });
+        ctx.strokeStyle = '#333'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(this.wire.x1, this.wire.y1);
+        ctx.quadraticCurveTo((this.wire.x1 + this.wire.x2) / 2, this.wire.y1 + this.wire.sag * 2, this.wire.x2, this.wire.y2);
+        ctx.stroke();
+      },
+
+      _drawHouse(ctx, h) {
+        ctx.fillStyle = h.color;
+        ctx.fillRect(h.x, h.y, h.w, h.h);
+        const t = this.WALL_T;
+        ctx.fillStyle = '#f4ead5';
+        ctx.fillRect(h.x + t, h.y + t, h.w - 2 * t, h.h - 2 * t);
+        ctx.fillRect(h.door.x, h.y + h.h - t, h.door.w, t);
+
+        const midY = h.y + t + (h.h - 2 * t) * 0.42;
+        ctx.strokeStyle = '#c9b896'; ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(h.x + t, midY); ctx.lineTo(h.x + h.w * 0.38, midY);
+        ctx.moveTo(h.x + h.w * 0.62, midY); ctx.lineTo(h.x + h.w - t, midY);
+        ctx.stroke();
+
+        ctx.fillStyle = '#a8dadc';
+        ctx.fillRect(h.x + t + 16, h.y + t + 14, 70, 44);
+        ctx.fillStyle = '#e07a5f';
+        ctx.fillRect(h.x + h.w - t - 90, h.y + h.h - t - 50, 76, 30);
+        ctx.fillStyle = '#8d6e63';
+        ctx.fillRect(h.x + h.w - t - 90, h.y + h.h - t - 100, 46, 30);
+
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.font = '700 13px sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(h.name, h.x + h.w / 2, h.y - 8);
+
+        if (h.npc) this._drawNPC(ctx, h.npc);
+      },
+
+      _drawFence(ctx, f) {
+        ctx.strokeStyle = '#8d6e63'; ctx.lineWidth = 6;
+        ctx.beginPath(); ctx.moveTo(f.x1, f.y1); ctx.lineTo(f.x2, f.y2); ctx.stroke();
+        for (let x = f.x1; x <= f.x2; x += 30) { ctx.fillStyle = '#a1887f'; ctx.fillRect(x - 3, f.y1 - 16, 6, 24); }
+      },
+
+      _drawCar(ctx, c) {
+        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.beginPath(); ctx.ellipse(c.x + c.w / 2, c.y + c.h + 6, c.w / 2, 8, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = c.color;
+        ctx.fillRect(c.x, c.y, c.w, c.h);
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.fillRect(c.x + 18, c.y + 8, c.w - 36, c.h - 24);
+      },
+
+      _drawBench(ctx, bn) {
+        ctx.fillStyle = '#8d6e63';
+        ctx.fillRect(bn.x, bn.y, bn.w, bn.h);
+        ctx.fillRect(bn.x, bn.y - 16, bn.w, 8);
+      },
+
+      _drawTreeTrunk(ctx, t) {
+        ctx.fillStyle = '#7a5230';
+        ctx.fillRect(t.x - 9, t.y - 6, 18, 30);
+      },
+
+      _drawTreeCanopy(ctx, t) {
+        ctx.fillStyle = '#4f9a5a';
+        ctx.beginPath(); ctx.arc(t.x, t.y - 14, t.canopyR, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.12)';
+        ctx.beginPath(); ctx.arc(t.x - t.canopyR * 0.3, t.y - 14 - t.canopyR * 0.3, t.canopyR * 0.4, 0, Math.PI * 2); ctx.fill();
+      },
+
+      _drawNPC(ctx, n) {
+        const bob = Math.sin(n.walkPhase) * 2;
+        ctx.save();
+        ctx.translate(n.x, n.y + bob);
+        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.beginPath(); ctx.ellipse(0, 20, 12, 4, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#333'; ctx.lineWidth = 4;
+        const legSwing = Math.sin(n.walkPhase) * 6;
+        ctx.beginPath(); ctx.moveTo(-4, 8); ctx.lineTo(-4 + legSwing, 20); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(4, 8); ctx.lineTo(4 - legSwing, 20); ctx.stroke();
+        ctx.fillStyle = n.shirt;
+        ctx.fillRect(-10, -14, 20, 24);
+        ctx.fillStyle = n.skin;
+        ctx.beginPath(); ctx.arc(0, -22, 8, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+      },
+
+      _drawBird(ctx, b) {
+        const liftY = b.altitude * 0.6;
+        const scale = 1 + (b.altitude / this.MAX_ALT) * 0.4;
+        const shadowA = Math.max(0.08, 0.35 - (b.altitude / this.MAX_ALT) * 0.3);
+        const shadowScale = Math.max(0.3, 1 - (b.altitude / this.MAX_ALT) * 0.6);
+        ctx.fillStyle = `rgba(0,0,0,${shadowA})`;
+        ctx.beginPath(); ctx.ellipse(b.x, b.y, 7 * shadowScale, 3 * shadowScale, 0, 0, Math.PI * 2); ctx.fill();
+
+        ctx.save();
+        ctx.translate(b.x, b.y - liftY);
+        ctx.scale(b.facing * scale, scale);
+
+        const flap = b.state === 'fly' ? Math.sin(b.wingPhase) * 0.7 : Math.sin(b.wingPhase) * 0.08;
+        ctx.fillStyle = '#a8322d';
+        ctx.save();
+        ctx.translate(-1, -1);
+        ctx.rotate(flap);
+        ctx.beginPath(); ctx.ellipse(-2, 0, 7, 3.2, 0.3, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+
+        ctx.fillStyle = '#e63946';
+        ctx.beginPath(); ctx.ellipse(0, 0, 8, 5.5, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#f1faee';
+        ctx.beginPath(); ctx.ellipse(1, 2, 5, 3, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#e63946';
+        ctx.beginPath(); ctx.arc(7, -3, 4.4, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#f4a300';
+        ctx.beginPath(); ctx.moveTo(10.5, -3); ctx.lineTo(15, -1.6); ctx.lineTo(10.5, -0.5); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#111';
+        ctx.beginPath(); ctx.arc(8.3, -4.2, 0.9, 0, Math.PI * 2); ctx.fill();
+
+        if (b.state !== 'fly') {
+          ctx.strokeStyle = '#f4a300'; ctx.lineWidth = 0.8;
+          ctx.beginPath(); ctx.moveTo(-1, 4.5); ctx.lineTo(-2, 8); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(2, 4.5); ctx.lineTo(3, 8); ctx.stroke();
+        }
+
+        ctx.restore();
+      },
+    };
+
+    /* ══════════════════════════════════
        DUMB PEOPLES GAME
     ══════════════════════════════════ */
     const DPG = {
@@ -9170,6 +9714,7 @@
         if (active.id === 'screen-uno-play') UNO.quit();
         if (active.id === 'screen-uno-host') UNO.cancelHost();
         if (active.id === 'screen-uno-join') UNO.cancelJoin();
+        if (active.id === 'screen-bird') { BIRD.cleanup(); showScreen('game'); }
         return;
       }
       if (e.key === 'Enter') {
