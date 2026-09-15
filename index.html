@@ -8929,8 +8929,17 @@
           const len = Math.hypot(mx, my);
           mx /= len; my /= len;
           const speed = 70;
-          b.x = Math.max(14, Math.min(this.INTERIOR_W - 14, b.x + mx * speed * dt));
-          b.y = Math.max(14, Math.min(this.INTERIOR_H - 14, b.y + my * speed * dt));
+          const clampX = v => Math.max(14, Math.min(this.INTERIOR_W - 14, v));
+          const clampY = v => Math.max(14, Math.min(this.INTERIOR_H - 14, v));
+          const nx = clampX(b.x + mx * speed * dt);
+          const ny = clampY(b.y + my * speed * dt);
+          if (!this._collideInterior(nx, ny)) {
+            b.x = nx; b.y = ny;
+          } else if (!this._collideInterior(nx, b.y)) {
+            b.x = nx;
+          } else if (!this._collideInterior(b.x, ny)) {
+            b.y = ny;
+          }
           if (mx !== 0) b.facing = mx > 0 ? 1 : -1;
           b.wingPhase += dt * 3;
         } else {
@@ -8987,6 +8996,29 @@
         for (const h of this.houses) {
           if (x > h.x && x < h.x + h.w && y > h.y && y < h.y + h.h) return true;
         }
+        return false;
+      },
+
+      _collideInterior(x, y) {
+        const wt = 10, gap = 34;
+        const floor = this._currentFloor();
+        for (const r of floor.rooms) {
+          if (!r.private) continue;
+          if (x < r.x || x > r.x + r.w || y < r.y || y > r.y + r.h) continue;
+          const inInner = x > r.x + wt && x < r.x + r.w - wt && y > r.y + wt && y < r.y + r.h - wt;
+          if (inInner) continue;
+          if (this._inDoorGap(x, y, r, wt, gap)) continue;
+          return true;
+        }
+        return false;
+      },
+
+      _inDoorGap(x, y, r, wt, gap) {
+        const midX = r.x + r.w / 2, midY = r.y + r.h / 2;
+        if (r.doorSide === 'top') return y >= r.y && y <= r.y + wt && x > midX - gap / 2 && x < midX + gap / 2;
+        if (r.doorSide === 'bottom') return y >= r.y + r.h - wt && y <= r.y + r.h && x > midX - gap / 2 && x < midX + gap / 2;
+        if (r.doorSide === 'left') return x >= r.x && x <= r.x + wt && y > midY - gap / 2 && y < midY + gap / 2;
+        if (r.doorSide === 'right') return x >= r.x + r.w - wt && x <= r.x + r.w && y > midY - gap / 2 && y < midY + gap / 2;
         return false;
       },
 
