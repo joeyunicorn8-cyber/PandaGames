@@ -8543,11 +8543,13 @@
       canvas: null, ctx: null, W: 0, H: 0, _raf: null, _lastT: 0,
       WORLD_W: 2600, WORLD_H: 1400,
       MAX_ALT: 240, WALL_T: 14,
+      INTERIOR_W: 332, INTERIOR_H: 222,
       HOUSE_COLORS: ['#e07a5f', '#3d5a80', '#81b29a', '#f2cc8f', '#9d8189'],
 
       camera: { x: 0, y: 0, zoom: 1.6 },
       keys: { up: false, down: false, left: false, right: false, fly: false },
       bird: { x: 0, y: 0, altitude: 0, vAlt: 0, facing: 1, state: 'walk', perch: null, wingPhase: 0 },
+      location: { inside: false, house: null, floor: 0 },
       houses: [], trees: [], fences: [], cars: [], wire: null, wirePoles: [], bench: null,
       perchPoints: [], zones: {}, npcs: [],
       _built: false, _kd: null, _ku: null,
@@ -8558,6 +8560,7 @@
         showScreen('bird');
         if (!this._built) { this._buildWorld(); this._built = true; }
         this._resetNPCs();
+        this.location = { inside: false, house: null, floor: 0 };
         const spawnHouse = this.houses[0];
         this.bird = { x: spawnHouse.x + spawnHouse.w / 2, y: 470, altitude: 0, vAlt: 0, facing: 1, state: 'walk', perch: null, wingPhase: 0 };
         this.camera.x = this.bird.x; this.camera.y = this.bird.y; this.camera.zoom = 1.6;
@@ -8607,20 +8610,19 @@
         if (k === 'ArrowLeft' || k === 'a' || k === 'A') { this.keys.left = down; e.preventDefault(); }
         if (k === 'ArrowRight' || k === 'd' || k === 'D') { this.keys.right = down; e.preventDefault(); }
         if (k === ' ') { this.keys.fly = down; e.preventDefault(); }
-        if ((k === 'e' || k === 'E') && down) this._onPerchKey();
+        if ((k === 'e' || k === 'E') && down) this._onInteractKey();
       },
 
-      _onPerchKey() {
+      _onInteractKey() {
+        const it = this._findInteraction();
+        if (!it) return;
         const b = this.bird;
-        if (b.state === 'perch') {
-          b.state = 'fly'; b.perch = null; b.vAlt = 40;
-          return;
-        }
-        const target = this._findNearbyPerch();
-        if (target) {
-          b.x = target.x; b.y = target.y; b.altitude = target.alt;
-          b.state = 'perch'; b.perch = target; b.vAlt = 0;
-        }
+        if (it.type === 'unperch') { b.state = 'fly'; b.perch = null; b.vAlt = 40; return; }
+        if (it.type === 'perch') { b.x = it.point.x; b.y = it.point.y; b.altitude = it.point.alt; b.state = 'perch'; b.perch = it.point; b.vAlt = 0; return; }
+        if (it.type === 'enter') { this._enterHouse(it.house); return; }
+        if (it.type === 'exit') { this._exitHouse(); return; }
+        if (it.type === 'stairsUp') { this._goStairs(1); return; }
+        if (it.type === 'stairsDown') { this._goStairs(0); return; }
       },
 
       _findNearbyPerch() {
@@ -8631,6 +8633,57 @@
           if (d < bestD) { bestD = d; best = p; }
         }
         return best;
+      },
+
+      _findInteraction() {
+        const b = this.bird;
+        if (this.location.inside) {
+          const floor = this._currentFloor();
+          if (this.location.floor === 0 && floor.entry) {
+            if (Math.hypot(b.x - floor.entry.x, b.y - floor.entry.y) < 30) return { type: 'exit', point: floor.entry };
+          }
+          if (floor.stairsUp && Math.hypot(b.x - floor.stairsUp.x, b.y - floor.stairsUp.y) < 28) return { type: 'stairsUp', point: floor.stairsUp };
+          if (floor.stairsDown && Math.hypot(b.x - floor.stairsDown.x, b.y - floor.stairsDown.y) < 28) return { type: 'stairsDown', point: floor.stairsDown };
+          return null;
+        }
+        if (b.state === 'perch') return { type: 'unperch' };
+        if (b.altitude <= 4) {
+          for (const h of this.houses) {
+            const dx = h.x + h.w / 2, dy = h.y + h.h + 6;
+            if (Math.hypot(b.x - dx, b.y - dy) < 46) return { type: 'enter', house: h };
+          }
+        }
+        const p = this._findNearbyPerch();
+        if (p) return { type: 'perch', point: p };
+        return null;
+      },
+
+      _enterHouse(h) {
+        this.location = { inside: true, house: h, floor: 0 };
+        const entry = h.plan.floors[0].entry;
+        const b = this.bird;
+        b.x = entry.x; b.y = entry.y - 14; b.altitude = 0; b.vAlt = 0; b.state = 'walk'; b.perch = null;
+        this.camera.x = b.x; this.camera.y = b.y;
+      },
+
+      _exitHouse() {
+        const h = this.location.house;
+        const b = this.bird;
+        b.x = h.x + h.w / 2; b.y = h.y + h.h + 16; b.altitude = 0; b.vAlt = 0; b.state = 'walk'; b.perch = null;
+        this.camera.x = b.x; this.camera.y = b.y;
+        this.location = { inside: false, house: null, floor: 0 };
+      },
+
+      _goStairs(targetFloor) {
+        const target = this.location.house.plan.floors[targetFloor];
+        const pt = targetFloor === 1 ? target.stairsDown : target.stairsUp;
+        this.location.floor = targetFloor;
+        if (pt) { this.bird.x = pt.x; this.bird.y = pt.y; }
+        this.camera.x = this.bird.x; this.camera.y = this.bird.y;
+      },
+
+      _currentFloor() {
+        return this.location.house.plan.floors[this.location.floor];
       },
 
       /* ══════ WORLD BUILD (once) ══════ */
@@ -8645,7 +8698,8 @@
             x, y: houseY, w: houseW, h: houseH,
             color: this.HOUSE_COLORS[i % this.HOUSE_COLORS.length],
             door: { x: x + houseW / 2 - doorW / 2, w: doorW },
-            name: 'House ' + (i + 1),
+            plan: this._buildHousePlan(i),
+            npc: null,
           });
         }
 
@@ -8696,12 +8750,106 @@
         };
       },
 
+      /* ══════ HOUSE FLOOR PLANS — 5 distinct homes, hand-laid-out ══════ */
+      _buildHousePlan(i) {
+        const fr = (x, y, w, h) => ({ x: x * this.INTERIOR_W, y: y * this.INTERIOR_H, w: w * this.INTERIOR_W, h: h * this.INTERIOR_H });
+        const fp = (x, y) => ({ x: x * this.INTERIOR_W, y: y * this.INTERIOR_H });
+
+        if (i === 0) {
+          // Cottage — 1 story, 2 bedrooms
+          return { stories: 1, floors: [{
+            rooms: [
+              { type: 'living',   ...fr(0, 0.62, 1.0, 0.38), private: false },
+              { type: 'kitchen',  ...fr(0, 0, 0.30, 0.62), private: false },
+              { type: 'bedroom',  ...fr(0.30, 0, 0.30, 0.62), private: true, doorSide: 'bottom', accent: '#8ecae6' },
+              { type: 'bathroom', ...fr(0.60, 0, 0.16, 0.62), private: true, doorSide: 'bottom' },
+              { type: 'bedroom',  ...fr(0.76, 0, 0.24, 0.62), private: true, doorSide: 'bottom', accent: '#f4a300' },
+            ],
+            entry: fp(0.5, 1), stairsUp: null, stairsDown: null,
+          }] };
+        }
+        if (i === 1) {
+          // Bungalow — 1 story, 2 bedrooms + dining
+          return { stories: 1, floors: [{
+            rooms: [
+              { type: 'living',   ...fr(0, 0.6, 0.62, 0.4), private: false },
+              { type: 'dining',   ...fr(0.62, 0.6, 0.38, 0.4), private: false },
+              { type: 'kitchen',  ...fr(0, 0, 0.34, 0.6), private: false },
+              { type: 'bedroom',  ...fr(0.34, 0, 0.32, 0.6), private: true, doorSide: 'bottom', accent: '#e07a5f' },
+              { type: 'bathroom', ...fr(0.66, 0, 0.16, 0.6), private: true, doorSide: 'bottom' },
+              { type: 'bedroom',  ...fr(0.82, 0, 0.18, 0.6), private: true, doorSide: 'bottom', accent: '#81b29a' },
+            ],
+            entry: fp(0.5, 1), stairsUp: null, stairsDown: null,
+          }] };
+        }
+        if (i === 2) {
+          // Colonial — 2 story, 4 bedrooms
+          return { stories: 2, floors: [
+            {
+              rooms: [
+                { type: 'living',   ...fr(0, 0.6, 0.65, 0.4), private: false },
+                { type: 'bathroom', ...fr(0.65, 0.6, 0.35, 0.4), private: true, doorSide: 'left' },
+                { type: 'kitchen',  ...fr(0, 0, 0.4, 0.6), private: false },
+                { type: 'dining',   ...fr(0.4, 0, 0.3, 0.6), private: false },
+                { type: 'hallway',  ...fr(0.7, 0, 0.3, 0.6), private: false },
+              ],
+              entry: fp(0.5, 1), stairsUp: fp(0.85, 0.3), stairsDown: null,
+            },
+            {
+              rooms: [
+                { type: 'bedroom',  ...fr(0, 0, 0.35, 0.5), private: true, doorSide: 'right', accent: '#8ecae6' },
+                { type: 'bedroom',  ...fr(0.35, 0, 0.35, 0.5), private: true, doorSide: 'right', accent: '#f4a300' },
+                { type: 'bedroom',  ...fr(0, 0.5, 0.35, 0.5), private: true, doorSide: 'right', accent: '#e07a5f' },
+                { type: 'bedroom',  ...fr(0.35, 0.5, 0.35, 0.5), private: true, doorSide: 'right', accent: '#81b29a' },
+                { type: 'hallway',  ...fr(0.7, 0, 0.3, 0.6), private: false },
+                { type: 'bathroom', ...fr(0.7, 0.6, 0.3, 0.4), private: true, doorSide: 'left' },
+              ],
+              entry: null, stairsUp: null, stairsDown: fp(0.85, 0.3),
+            },
+          ] };
+        }
+        if (i === 3) {
+          // Townhouse — 2 story, 2 bedrooms + office
+          return { stories: 2, floors: [
+            {
+              rooms: [
+                { type: 'living',  ...fr(0, 0.6, 1.0, 0.4), private: false },
+                { type: 'kitchen', ...fr(0, 0, 0.45, 0.6), private: false },
+                { type: 'hallway', ...fr(0.45, 0, 0.22, 0.6), private: false },
+                { type: 'office',  ...fr(0.67, 0, 0.33, 0.6), private: true, doorSide: 'left' },
+              ],
+              entry: fp(0.5, 1), stairsUp: fp(0.56, 0.3), stairsDown: null,
+            },
+            {
+              rooms: [
+                { type: 'bedroom',  ...fr(0, 0, 0.42, 1.0), private: true, doorSide: 'right', accent: '#8ecae6' },
+                { type: 'hallway',  ...fr(0.42, 0, 0.22, 1.0), private: false },
+                { type: 'bedroom',  ...fr(0.64, 0, 0.36, 0.55), private: true, doorSide: 'left', accent: '#f4a300' },
+                { type: 'bathroom', ...fr(0.64, 0.55, 0.36, 0.45), private: true, doorSide: 'left' },
+              ],
+              entry: null, stairsUp: null, stairsDown: fp(0.53, 0.25),
+            },
+          ] };
+        }
+        // Ranch — 1 story, 2 bedrooms
+        return { stories: 1, floors: [{
+          rooms: [
+            { type: 'living',   ...fr(0, 0.55, 1.0, 0.45), private: false },
+            { type: 'bedroom',  ...fr(0, 0, 0.3, 0.55), private: true, doorSide: 'bottom', accent: '#9d8189' },
+            { type: 'bathroom', ...fr(0.3, 0, 0.16, 0.55), private: true, doorSide: 'bottom' },
+            { type: 'kitchen',  ...fr(0.46, 0, 0.3, 0.55), private: false },
+            { type: 'bedroom',  ...fr(0.76, 0, 0.24, 0.55), private: true, doorSide: 'bottom', accent: '#457b9d' },
+          ],
+          entry: fp(0.5, 1), stairsUp: null, stairsDown: null,
+        }] };
+      },
+
       _resetNPCs() {
         this.npcs = [];
         const skinTones = ['#f1c27d', '#e0ac69', '#c68642', '#8d5524', '#ffdbac'];
         const shirtColors = ['#ef476f', '#06d6a0', '#118ab2', '#ffd166', '#8338ec', '#fb5607'];
         this.houses.forEach(h => {
-          const bounds = { x: h.x + this.WALL_T + 10, y: h.y + this.WALL_T + 10, w: h.w - this.WALL_T * 2 - 20, h: h.h - this.WALL_T * 2 - 20 };
+          const bounds = { x: 16, y: 16, w: this.INTERIOR_W - 32, h: this.INTERIOR_H - 32 };
           const npc = this._makeNPC(bounds, skinTones, shirtColors, true);
           h.npc = npc;
           this.npcs.push(npc);
@@ -8724,6 +8872,13 @@
 
       /* ══════ UPDATE ══════ */
       _update(dt) {
+        if (this.location.inside) this._updateInside(dt);
+        else this._updateOutside(dt);
+        this._updateHint();
+        this.npcs.forEach(n => this._updateNPC(n, dt));
+      },
+
+      _updateOutside(dt) {
         const b = this.bird;
 
         if (b.state !== 'perch') {
@@ -8761,9 +8916,32 @@
         this.camera.zoom += (targetZoom - this.camera.zoom) * Math.min(1, dt * 3);
         this.camera.x += (b.x - this.camera.x) * Math.min(1, dt * 4);
         this.camera.y += (b.y - this.camera.y) * Math.min(1, dt * 4);
+      },
 
-        this._updateHint();
-        this.npcs.forEach(n => this._updateNPC(n, dt));
+      _updateInside(dt) {
+        const b = this.bird;
+        let mx = 0, my = 0;
+        if (this.keys.left) mx -= 1;
+        if (this.keys.right) mx += 1;
+        if (this.keys.up) my -= 1;
+        if (this.keys.down) my += 1;
+        if (mx || my) {
+          const len = Math.hypot(mx, my);
+          mx /= len; my /= len;
+          const speed = 70;
+          b.x = Math.max(14, Math.min(this.INTERIOR_W - 14, b.x + mx * speed * dt));
+          b.y = Math.max(14, Math.min(this.INTERIOR_H - 14, b.y + my * speed * dt));
+          if (mx !== 0) b.facing = mx > 0 ? 1 : -1;
+          b.wingPhase += dt * 3;
+        } else {
+          b.wingPhase += dt * 1.5;
+        }
+        b.altitude = 0; b.vAlt = 0; b.state = 'walk';
+
+        const targetZoom = 2.3;
+        this.camera.zoom += (targetZoom - this.camera.zoom) * Math.min(1, dt * 3);
+        this.camera.x += (b.x - this.camera.x) * Math.min(1, dt * 4);
+        this.camera.y += (b.y - this.camera.y) * Math.min(1, dt * 4);
       },
 
       _updateHint() {
@@ -8771,16 +8949,21 @@
         const hint = document.getElementById('bird-hint');
         const altWrap = document.getElementById('bird-altitude-wrap');
         document.getElementById('bird-altitude-fill').style.height = Math.round((b.altitude / this.MAX_ALT) * 100) + '%';
-        altWrap.classList.toggle('visible', b.altitude > 2 || b.state === 'perch');
+        altWrap.classList.toggle('visible', !this.location.inside && (b.altitude > 2 || b.state === 'perch'));
 
-        if (b.state === 'perch') {
-          hint.textContent = 'Perched — press E to fly off';
-        } else if (b.state === 'fly') {
-          const near = this._findNearbyPerch();
-          hint.textContent = near ? 'Press E to perch' : 'Arrows/WASD to fly · Release SPACE to glide down';
-        } else {
-          hint.textContent = 'Arrows/WASD to walk · Hold SPACE to fly';
+        const it = this._findInteraction();
+        if (this.location.inside) {
+          if (it && it.type === 'exit') hint.textContent = 'Press E to exit';
+          else if (it && it.type === 'stairsUp') hint.textContent = 'Press E to go upstairs';
+          else if (it && it.type === 'stairsDown') hint.textContent = 'Press E to go downstairs';
+          else hint.textContent = 'Arrows/WASD to walk around';
+          return;
         }
+        if (b.state === 'perch') { hint.textContent = 'Perched — press E to fly off'; return; }
+        if (it && it.type === 'enter') { hint.textContent = 'Press E to enter'; return; }
+        if (it && it.type === 'perch') { hint.textContent = 'Press E to perch'; return; }
+        if (b.state === 'fly') { hint.textContent = 'Arrows/WASD to fly · Release SPACE to glide down'; return; }
+        hint.textContent = 'Arrows/WASD to walk · Hold SPACE to fly';
       },
 
       _updateNPC(n, dt) {
@@ -8802,21 +8985,19 @@
 
       _collideHouses(x, y) {
         for (const h of this.houses) {
-          if (x < h.x || x > h.x + h.w || y < h.y || y > h.y + h.h) continue;
-          const t = this.WALL_T;
-          const inInner = x > h.x + t && x < h.x + h.w - t && y > h.y + t && y < h.y + h.h - t;
-          if (inInner) continue;
-          const nearSouthWall = y > h.y + h.h - t - 2;
-          const inDoor = x > h.door.x && x < h.door.x + h.door.w;
-          if (nearSouthWall && inDoor) continue;
-          return true;
+          if (x > h.x && x < h.x + h.w && y > h.y && y < h.y + h.h) return true;
         }
         return false;
       },
 
       /* ══════ DRAW ══════ */
       _draw() {
-        const ctx = this.ctx, W = this.W, H = this.H;
+        if (this.location.inside) this._drawInside(this.ctx);
+        else this._drawOutside(this.ctx);
+      },
+
+      _drawOutside(ctx) {
+        const W = this.W, H = this.H;
         ctx.save();
         ctx.fillStyle = '#bde0fe';
         ctx.fillRect(0, 0, W, H);
@@ -8894,33 +9075,52 @@
       },
 
       _drawHouse(ctx, h) {
+        // walls
         ctx.fillStyle = h.color;
         ctx.fillRect(h.x, h.y, h.w, h.h);
-        const t = this.WALL_T;
-        ctx.fillStyle = '#f4ead5';
-        ctx.fillRect(h.x + t, h.y + t, h.w - 2 * t, h.h - 2 * t);
-        ctx.fillRect(h.door.x, h.y + h.h - t, h.door.w, t);
 
-        const midY = h.y + t + (h.h - 2 * t) * 0.42;
-        ctx.strokeStyle = '#c9b896'; ctx.lineWidth = 6;
+        // porch/entry facade strip (stays below the roof so the door reads clearly)
+        this._drawFacade(ctx, h);
+
+        // roof — covers most of the footprint, leaving the entry strip exposed
+        const overhang = 10, roofH = h.h - 34;
+        ctx.fillStyle = this._darken(h.color, 55);
+        ctx.fillRect(h.x - overhang, h.y - overhang, h.w + overhang * 2, roofH + overhang);
+        ctx.strokeStyle = 'rgba(255,255,255,0.22)'; ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.moveTo(h.x + t, midY); ctx.lineTo(h.x + h.w * 0.38, midY);
-        ctx.moveTo(h.x + h.w * 0.62, midY); ctx.lineTo(h.x + h.w - t, midY);
+        ctx.moveTo(h.x - overhang + 6, h.y - overhang + (roofH + overhang) / 2);
+        ctx.lineTo(h.x + h.w + overhang - 6, h.y - overhang + (roofH + overhang) / 2);
         ctx.stroke();
-
-        ctx.fillStyle = '#a8dadc';
-        ctx.fillRect(h.x + t + 16, h.y + t + 14, 70, 44);
-        ctx.fillStyle = '#e07a5f';
-        ctx.fillRect(h.x + h.w - t - 90, h.y + h.h - t - 50, 76, 30);
-        ctx.fillStyle = '#8d6e63';
-        ctx.fillRect(h.x + h.w - t - 90, h.y + h.h - t - 100, 46, 30);
-
-        ctx.fillStyle = 'rgba(0,0,0,0.35)';
-        ctx.font = '700 13px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText(h.name, h.x + h.w / 2, h.y - 8);
+        ctx.fillStyle = 'rgba(0,0,0,0.18)';
+        ctx.fillRect(h.x - overhang, h.y - overhang + roofH + overhang - 6, h.w + overhang * 2, 6);
+        ctx.fillStyle = this._darken(h.color, 75);
+        ctx.fillRect(h.x + h.w * 0.72, h.y - overhang - 14, 16, 20);
 
         if (h.npc) this._drawNPC(ctx, h.npc);
+      },
+
+      _drawFacade(ctx, h) {
+        const y0 = h.y + h.h - 34;
+        ctx.fillStyle = 'rgba(255,255,255,0.08)';
+        ctx.fillRect(h.x, y0, h.w, 34);
+
+        const winY = y0 + 9, winH = 16;
+        ctx.fillStyle = '#bfe3f0';
+        if (h.door.x - h.x > 50) { ctx.fillRect(h.x + 16, winY, 30, winH); ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 1.5; ctx.strokeRect(h.x + 16, winY, 30, winH); }
+        if ((h.x + h.w) - (h.door.x + h.door.w) > 50) { ctx.fillRect(h.x + h.w - 46, winY, 30, winH); ctx.strokeRect(h.x + h.w - 46, winY, 30, winH); }
+
+        ctx.fillStyle = '#4a3427';
+        ctx.fillRect(h.door.x, y0, h.door.w, 34);
+        ctx.fillStyle = '#6b4a37';
+        ctx.fillRect(h.door.x + 4, y0 + 3, h.door.w - 8, 28);
+        ctx.fillStyle = '#d4af37';
+        ctx.beginPath(); ctx.arc(h.door.x + h.door.w - 10, y0 + 17, 2, 0, Math.PI * 2); ctx.fill();
+      },
+
+      _darken(hex, amt) {
+        let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+        r = Math.max(0, r - amt); g = Math.max(0, g - amt); b = Math.max(0, b - amt);
+        return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
       },
 
       _drawFence(ctx, f) {
@@ -9011,6 +9211,279 @@
         }
 
         ctx.restore();
+      },
+
+      /* ══════ INTERIOR SCENE ══════ */
+      _drawInside(ctx) {
+        const W = this.W, H = this.H;
+        ctx.save();
+        ctx.fillStyle = '#e9e2d3';
+        ctx.fillRect(0, 0, W, H);
+
+        const zoom = this.camera.zoom;
+        ctx.translate(W / 2, H / 2);
+        ctx.scale(zoom, zoom);
+        ctx.translate(-this.camera.x, -this.camera.y);
+
+        ctx.fillStyle = '#efe7d8';
+        ctx.fillRect(0, 0, this.INTERIOR_W, this.INTERIOR_H);
+        ctx.strokeStyle = '#c9b896'; ctx.lineWidth = 3;
+        ctx.strokeRect(1.5, 1.5, this.INTERIOR_W - 3, this.INTERIOR_H - 3);
+
+        const floor = this._currentFloor();
+        floor.rooms.forEach(r => this._drawRoomFloor(ctx, r));
+        floor.rooms.forEach(r => { if (r.private) this._drawRoomWalls(ctx, r); });
+        floor.rooms.forEach(r => this._drawRoomFurniture(ctx, r));
+
+        if (this.location.floor === 0 && floor.entry) this._drawEntryMat(ctx, floor.entry);
+        if (floor.stairsUp) this._drawStairs(ctx, floor.stairsUp, 'up');
+        if (floor.stairsDown) this._drawStairs(ctx, floor.stairsDown, 'down');
+
+        const h = this.location.house;
+        if (this.location.floor === 0 && h.npc) this._drawNPC(ctx, h.npc);
+
+        const it = this._findInteraction();
+        if (it && it.point && (it.type === 'exit' || it.type === 'stairsUp' || it.type === 'stairsDown')) {
+          ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.arc(it.point.x, it.point.y, 14, 0, Math.PI * 2); ctx.stroke();
+        }
+
+        this._drawBird(ctx, this.bird);
+
+        ctx.restore();
+      },
+
+      _drawRoomFloor(ctx, r) {
+        const styles = {
+          living: { base: '#c9a06b', kind: 'plank' },
+          dining: { base: '#c9a06b', kind: 'plank' },
+          hallway: { base: '#c1976a', kind: 'plank' },
+          office: { base: '#c9a06b', kind: 'plank' },
+          kitchen: { base: '#e8e2d6', kind: 'tile' },
+          bathroom: { base: '#dfeef0', kind: 'tile' },
+          bedroom: { base: r.accent ? this._lighten(r.accent, 70) : '#e3c9c2', kind: 'carpet' },
+        };
+        const s = styles[r.type] || styles.living;
+        ctx.fillStyle = s.base;
+        ctx.fillRect(r.x, r.y, r.w, r.h);
+        ctx.save();
+        ctx.beginPath(); ctx.rect(r.x, r.y, r.w, r.h); ctx.clip();
+        if (s.kind === 'plank') {
+          ctx.strokeStyle = 'rgba(0,0,0,0.06)'; ctx.lineWidth = 1;
+          for (let y = r.y; y < r.y + r.h; y += 14) { ctx.beginPath(); ctx.moveTo(r.x, y); ctx.lineTo(r.x + r.w, y); ctx.stroke(); }
+        } else if (s.kind === 'tile') {
+          ctx.strokeStyle = 'rgba(0,0,0,0.08)'; ctx.lineWidth = 1;
+          for (let x = r.x; x < r.x + r.w; x += 18) { ctx.beginPath(); ctx.moveTo(x, r.y); ctx.lineTo(x, r.y + r.h); ctx.stroke(); }
+          for (let y = r.y; y < r.y + r.h; y += 18) { ctx.beginPath(); ctx.moveTo(r.x, y); ctx.lineTo(r.x + r.w, y); ctx.stroke(); }
+        } else if (s.kind === 'carpet') {
+          ctx.fillStyle = 'rgba(255,255,255,0.06)';
+          for (let y = r.y; y < r.y + r.h; y += 6) ctx.fillRect(r.x, y, r.w, 2);
+        }
+        ctx.restore();
+      },
+
+      _drawRoomWalls(ctx, r) {
+        const gap = 34;
+        ctx.strokeStyle = 'rgba(120,100,80,0.55)'; ctx.lineWidth = 4;
+        const sides = {
+          top: [r.x, r.y, r.x + r.w, r.y],
+          bottom: [r.x, r.y + r.h, r.x + r.w, r.y + r.h],
+          left: [r.x, r.y, r.x, r.y + r.h],
+          right: [r.x + r.w, r.y, r.x + r.w, r.y + r.h],
+        };
+        Object.keys(sides).forEach(side => {
+          const [x1, y1, x2, y2] = sides[side];
+          if (side !== r.doorSide) { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); return; }
+          const midx = (x1 + x2) / 2, midy = (y1 + y2) / 2;
+          const dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy) || 1, ux = dx / len, uy = dy / len;
+          ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(midx - ux * gap / 2, midy - uy * gap / 2); ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(midx + ux * gap / 2, midy + uy * gap / 2); ctx.lineTo(x2, y2); ctx.stroke();
+        });
+      },
+
+      _drawRoomFurniture(ctx, r) {
+        if (r.type === 'bedroom') this._furnBedroom(ctx, r);
+        else if (r.type === 'bathroom') this._furnBathroom(ctx, r);
+        else if (r.type === 'kitchen') this._furnKitchen(ctx, r);
+        else if (r.type === 'living') this._furnLiving(ctx, r);
+        else if (r.type === 'dining') this._furnDining(ctx, r);
+        else if (r.type === 'office') this._furnOffice(ctx, r);
+        else if (r.type === 'hallway') this._furnHallway(ctx, r);
+      },
+
+      _furnBedroom(ctx, r) {
+        const accent = r.accent || '#8ecae6';
+        const bw = Math.min(r.w * 0.42, 88), bh = Math.min(r.h * 0.5, 64);
+        const bx = r.x + 14, by = r.y + 12;
+
+        ctx.fillStyle = 'rgba(0,0,0,0.05)';
+        ctx.beginPath(); ctx.ellipse(r.x + r.w * 0.58, r.y + r.h * 0.68, r.w * 0.26, r.h * 0.2, 0, 0, Math.PI * 2); ctx.fill();
+
+        ctx.fillStyle = 'rgba(0,0,0,0.15)'; ctx.fillRect(bx + 2, by + bh + 1, bw, 3);
+        ctx.fillStyle = '#7a5a44';
+        ctx.fillRect(bx, by, bw, bh);
+        ctx.fillStyle = '#fbfaf7';
+        ctx.fillRect(bx + 4, by + 4, bw - 8, bh - 8);
+        ctx.fillStyle = accent;
+        ctx.fillRect(bx + 4, by + bh * 0.42, bw - 8, bh * 0.58 - 4);
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        ctx.beginPath(); ctx.moveTo(bx + bw - 4, by + bh * 0.42); ctx.lineTo(bx + bw - 16, by + bh * 0.42); ctx.lineTo(bx + bw - 4, by + bh * 0.42 + 14); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(bx + 6, by + 5, bw - 12, bh * 0.26);
+        ctx.strokeStyle = 'rgba(0,0,0,0.08)'; ctx.lineWidth = 1; ctx.strokeRect(bx + 6, by + 5, bw - 12, bh * 0.26);
+
+        const nsx = bx + bw + 8, nsy = by + 8;
+        ctx.fillStyle = '#7a5a44'; ctx.fillRect(nsx, nsy, 20, 20);
+        ctx.strokeStyle = '#5a4534'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(nsx + 10, nsy - 4); ctx.lineTo(nsx + 10, nsy); ctx.stroke();
+        ctx.fillStyle = '#f4d35e'; ctx.beginPath(); ctx.arc(nsx + 10, nsy - 6, 5, 0, Math.PI * 2); ctx.fill();
+
+        const wx = r.x + r.w - 32, wy = r.y + r.h - 68;
+        if (wx > bx + bw + 30) {
+          ctx.fillStyle = 'rgba(0,0,0,0.15)'; ctx.fillRect(wx + 2, wy + 1, 28, 62);
+          ctx.fillStyle = '#6b4f3a'; ctx.fillRect(wx, wy, 28, 62);
+          ctx.strokeStyle = 'rgba(0,0,0,0.25)'; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(wx + 14, wy + 4); ctx.lineTo(wx + 14, wy + 58); ctx.stroke();
+          ctx.fillStyle = '#d4af37';
+          ctx.beginPath(); ctx.arc(wx + 11, wy + 31, 1.4, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(wx + 17, wy + 31, 1.4, 0, Math.PI * 2); ctx.fill();
+        }
+      },
+
+      _furnBathroom(ctx, r) {
+        const tx = r.x + 10, ty = r.y + 10, tw = Math.min(r.w * 0.34, 58), th = Math.min(r.h * 0.5, 38);
+        ctx.fillStyle = 'rgba(0,0,0,0.12)'; ctx.fillRect(tx + 2, ty + 3, tw, th);
+        ctx.fillStyle = '#ffffff'; ctx.fillRect(tx, ty, tw, th);
+        ctx.strokeStyle = '#bcd4de'; ctx.lineWidth = 2; ctx.strokeRect(tx, ty, tw, th);
+        ctx.fillStyle = '#dff0f5'; ctx.fillRect(tx + 4, ty + 4, tw - 8, th - 8);
+
+        const sx = r.x + r.w - 24, sy = r.y + 12;
+        if (sx > tx + tw + 16) {
+          ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(sx, sy, 12, 8, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#c9c2b8'; ctx.lineWidth = 1.2; ctx.stroke();
+          ctx.fillStyle = '#7a5a44'; ctx.fillRect(sx - 5, sy + 8, 10, 12);
+        }
+
+        const wcx = r.x + r.w - 22, wcy = r.y + r.h - 30;
+        ctx.fillStyle = '#fff'; ctx.fillRect(wcx - 8, wcy, 16, 9);
+        ctx.beginPath(); ctx.ellipse(wcx, wcy + 14, 10, 8, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.strokeStyle = '#c9c2b8'; ctx.lineWidth = 1.2; ctx.stroke();
+
+        ctx.fillStyle = 'rgba(120,170,200,0.3)';
+        ctx.beginPath(); ctx.ellipse(r.x + r.w * 0.38, r.y + r.h * 0.7, 18, 10, 0, 0, Math.PI * 2); ctx.fill();
+      },
+
+      _furnKitchen(ctx, r) {
+        const cy = r.y + 8, ch = 24;
+        ctx.fillStyle = 'rgba(0,0,0,0.12)'; ctx.fillRect(r.x + 8, cy + ch, r.w - 16, 2);
+        ctx.fillStyle = '#b6a488'; ctx.fillRect(r.x + 8, cy, r.w - 16, ch);
+        ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 1;
+        for (let x = r.x + 8 + 20; x < r.x + r.w - 16; x += 26) { ctx.beginPath(); ctx.moveTo(x, cy + ch * 0.4); ctx.lineTo(x, cy + ch); ctx.stroke(); }
+
+        ctx.fillStyle = '#dfe6e6'; ctx.fillRect(r.x + 22, cy + 5, 24, 13);
+        ctx.strokeStyle = '#9fb0b0'; ctx.strokeRect(r.x + 22, cy + 5, 24, 13);
+
+        const stoveX = r.x + r.w - 68;
+        [[0, 0], [17, 0], [0, 14], [17, 14]].forEach(([ox, oy]) => { ctx.fillStyle = '#333'; ctx.beginPath(); ctx.arc(stoveX + ox, cy + 6 + oy, 4.2, 0, Math.PI * 2); ctx.fill(); });
+
+        const fx = r.x + r.w - 32, fy = r.y + r.h - 52;
+        if (fy > cy + ch + 10) {
+          ctx.fillStyle = 'rgba(0,0,0,0.12)'; ctx.fillRect(fx + 2, fy + 1, 24, 46);
+          ctx.fillStyle = '#e7e9ea'; ctx.fillRect(fx, fy, 24, 46);
+          ctx.strokeStyle = '#c3c8c8'; ctx.strokeRect(fx, fy, 24, 46);
+          ctx.fillStyle = '#b0b6b6'; ctx.fillRect(fx + 20, fy + 6, 2, 12);
+        }
+
+        if (r.w > 150 && r.h > 100) {
+          const tx = r.x + r.w * 0.28, ty = r.y + r.h * 0.72;
+          ctx.fillStyle = 'rgba(0,0,0,0.08)'; ctx.beginPath(); ctx.ellipse(tx, ty + 2, 20, 14, 0, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#c9a06b'; ctx.beginPath(); ctx.ellipse(tx, ty, 18, 13, 0, 0, Math.PI * 2); ctx.fill();
+          [[-24, 0], [24, 0]].forEach(([ox, oy]) => { ctx.fillStyle = '#7a5a44'; ctx.fillRect(tx + ox - 4, ty + oy - 4, 8, 8); });
+        }
+      },
+
+      _furnLiving(ctx, r) {
+        const accent = r.accent || '#5aa9ff';
+        ctx.fillStyle = 'rgba(0,0,0,0.05)';
+        ctx.beginPath(); ctx.ellipse(r.x + r.w * 0.5, r.y + r.h * 0.55, r.w * 0.32, r.h * 0.26, 0, 0, Math.PI * 2); ctx.fill();
+
+        const sx = r.x + 10, sy = r.y + r.h * 0.28, sw = Math.min(r.w * 0.28, 46), sh = Math.min(r.h * 0.55, 84);
+        ctx.fillStyle = 'rgba(0,0,0,0.12)'; ctx.fillRect(sx + 2, sy + sh + 1, sw, 3);
+        ctx.fillStyle = accent; ctx.fillRect(sx, sy, sw, sh);
+        ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 1;
+        for (let y = sy + sh * 0.22; y < sy + sh; y += sh * 0.26) { ctx.beginPath(); ctx.moveTo(sx + 4, y); ctx.lineTo(sx + sw - 4, y); ctx.stroke(); }
+        ctx.fillStyle = this._darken(accent, 30);
+        ctx.fillRect(sx - 4, sy, 6, sh); ctx.fillRect(sx + sw - 2, sy, 6, sh);
+
+        const tx = sx + sw + 18, ty = sy + sh * 0.42;
+        ctx.fillStyle = 'rgba(0,0,0,0.1)'; ctx.fillRect(tx + 2, ty + 2, 32, 18);
+        ctx.fillStyle = '#c9a06b'; ctx.fillRect(tx, ty, 32, 18);
+
+        const tvx = r.x + r.w - 44, tvy = r.y + 10;
+        if (tvx > tx + 44) {
+          ctx.fillStyle = '#3a3a3a'; ctx.fillRect(tvx, tvy, 38, 9);
+          ctx.fillStyle = '#111'; ctx.fillRect(tvx + 3, tvy - 15, 30, 15);
+          ctx.fillStyle = '#2a5d8a'; ctx.fillRect(tvx + 5, tvy - 13, 26, 11);
+        }
+
+        const px = r.x + r.w - 18, py = r.y + r.h - 18;
+        if (px > tvx + 20 || tvy + 40 < py) {
+          ctx.fillStyle = '#7a5a44'; ctx.fillRect(px - 6, py - 4, 12, 10);
+          ctx.fillStyle = '#4f9a5a'; ctx.beginPath(); ctx.arc(px, py - 8, 8, 0, Math.PI * 2); ctx.fill();
+        }
+      },
+
+      _furnDining(ctx, r) {
+        const cx = r.x + r.w / 2, cy = r.y + r.h / 2;
+        ctx.fillStyle = 'rgba(255,235,180,0.25)';
+        ctx.beginPath(); ctx.arc(cx, cy, 30, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(0,0,0,0.06)';
+        ctx.beginPath(); ctx.ellipse(cx, cy, r.w * 0.3, r.h * 0.28, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(0,0,0,0.1)'; ctx.beginPath(); ctx.ellipse(cx, cy + 2, 32, 22, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#c9a06b'; ctx.beginPath(); ctx.ellipse(cx, cy, 30, 20, 0, 0, Math.PI * 2); ctx.fill();
+        [[0, -32], [0, 32], [-46, 0], [46, 0]].forEach(([ox, oy]) => { ctx.fillStyle = '#7a5a44'; ctx.fillRect(cx + ox - 5, cy + oy - 5, 10, 10); });
+      },
+
+      _furnOffice(ctx, r) {
+        const dx = r.x + 10, dy = r.y + 10;
+        ctx.fillStyle = 'rgba(0,0,0,0.1)'; ctx.fillRect(dx + 2, dy + 26, 60, 3);
+        ctx.fillStyle = '#7a5a44'; ctx.fillRect(dx, dy, 60, 24);
+        ctx.fillStyle = '#222'; ctx.fillRect(dx + 8, dy - 12, 24, 13);
+        ctx.fillStyle = '#4aa3ff'; ctx.fillRect(dx + 10, dy - 10, 20, 9);
+        ctx.fillStyle = '#555'; ctx.fillRect(dx + 20, dy + 28, 16, 16);
+
+        const bx = r.x + r.w - 14, by = r.y + 8;
+        ctx.fillStyle = '#6b4f3a'; ctx.fillRect(bx - 14, by, 14, Math.min(r.h * 0.5, 60));
+        ['#e63946', '#457b9d', '#f4a300', '#2a9d8f'].forEach((c, i) => { ctx.fillStyle = c; ctx.fillRect(bx - 12, by + 4 + i * 10, 10, 7); });
+      },
+
+      _furnHallway(ctx, r) {
+        const tx = r.x + 10, ty = r.y + r.h / 2 - 6;
+        if (r.w < 80 || r.h < 60) return;
+        ctx.fillStyle = '#7a5a44'; ctx.fillRect(tx, ty, 28, 9);
+        ctx.fillStyle = '#e6d9c3'; ctx.fillRect(tx + 3, ty - 15, 20, 13);
+        ctx.strokeStyle = '#7a5a44'; ctx.lineWidth = 2; ctx.strokeRect(tx + 3, ty - 15, 20, 13);
+      },
+
+      _drawEntryMat(ctx, pt) {
+        ctx.fillStyle = 'rgba(0,0,0,0.12)'; ctx.fillRect(pt.x - 22, pt.y - 10, 44, 20);
+        ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 2;
+        ctx.strokeRect(pt.x - 20, pt.y - 8, 40, 16);
+      },
+
+      _drawStairs(ctx, pt, dir) {
+        ctx.save();
+        ctx.translate(pt.x, pt.y);
+        for (let i = 0; i < 5; i++) { ctx.fillStyle = i % 2 ? '#8d7358' : '#9c8265'; ctx.fillRect(-20, -20 + i * 8, 40, 8); }
+        ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.lineWidth = 1; ctx.strokeRect(-20, -20, 40, 40);
+        ctx.fillStyle = '#fff'; ctx.font = '700 16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(dir === 'up' ? '↑' : '↓', 0, 0);
+        ctx.restore();
+      },
+
+      _lighten(hex, amt) {
+        let r = parseInt(hex.slice(1, 3), 16), g = parseInt(hex.slice(3, 5), 16), b = parseInt(hex.slice(5, 7), 16);
+        r = Math.min(255, r + amt); g = Math.min(255, g + amt); b = Math.min(255, b + amt);
+        return '#' + [r, g, b].map(v => v.toString(16).padStart(2, '0')).join('');
       },
     };
 
